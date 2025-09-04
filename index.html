@@ -1,0 +1,3634 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beyblade ANANAS CX</title> <!-- Zmieniono tytuł -->
+<link rel="icon" href="bal.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+
+<style>
+html, body {
+    height:100%;
+    margin:0;
+    padding:0;
+    font-family:'Kode Mono', monospace;
+    background:#101018;
+    color:#f0f0f0;
+    overflow-x:hidden;
+	   text-align: center
+}
+#vanta-background {
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    z-index:0;
+}
+.sidebar {
+    height:100%;
+    width:50px; 
+    position:fixed;
+    top:0;
+    left:0;
+    background:rgba(30,30,30,0.75);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    box-shadow:3px 0 15px rgba(0,0,0,0.6);
+    transition:width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius:0 15px 15px 0;
+    z-index:2000;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; 
+    overflow-x: hidden; 
+}
+.sidebar.expanded { width:260px; }
+.openbtn-container {
+    width: 100%; 
+    padding-top: 10px; 
+    padding-bottom: 8px; 
+    display: flex; 
+    box-sizing: border-box;
+}
+.openbtn {
+    cursor:pointer; display:flex; align-items:center; gap: 12px; 
+    border-radius:10px; transition: background-color 0.25s ease;
+    box-sizing: border-box; padding: 10px; margin: 0 auto; 
+}
+.sidebar.expanded .openbtn-container { padding-left: 10px; padding-right: 10px; }
+.sidebar.expanded .openbtn { margin: 0; }
+.openbtn:focus-visible { 
+    border-color: rgba(138, 43, 226, 0.7);
+    box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.3);
+}
+.openbtn img { width:28px; height:28px; display: block; flex-shrink: 0; }
+.openbtn .menu-text {
+    color:#f0f0f0; font-size:1.0em; font-weight:bold; opacity:0;
+    max-width:0; overflow:hidden; white-space:nowrap;
+    transition:opacity 0.25s ease 0.1s, max-width 0.25s ease 0.1s;
+}
+.sidebar.expanded .openbtn .menu-text { opacity:1; max-width:120px; }
+.sidebar-links {
+    width: 100%; overflow-y: auto; max-height: calc(100% - 70px); 
+    box-sizing: border-box;
+}
+.sidebar a {
+    display:flex; align-items:center; gap:12px; color:#e0e0e0; 
+    text-decoration:none; transition: background-color 0.25s ease, color 0.25s ease;
+    border-radius:8px; box-sizing: border-box; white-space: nowrap; 
+    overflow: hidden; padding: 12px; justify-content: center;
+    width: auto; margin: 4px auto; 
+}
+.sidebar:not(.expanded) a span { display: none; }
+.sidebar.expanded a {
+    width: calc(100% - 20px); margin: 4px 10px;         
+    padding: 12px 10px; justify-content: flex-start; 
+}
+.sidebar.expanded a span { display: inline; opacity:1; }
+.sidebar a:hover { background:rgba(70,70,70,0.8); color: #ffffff; }
+.sidebar a img { width: 22px; height: 22px; flex-shrink: 0; }
+.sidebar a.active-link {
+    background: rgba(138,43,226,0.4); font-weight: bold; color: #fff;
+}
+.sidebar a.active-link:hover { background: rgba(138,43,226,0.5); }
+#app-container {
+    position:relative; z-index:1; min-height:100vh; padding: 20px; 
+    box-sizing:border-box; margin-left:50px; 
+    transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page { display:none; padding-top: 20px; animation: fadeInPage 0.5s ease-in-out; }
+.page.active { display:block;}
+@keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.9em;}
+select, input[type="text"], input[type="number"], input[type="url"], textarea {
+    width:100%; padding:12px 15px; margin:0 0 10px 0; /* Zmieniony margines dolny */
+    background:rgba(45,45,55,0.8); color:#f0f0f0;
+    font-family:'Kode Mono', monospace; font-size:1em;
+    box-sizing:border-box; border-radius:8px;
+    border: 1px solid rgba(255,255,255,0.15); 
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+select:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="url"]:focus, textarea:focus {
+    border-color: rgba(138, 43, 226, 0.7);
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.25); 
+}
+textarea { resize:vertical; min-height: 80px; margin-bottom:12px; }
+button {
+    cursor:pointer; background:rgba(80,85,95,0.8); color: #f0f0f0;
+    transition:background-color 0.2s ease, transform 0.1s ease;
+    border: 1px solid rgba(255,255,255,0.1); padding: 12px 18px; 
+    font-family:'Kode Mono', monospace; font-size: 1em;
+    border-radius:8px; font-weight: bold;
+}
+button:hover { background:rgba(100,105,115,0.9); }
+button:active { transform: scale(0.97); background:rgba(70,75,85,0.9); }
+button:disabled { background: rgba(60,60,70,0.7); color: #888; cursor: not-allowed; }
+.button-auto-width { width:auto; }
+button.cancel-btn, button.danger-btn { background: rgba(190, 50, 50, 0.7); }
+button.cancel-btn:hover, button.danger-btn:hover { background: rgba(210, 60, 60, 0.8); }
+button.cancel-btn:active, button.danger-btn:active { background: rgba(170, 40, 40, 0.8); }
+
+.card {
+    background:rgba(35,35,45,0.75); backdrop-filter:blur(6px); 
+    -webkit-backdrop-filter:blur(6px); border-radius:15px; 
+    box-shadow:0 8px 20px rgba(0,0,0,0.5); padding:20px; 
+    margin:15px 0; text-align:center; width: 100%; box-sizing: border-box;
+}
+.card h2, .page > h2 { margin-top:0; margin-bottom: 20px; color: #a25ff0; font-weight: bold; text-align: center;}
+.card h3 { margin-top:0; margin-bottom: 15px; color: #b27ff0; font-weight: bold;}
+.card h4 { margin-top:0; margin-bottom: 8px; color: #c080ff; font-weight: bold;}
+.card p { font-size: 0.95em; line-height: 1.6; color: #d0d0d0; }
+
+/* Style dla obrazków części w magazynie (większe) */
+img.part-img { 
+    max-width: 130px; height: 130px; object-fit:contain;
+    display:block; margin:10px auto 15px auto; border-radius: 10px; 
+}
+.part-img-placeholder { 
+    width: 130px; height: 130px; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.15); border-radius: 10px; margin: 10px auto 15px auto;
+    color: #999; font-size: 0.9em; text-align: center;
+}
+
+/* === UJEDNOLICONE STYLE DLA OBRAZKÓW W WYNIKACH LOSOWANIA I PODGLĄDZIE DECKU === */
+.wynik-zestaw-obrazki { /* Główny kontener obrazków w karcie wyniku/podglądzie decku */
+    display: flex; justify-content: center; align-items: center;
+    gap: 8px; /* Możesz dostosować odstęp */
+    padding: 8px 5px; /* Możesz dostosować padding */
+    width: 100%;
+    min-height: auto; /* Pozwól zawartości określić wysokość */
+    overflow: hidden; box-sizing: border-box; 
+}
+
+/* Obrazki/placeholdery części w kartach (zarówno wylosowane, jak i zapisane decki) */
+/* Używamy klas .deck-part-img i .deck-part-placeholder generowanych przez JS */
+.wynik-zestaw-obrazki img.deck-part-img,
+.wynik-zestaw-obrazki div.deck-part-placeholder {
+    height: 60px; /* <<< USTAWIENIE ROZMIARU NA 60px */
+    max-width: 60px; /* <<< USTAWIENIE ROZMIARU NA 60px */
+    object-fit: contain;
+    border-radius: 4px; /* Możesz dostosować promień */
+}
+
+/* Ogólny styl dla placeholderów (jeśli nie mają obrazka) */
+/* Ten styl jest używany przez .deck-part-placeholder */
+.deck-part-placeholder {
+    width:60px; /* Dopasuj do height/max-width powyżej */
+    height:60px; /* Dopasuj do height/max-width powyżej */
+    border:1px dashed #555; 
+    background-color: rgba(0,0,0,0.15); /* Dodano dla spójności z poprzednim placeholder-small */
+    display:flex; align-items:center; justify-content:center; 
+    font-size:0.55em; /* Możesz dostosować */
+    color:#999; /* Możesz dostosować */
+    border-radius:4px; /* Dopasuj do border-radius obrazków */
+}
+
+/* Specjalny placeholder dla zintegrowanego bita */
+/* Stosowane w .generated-set-card oraz .deck-card-set-preview */
+.wynik-zestaw-obrazki div.deck-part-placeholder[title*="Bit zintegrowany"] {
+    /* Rozmiar dziedziczy z .deck-part-placeholder (60x60) */
+    font-size: 0.5em; 
+    line-height: 1.2;
+    padding: 5px; /* Dla lepszego ułożenia tekstu wewnątrz */
+    box-sizing: border-box; 
+}
+
+/* STARE STYLE DLA .part-img-small i .part-img-placeholder-small - ZAKOMENTOWANE/NIEPOTRZEBNE */
+/*
+.wynik-zestaw-obrazki .part-img-small { 
+    height: 70px; max-width: 70px; 
+    object-fit: contain; border-radius: 6px;
+}
+.wynik-zestaw-obrazki .part-img-placeholder-small { 
+    width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;
+    background-color: rgba(0,0,0,0.15); border-radius: 8px; color: #999;
+    font-size: 0.7em; padding: 0 5px; text-align: center;
+}
+*/
+
+.wynik-nazwy { /* Style dla nazw pod wynikami losowania - jeśli nadal używane */
+    text-align: center; margin-top: 10px; margin-bottom: 5px; 
+    font-size: 0.9em; font-weight: bold; word-break: break-word; color: #e0e0e0; line-height: 1.4;
+}
+.card p strong { color: #a25ff0; }
+.item-actions {
+    display:flex; justify-content:space-around; gap: 8px; margin-top:15px;
+}
+.item-actions button {
+    flex-grow: 1; flex-basis: 0; padding: 10px; font-size: 0.85em;
+}
+
+/* Dodatkowe style dla wyników CX (głównie marginesy i obramowania) */
+.wylosowany-zestaw-cx .cx-blade-komponenty, .wylosowany-zestaw-cx .cx-drive-komponenty {
+    border: 1px solid rgba(138,43,226,0.3); padding: 8px; margin-bottom: 10px; border-radius: 8px;
+}
+.wylosowany-zestaw-cx .cx-blade-komponenty h5, .wylosowany-zestaw-cx .cx-drive-komponenty h5 {
+    margin:0 0 8px 0; text-align:center; color:#c080ff; font-size: 0.9em;
+}
+/* Style dla kontenerów obrazków CX w wylosowanych kartach i zapisanych deckach */
+.cx-images-container .cx-blade-row,
+.cx-images-container .cx-drive-row {
+    /* .wynik-zestaw-obrazki jest już w nich, więc dziedziczą flex i gap */
+    /* Można dodać specyficzne marginesy jeśli trzeba */
+}
+.cx-images-container .cx-drive-row {
+    margin-top: 5px; /* Tak jak było w JS, można to trzymać tutaj */
+}
+
+
+.import-export-section { margin-bottom:25px; }
+.action-button-container {
+    background:rgba(40,40,50,0.7); backdrop-filter:blur(10px); 
+    -webkit-backdrop-filter:blur(10px); border-radius:12px;
+    padding:20px; margin-top:15px; box-shadow:0 6px 15px rgba(0,0,0,0.45);
+}
+.action-button-container h4 {
+    margin-top:0; margin-bottom:12px; color: #a25ff0; font-size: 1.1em;
+}
+#notification-bar {
+    position:fixed; top:0; left:0; width:100%; color:white;
+    text-align:center; padding:14px; font-size: 1em; font-weight: bold;
+    z-index:10000; display:none; border-radius:0 0 12px 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    opacity:0; transition: opacity 0.3s ease-in-out;
+}
+#notification-bar.notification-show { 
+    opacity:1;
+}
+
+#generator-obraz img {
+    display: block; width: 70%; max-width: 220px; height: auto;   
+    margin: 10px auto; animation: rotateImg 10s linear infinite; 
+    opacity: 0.6; border-radius: 12px;
+}
+@keyframes rotateImg {
+    from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+}
+* { -webkit-tap-highlight-color: transparent; }
+button, a, select, input, textarea { outline: none; }
+
+#lista-magazyn {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 15px;
+}
+#lista-magazyn .card { 
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  padding: 15px; 
+}
+#lista-magazyn img.part-img { /* Obrazek części w magazynie - ten jest większy, zostawiamy */
+  width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;
+}
+#lista-magazyn h3 { font-size: 1.05em; margin: 5px 0; color: #e0e0e0;}
+#lista-magazyn p { font-size: 0.8em; margin: 3px 0; line-height: 1.3; color: #bbb;}
+
+#savedDecksContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+    gap: 15px;
+}
+.saved-deck-card { text-align: left; }
+
+.deck-card-set-preview { /* Podgląd pojedynczego zestawu w karcie decku */
+    margin-bottom: 10px; padding-bottom: 10px; 
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.deck-card-set-preview:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.deck-card-set-preview strong { font-size:0.9em; display: block; margin-bottom: 6px; color: #c080ff;}
+
+/* Kontener obrazków w podglądzie zestawu decku - .wynik-zestaw-obrazki jest już ostylowany wyżej */
+.deck-card-set-preview .wynik-zestaw-obrazki { 
+    justify-content: center; 
+    gap: 6px; /* Można dostosować specyficzny gap dla podglądu decku */
+    margin-bottom: 6px; 
+    padding: 0; /* Może być potrzebny reset paddingu jeśli globalny jest inny */
+}
+/* Obrazki/placeholdery w podglądzie zestawu decku - już obsłużone przez ogólną regułę wyżej */
+/* .deck-card-set-preview .wynik-zestaw-obrazki img.deck-part-img, 
+.deck-card-set-preview .wynik-zestaw-obrazki div.deck-part-placeholder {
+    height: 60px; max-width: 60px; 
+    object-fit: contain; border-radius: 4px;
+} */
+
+
+.stat-grid { /* Dla statystyk w karcie decku i wylosowanego zestawu */
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 10px; 
+    margin-top: 5px; font-size: 0.8em; line-height: 1.5;
+}
+.stat-grid span { padding: 3px 6px; border-radius: 3px; white-space:nowrap; }
+
+#formularz .card { padding: 20px; }
+#formularz label { display: block; margin-bottom: 4px; text-align: left; font-size:0.9em; color:#ccc;}
+#formularz input[type="text"], 
+#formularz input[type="number"], 
+#formularz input[type="url"] {
+    margin-bottom: 12px; 
+}
+
+.item-quantity-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 12px;
+    margin-bottom: 8px;
+}
+
+.quantity-btn {
+    font-size: 1.2em; 
+    padding: 6px 12px; 
+    min-width: 40px; 
+    line-height: 1;
+    font-weight: bold;
+}
+.quantity-btn:disabled {
+    background: rgba(60,60,70,0.5);
+    color: #777;
+    cursor: not-allowed;
+}
+
+.quantity-display {
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 5px 10px;
+    background-color: rgba(0,0,0,0.15);
+    border-radius: 6px;
+    min-width: 30px; 
+    text-align: center;
+}
+
+.item-management-actions {
+    display: flex;
+    justify-content: space-around; 
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.small-action-btn {
+    padding: 8px 12px;
+    font-size: 0.8em; 
+    flex-grow: 1; 
+    flex-basis: 0;
+}
+.small-action-btn.danger-btn { 
+    background: rgba(190, 50, 50, 0.7);
+}
+.small-action-btn.danger-btn:hover {
+    background: rgba(210, 60, 60, 0.8);
+}
+.beta-label {
+color: red;
+font-size: 0.8em;
+margin-left: 6px;
+font-weight: bold; /* poprawiona literówka z font-weght */
+}
+</style>
+
+</head>
+<body>
+
+<div id="vanta-background"></div>
+<div id="notification-bar"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="openbtn-container">
+        <div class="openbtn" id="sidebarToggleBtn" title="Rozwiń/Zwiń menu">
+            <img src="menu.png" alt="Menu Icon" id="menu-icon">
+            <span class="menu-text" id="menu-btn-text">MENU</span>
+        </div>
+    </div>
+
+    <div class="sidebar-links">
+        <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="ATK.png" alt="Generator"><span>Generator</span></a>
+        <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="DEF.png" alt="Magazyn"><span>Magazyn</span></a>
+    
+        <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="STM.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a> <!-- lub Twoja oryginalna ikona dla "Deck" -->
+		<a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="STM.png" alt="Galeria"><span>Moje Decki</span></a> <!-- lub Twoja oryginalna ikona dla "Galeria" -->
+		<a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="BAL.png" alt="Import/Eksport"><span>Dane</span></a> <!-- lub Twoja oryginalna ikona dla "Import/Eksport" -->
+    </div>
+
+</div>
+
+<div id="app-container">
+
+<!-- Strona Generatora Losowego -->
+<section id="generator" class="page">
+  <h2>Generator Zestawów</h2>
+  <div class="card">
+    <label for="seriaLosowania">Wybierz Serię do Losowania:</label>
+    <select id="seriaLosowania" aria-label="Seria Beybladów do losowania">
+        <option value="bx_ux">BX / UX (Blade, Ratchet, Bit)</option>
+        <option value="cx">CX (LockChip, Main, Assist, Ratchet, Bit)</option>
+    </select>
+    
+    <label for="ilosc" style="margin-top:15px;">Wybierz ilość Beybladów do wylosowania:</label>
+    <select id="ilosc" aria-label="Ilość Beybladów do wylosowania">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+    </select>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+        <button onclick="LOSUJ()">Losuj Zestawy</button>
+        <button onclick="wyczyscLosowanie()" class="cancel-btn">Wyczyść Wyniki</button>
+    </div>
+  </div>
+
+  <div id="generator-obraz" style="margin-top:20px; margin-bottom: 20px;">
+    <img id="placeholder-img" src="tlo.png" alt="Animowane tło generatora">
+  </div>
+ 
+  <div id="wyniki" style="margin-top:20px;">
+      <!-- Wyniki losowania pojawią się tutaj -->
+  </div>
+</section>
+
+<!-- Strona Magazynu -->
+<section id="magazyn" class="page">
+  <h2>Mój Magazyn Części</h2>
+  <div class="card" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;"> 
+    
+    <div style="flex-grow: 1; min-width: 200px;">
+      <label for="filterKategoria">Filtruj według kategorii:</label>
+      <select id="filterKategoria" onchange="wyswietlMagazyn()" aria-label="Filtr kategorii części">
+          <option value="all">Wszystkie Kategorie</option>
+          <optgroup label="Seria BX / UX">
+              <option value="blade">Blade (BX/UX)</option>
+          </optgroup>
+          <optgroup label="Seria CX">
+              <option value="cx-lock-chip">CX Lock Chip</option>
+              <option value="cx-main-blade">CX Main Blade</option>
+              <option value="cx-assist-blade">CX Assist Blade</option>
+          </optgroup>
+          <optgroup label="Komponenty Wspólne">
+              <option value="rachet">Ratchet</option>
+              <option value="bit">Bit</option>
+          </optgroup>
+      </select>
+    </div>
+
+    <div style="flex-grow: 1; min-width: 200px;">
+      <label for="filterPosiadane">Pokaż części:</label>
+      <select id="filterPosiadane" onchange="wyswietlMagazyn()" aria-label="Filtr posiadanych części">
+          <option value="posiadane">Posiadane</option>
+          <option value="nieposiadane">Nieposiadane</option>
+          <option value="wszystkie_w_bazie">Wszystkie</option> 
+      </select>
+    </div>
+
+  </div>
+  <div id="lista-magazyn" style="margin-top:15px;">
+      <!-- Karty części magazynu pojawią się tutaj -->
+  </div>
+</section>
+
+
+
+<!-- Strona Deck Generatora -->
+<section id="deck" class="page">
+  <h2>Deck Generator</h2>
+  <p style="text-align: center;">Stwórz własny zestaw 3 Beybladów, nazwij go i zapisz!</p>
+  
+  <div class="card" style="margin-bottom: 20px;">
+    <h3>Zarządzanie Deckiem</h3>
+    <div>
+      <label for="deckName" style="display: block; margin-bottom: 5px;">Nazwa Decku:</label>
+      <input type="text" id="deckName" placeholder="Np. Mój Deck Turniejowy" style="margin-bottom: 10px;">
+    </div>
+    <button id="saveDeckButton" onclick="saveCurrentDeck()">Zapisz Aktualny Deck</button>
+  </div>
+
+  <div id="deck-builder" style="margin-bottom: 30px;">
+    <!-- Tutaj renderDeckBuilder wstawia 3 karty .deck-set -->
+    <!-- UWAGA: Ta sekcja wymaga znacznych modyfikacji dla obsługi serii CX -->
+  </div>
+</section>
+
+<!-- Strona Galerii Zapisanych Decków -->
+<section id="galeriaDeckow" class="page">
+  <h2>Moje Zapisane Decki</h2>
+  <p style="text-align: center;">Tutaj znajdziesz wszystkie swoje zapisane konfiguracje decków.</p>
+  <div id="savedDecksContainer" style="margin-top: 20px;"> 
+    <!-- Karty zapisanych decków pojawią się tutaj dzięki displaySavedDecks() -->
+  </div>
+</section>
+
+<!-- Strona Importu/Eksportu -->
+<section id="importexport" class="page">
+  <h2>Zarządzanie Danymi Aplikacji</h2>
+  <div class="action-button-container import-export-section">
+    <h4>Importuj lub Eksportuj Dane Magazynu Części</h4>
+    <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
+    <button class="button-auto-width" onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn do Pola</button>
+    <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Dane magazynu w formacie JSON pojawią się tutaj po eksporcie, lub wklej tutaj dane do importu..." aria-label="Pole tekstowe dla danych JSON magazynu"></textarea>
+    <button class="button-auto-width" onclick="importujDaneZPolaTekstowego()">Importuj Magazyn z Pola</button>
+  </div>
+  <div class="action-button-container import-export-section">
+    <h4>Importuj lub Eksportuj Zapisane Decki</h4>
+    <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
+    <button class="button-auto-width" onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki do Pola</button>
+    <textarea id="poleDanychJsonDecki" rows="8" placeholder="Dane zapisanych decków w formacie JSON pojawią się tutaj po eksporcie, lub wklej tutaj dane do importu..." aria-label="Pole tekstowe dla danych JSON zapisanych decków"></textarea>
+    <button class="button-auto-width" onclick="importujDeckiZPolaTekstowego()">Importuj Decki z Pola</button>
+  </div>
+  <div class="action-button-container">
+    <h4>Usuń/przywróć domyślne </h4>
+    <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Uwaga: Poniższa operacja trwale usunie wszystkie części z Twojego magazynu ORAZ wszystkie zapisane Decki.</p>
+    <button class="button-auto-width danger-btn" onclick="wykonajWyczyszczenieDanych()">Wyczyść Wszystkie Dane (Nieodwracalne)</button>
+<!-- Wewnątrz <section id="importexport" class="page"> -->
+    <div class="section-container">
+        <h4>Import/Eksport Danych Magazynu</h4>
+        <!-- ... -->
+      <button onclick="importujMagazynZBazyDomyslnejHTML()" style="margin-top: 10px; background-color: #3a753c;">Załaduj Domyślną Bazę Części (z HTML)</button>
+    </div>
+
+  </div>
+  
+</section>
+
+</div> <!-- Koniec #app-container -->
+
+<script>
+// =================================
+// Konfiguracja i Zmienne Globalne
+// =================================
+let sidebarExpanded = false;
+let czyEdycjaWProgresie = false; // Flaga dla edycji CZĘŚCI
+const sidebarWidthExpanded = 260;
+const sidebarWidthCollapsed = 50;
+let currentEditingDeckId = null; // Dla edycji DECKÓW ze strony "Deck Generator"
+
+let sidebar, appContainer, sidebarToggleBtn, menuIcon, menuBtnText;
+// Elementy specyficzne dla stron, inicjalizowane w DOMContentLoaded
+let wynikiDivGenerator, placeholderActualImgGenerator, deckBuilderContainerDeckPage;
+
+// Globalna tablica dla ostatnio wylosowanych zestawów z LOSUJ()
+let ostatnioWylosowaneZestawyGlobalnie = [];
+
+
+// =================================
+// Funkcje Pomocnicze i Inicjalizacyjne
+// =================================
+function showNotification(message, duration = 3000, type = 'info') { // Domyślny typ to 'info'
+    const bar = document.getElementById("notification-bar");
+    if (!bar) { console.error("Element #notification-bar nie znaleziony!"); return; }
+    bar.textContent = message;
+    bar.className = 'notification-show'; 
+
+    let bgColor = 'rgba(138, 43, 226, 0.9)'; 
+    let textColor = '#fff';
+    
+    if (type === 'error') bgColor = 'rgba(220, 53, 69, 0.9)'; // Czerwony
+    else if (type === 'success') bgColor = 'rgba(40, 167, 69, 0.9)'; // Zielony
+    else if (type === 'warning') { bgColor = 'rgba(255, 193, 7, 0.9)'; textColor = '#333'; } // Żółty
+    
+    bar.style.backgroundColor = bgColor;
+    bar.style.color = textColor;
+    bar.style.backdropFilter = 'blur(5px)';
+    bar.style.webkitBackdropFilter = 'blur(5px)';
+    bar.style.display = "block";
+    bar.style.opacity = "1";
+
+    if (bar._hideTimeout) clearTimeout(bar._hideTimeout);
+    bar._hideTimeout = setTimeout(() => {
+        bar.style.opacity = "0";
+        setTimeout(() => { bar.style.display = "none"; }, 300); 
+    }, duration);
+}
+
+// =================================
+// Zarządzanie Sidebarem i Nawigacją
+// =================================
+function toggleSidebar() {
+    sidebarExpanded = !sidebarExpanded;
+    if (sidebar) sidebar.classList.toggle('expanded', sidebarExpanded);
+    if (appContainer) appContainer.style.marginLeft = (sidebarExpanded ? sidebarWidthExpanded : sidebarWidthCollapsed) + 'px';
+    if (menuIcon && menuBtnText) {
+        if (sidebarExpanded) {
+            menuIcon.src = 'menu2.png'; menuIcon.alt = "Zamknij"; menuBtnText.textContent = 'ZAMKNIJ MENU';
+            if(sidebarToggleBtn) sidebarToggleBtn.title = "Zwiń menu";
+        } else {
+            menuIcon.src = 'menu.png'; menuIcon.alt = "Menu"; menuBtnText.textContent = 'MENU';
+            if(sidebarToggleBtn) sidebarToggleBtn.title = "Rozwiń menu";
+        }
+    }
+}
+function navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) {
+    console.log(`Nawigacja do: ${pageId}, forceRenderDeckBuilder: ${forceRenderDeckBuilder}`);
+
+    document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active-link'));
+    if (clickedLinkElement) {
+        clickedLinkElement.classList.add('active-link');
+    }
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const page = document.getElementById(pageId);
+    if (page) {
+        page.classList.add('active');
+    } else { 
+        console.error(`Strona ID '${pageId}' nie znaleziona.`); 
+        const domyslnyLinkFallback = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]');
+        if (domyslnyLinkFallback && pageId !== 'generator') {
+            navigateTo('generator', domyslnyLinkFallback, true);
+        }
+        return; 
+    }
+    
+    // Resetuj flagę edycji CZĘŚCI, jeśli opuszczamy stronę 'dodaj'
+    if (pageId !== 'dodaj' && czyEdycjaWProgresie) {
+        const typCzesciSelect = document.getElementById('typCzesci');
+        if (typCzesciSelect) typCzesciSelect.value = ""; 
+        pokazFormularz(); // Resetuje formularz do stanu "Wybierz typ"
+        czyEdycjaWProgresie = false;
+        console.log("Zresetowano stan edycji CZĘŚCI z powodu opuszczenia strony 'dodaj'.");
+    }
+
+    // Resetuj flagę edycji DECKU, jeśli opuszczamy stronę 'deck' (Generator Decków)
+    if (pageId !== 'deck' && currentEditingDeckId) {
+        const deckNameInput = document.getElementById('deckName');
+        const saveDeckBtn = document.getElementById('saveDeckButton');
+        if (deckNameInput) deckNameInput.value = '';
+        if (saveDeckBtn) saveDeckBtn.textContent = 'Zapisz Aktualny Deck';
+        currentEditingDeckId = null;
+        console.log("Zresetowano stan edycji DECKU z powodu opuszczenia strony 'deck'.");
+        // Nie wywołujemy renderDeckBuilder, bo opuszczamy stronę
+    }
+
+    if (pageId === 'magazyn') { 
+        wyswietlMagazyn(); 
+    } else if (pageId === 'dodaj') {
+        if (!czyEdycjaWProgresie) { // Tylko resetuj, jeśli nie jesteśmy celowo w trakcie edycji
+            const typCzesciSelect = document.getElementById('typCzesci');
+            if (typCzesciSelect) typCzesciSelect.value = "";
+            pokazFormularz();
+        }
+    } else if (pageId === 'generator') { 
+        // Wyczyść poprzednie wyniki losowania, jeśli to pożądane
+        // wyczyscLosowanie(); // Można odkomentować
+    } else if (pageId === 'deck') { 
+        if (forceRenderDeckBuilder) { 
+             renderDeckBuilder(); // Ta funkcja będzie wymagała modyfikacji dla serii CX
+        }
+    } else if (pageId === 'galeriaDeckow') { 
+        displaySavedDecks();
+    }
+    
+    if (sidebarExpanded && window.innerWidth < 768) {
+        toggleSidebar();
+    }
+}
+
+// =================================
+// Zarządzanie Magazynem (localStorage)
+// =================================
+const MAGAZYN_KEY = 'beybladeMagazynAnanasCX_v3'; // Nowy klucz, aby uniknąć konfliktu i zaznaczyć wersję
+
+function getMagazyn() {
+    try {
+        const magazynString = localStorage.getItem(MAGAZYN_KEY);
+        return magazynString ? JSON.parse(magazynString) : [];
+    } catch (e) { showNotification("Błąd odczytu danych magazynu.", 3000, 'error'); console.error("Błąd odczytu magazynu:", e); return []; }
+}
+function setMagazyn(magazynArray) {
+    try {
+        if (Array.isArray(magazynArray)) {
+            localStorage.setItem(MAGAZYN_KEY, JSON.stringify(magazynArray));
+        } else {
+            showNotification("Błąd zapisu: Dane magazynu muszą być tablicą.", 3000, 'error');
+            console.error("setMagazyn: Przekazano nie-tablicę:", magazynArray);
+        }
+    } catch (e) { showNotification("Błąd zapisu danych magazynu.", 3000, 'error'); console.error("Błąd zapisu magazynu:", e); }
+}
+
+function wyswietlMagazyn() {
+    console.log("[MAGAZYN_VIEW_1] Funkcja wyswietlMagazyn - START");
+    const magazynPelny = getMagazyn();
+    const lista = document.getElementById('lista-magazyn');
+
+    if (!lista) {
+        console.error("[MAGAZYN_VIEW_X1] Błąd krytyczny: Element #lista-magazyn nie istnieje.");
+        showNotification("Błąd wewnętrzny: Nie można wyświetlić magazynu.", 3000, 'error');
+        return;
+    }
+    lista.innerHTML = ''; // Wyczyść poprzednie wpisy
+
+    if (!Array.isArray(magazynPelny)) {
+        console.error("[MAGAZYN_VIEW_X2] Błąd: Dane z getMagazyn() nie są tablicą.");
+        lista.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>Błąd wczytywania danych magazynu.</p></div>';
+        return;
+    }
+
+    const filtrKategoriiSelect = document.getElementById('filterKategoria');
+    const filtrKategorii = filtrKategoriiSelect ? filtrKategoriiSelect.value : 'all';
+
+    const filtrPosiadaneSelect = document.getElementById('filterPosiadane');
+    const filtrPosiadania = filtrPosiadaneSelect ? filtrPosiadaneSelect.value : 'posiadane';
+
+    console.log(`[MAGAZYN_VIEW_2] Filtry - Kategoria: ${filtrKategorii}, Posiadanie: ${filtrPosiadania}`);
+
+    let czesciDoWyswietlenia = [...magazynPelny];
+
+    // 1. Filtracja na podstawie posiadania
+    if (filtrPosiadania === 'posiadane') {
+        czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && (parseInt(czesc.ilosc, 10) || 0) > 0);
+    } else if (filtrPosiadania === 'nieposiadane') {
+        czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && (parseInt(czesc.ilosc, 10) || 0) === 0);
+    }
+    // Dla 'wszystkie_w_bazie' nie robimy nic dodatkowego z tą listą.
+    console.log(`[MAGAZYN_VIEW_3] Po filtrze posiadania. Liczba części: ${czesciDoWyswietlenia.length}`);
+
+    // 2. Filtracja na podstawie kategorii
+    if (filtrKategorii !== 'all' && filtrKategorii) {
+        czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && czesc.typ === filtrKategorii);
+    }
+    console.log(`[MAGAZYN_VIEW_4] Po filtrze kategorii. Liczba części: ${czesciDoWyswietlenia.length}`);
+
+    if (czesciDoWyswietlenia.length === 0) {
+        lista.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>Brak części pasujących do wybranych filtrów.</p></div>';
+        console.log("[MAGAZYN_VIEW_5] Brak części do wyświetlenia po filtrowaniu.");
+        return;
+    }
+
+    // Sortowanie:
+    // 1. Alfabetycznie według TYPU części (kategorii)
+    // 2. W ramach tego samego typu, alfabetycznie według NAZWY części
+    czesciDoWyswietlenia.sort((a, b) => {
+        // Upewnij się, że a i b oraz ich właściwości 'typ' i 'nazwa' istnieją
+        const typA = (a && typeof a.typ === 'string') ? a.typ.toLowerCase() : "";
+        const typB = (b && typeof b.typ === 'string') ? b.typ.toLowerCase() : "";
+        const nazwaA = (a && typeof a.nazwa === 'string') ? a.nazwa.toLowerCase() : "";
+        const nazwaB = (b && typeof b.nazwa === 'string') ? b.nazwa.toLowerCase() : "";
+
+        // Najpierw sortuj według typu
+        if (typA < typB) return -1;
+        if (typA > typB) return 1;
+
+        // Jeśli typy są takie same, sortuj według nazwy
+        if (nazwaA < nazwaB) return -1;
+        if (nazwaA > nazwaB) return 1;
+
+        return 0; // Jeśli typy i nazwy są takie same
+    });
+
+    // Generowanie HTML dla każdej części
+    czesciDoWyswietlenia.forEach((czesc, index) => {
+        if (!czesc || !czesc.typ || typeof czesc.nazwa !== 'string') {
+            console.warn(`[MAGAZYN_VIEW_RENDER-${index}] Pominięto renderowanie nieprawidłowej części:`, czesc);
+            return;
+        }
+
+        const ilosc = parseInt(czesc.ilosc, 10) || 0;
+
+        // --- Logika BETA ---
+        let isBeta = false;
+        const maStat = (statName) => typeof czesc[statName] === 'number'; // Pomocnik
+
+        if (['blade', 'rachet', 'cx-main-blade', 'cx-assist-blade'].includes(czesc.typ)) {
+            if (maStat('ATK') && czesc.ATK === 0 &&
+                maStat('DEF') && czesc.DEF === 0 &&
+                maStat('STM') && czesc.STM === 0 &&
+                maStat('waga') && czesc.waga === 0) {
+                isBeta = true;
+            }
+        } else if (czesc.typ === 'bit') {
+            if (maStat('ATK') && czesc.ATK === 0 &&
+                maStat('DEF') && czesc.DEF === 0 &&
+                maStat('STM') && czesc.STM === 0 &&
+                maStat('waga') && czesc.waga === 0) {
+                isBeta = true;
+            }
+        } else if (czesc.typ === 'cx-lock-chip') {
+            if (maStat('waga') && czesc.waga === 0) {
+                isBeta = true;
+            }
+        }
+        // --- Koniec Logiki BETA ---
+
+        // Generowanie stringu statystyk
+        let statyString = '';
+        if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
+            statyString = `ATK:${czesc.ATK||0}, DEF:${czesc.DEF||0}, STM:${czesc.STM||0}, Waga:${czesc.waga||0}g`;
+        } else if (czesc.typ === 'bit') {
+            statyString = `ATK:${czesc.ATK||0}, DEF:${czesc.DEF||0}, STM:${czesc.STM||0}, Waga:${czesc.waga||0}g`;
+            statyString += `, DASH:${czesc.DASH||0}`;
+            statyString += `, B-RES:${czesc.BURST_RES||0}`;
+        } else if (czesc.typ === 'cx-lock-chip') {
+            statyString = `Waga:${czesc.waga||0}g`;
+            if (maStat('cx_lc_wytrz') && czesc.cx_lc_wytrz !== 0) statyString += `, Wytrz:${czesc.cx_lc_wytrz}`;
+            if (maStat('cx_lc_atk_bonus') && czesc.cx_lc_atk_bonus !== 0) statyString += `, ATK+:${czesc.cx_lc_atk_bonus}`;
+            if (maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus !== 0) statyString += `, DEF+:${czesc.cx_lc_def_bonus}`;
+        }
+        if (!statyString.trim() && !isBeta) {
+            statyString = "Brak szczegółowych statystyk";
+        } else if (!statyString.trim() && isBeta) {
+            statyString = "Statystyki: N/A (Wersja BETA)";
+        }
+
+        const imgHTML = czesc.img
+            ? `<img class="part-img" src="${czesc.img}" alt="${czesc.nazwa}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <div class="part-img-placeholder" style="display:none;">Brak<br>obr.</div>`
+            : `<div class="part-img-placeholder">Brak<br>obr.</div>`;
+
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card';
+        if (ilosc === 0) {
+            cardDiv.classList.add('part-not-owned');
+        }
+
+        const typNazwaFormatowana = czesc.typ.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+        const quantityControlsHTML = `
+            <div class="item-quantity-controls">
+                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', -1)"
+                        title="Zmniejsz ilość ${czesc.nazwa}"
+                        ${ilosc === 0 ? 'disabled' : ''}>-</button>
+                <span class="quantity-display" title="Aktualna ilość: ${ilosc}">${ilosc}</span>
+                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', 1)"
+                        title="Zwiększ ilość ${czesc.nazwa}">+</button>
+            </div>
+        `;
+
+        cardDiv.innerHTML = `
+            ${imgHTML}
+            <h3>
+                ${czesc.nazwa}
+                ${isBeta ? '<span class="beta-label">BETA</span>' : ''}
+            </h3>
+            <p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>
+            <p style="font-size:0.85em; line-height:1.4;">${statyString}</p>
+            ${quantityControlsHTML}
+        `;
+        lista.appendChild(cardDiv);
+    });
+    console.log("[MAGAZYN_VIEW_7] Renderowanie części zakończone.");
+}
+
+
+// 🔧 Funkcja zmiany ilości
+function zmienIlosc(id, delta) {
+    const magazyn = getMagazyn();
+    const index = magazyn.findIndex(c => String(c.id) === String(id));
+    if (index === -1) return;
+
+    const nowaIlosc = (magazyn[index].ilosc || 0) + delta;
+    magazyn[index].ilosc = Math.max(0, nowaIlosc); // ilość nie może spaść poniżej 0
+
+    setMagazyn(magazyn);
+    wyswietlMagazyn();
+}
+
+function obliczSumeStatystykZestawu(czesciZestawu, seria) {
+    console.log(`[STATS_CALC_1] Obliczanie statystyk dla serii: ${seria}, Czesci:`, JSON.parse(JSON.stringify(czesciZestawu)));
+    const suma = { ATK: 0, DEF: 0, STM: 0, WAGA: 0, DASH: 0, B_RES: 0, CX_LC_WYTRZ: 0 };
+
+    const getStat = (czesc, statName, defaultValue = 0) => {
+        if (!czesc || typeof czesc[statName] === 'undefined' || czesc[statName] === null) {
+            return defaultValue;
+        }
+        const val = parseFloat(czesc[statName]);
+        return isNaN(val) ? defaultValue : val;
+    };
+
+    let currentBlade, currentRatchet, currentBit;
+    let currentCxLockChip, currentCxMainBlade, currentCxAssistBlade;
+
+    if (seria === 'bx_ux') {
+        // console.log('[STATS_CALC_DEBUG_BXUX_0] Wejście do bloku bx_ux.');
+        // console.log('[STATS_CALC_DEBUG_BXUX_1] czesciZestawu PRZED destrukturyzacją:', JSON.parse(JSON.stringify(czesciZestawu)));
+        
+        const { blade, rachet, bit } = czesciZestawu;
+        currentBlade = blade;
+        currentRatchet = rachet;
+        currentBit = bit;
+
+        // console.log('[STATS_CALC_DEBUG_BXUX_2] Po destrukturyzacji i przypisaniu:');
+        // console.log('  currentBlade:', currentBlade ? currentBlade.nazwa : null);
+        // console.log('  currentRatchet:', currentRatchet ? currentRatchet.nazwa : null);
+        // console.log('  currentBit:', currentBit ? currentBit.nazwa : null);
+
+        if (currentBlade) {
+            // console.log('[STATS_CALC_DEBUG_BXUX_3] Przetwarzanie currentBlade:', currentBlade.nazwa);
+            suma.ATK += getStat(currentBlade, 'ATK');
+            suma.DEF += getStat(currentBlade, 'DEF');
+            suma.STM += getStat(currentBlade, 'STM');
+            suma.WAGA += getStat(currentBlade, 'waga');
+        } /* else {
+            console.log('[STATS_CALC_DEBUG_BXUX_3_WARN] currentBlade jest null/undefined.');
+        }*/
+
+        // console.log('[STATS_CALC_DEBUG_BXUX_4] Stan currentRatchet PRZED blokiem if(currentRatchet):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
+        
+        if (currentRatchet) { 
+            // console.log('[STATS_CALC_DEBUG_BXUX_5] Wewnątrz if(currentRatchet). Nazwa:', currentRatchet.nazwa, 'ID:', currentRatchet.id);
+            suma.ATK += getStat(currentRatchet, 'ATK');
+            suma.DEF += getStat(currentRatchet, 'DEF');
+            suma.STM += getStat(currentRatchet, 'STM');
+            suma.WAGA += getStat(currentRatchet, 'waga');
+
+            if (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true) {
+                // console.log('[STATS_CALC_DEBUG_BXUX_6] Specjalny ratchet wykryty:', currentRatchet.nazwa);
+                suma.DASH = getStat(currentRatchet, 'DASH');
+                suma.B_RES = getStat(currentRatchet, 'BURST_RES');
+                // console.log(`[STATS_CALC_2_BXUX_SPEC_RACHET] Ratchet "${currentRatchet.nazwa}" integruje bit. DASH: ${suma.DASH}, B_RES: ${suma.B_RES}`);
+            } /* else {
+                 console.log('[STATS_CALC_DEBUG_BXUX_6] To jest zwykły ratchet:', currentRatchet.nazwa);
+            }*/
+        } /* else {
+            console.log('[STATS_CALC_DEBUG_BXUX_5_WARN] currentRatchet jest null/undefined. Pomijam blok statystyk racheta.');
+        }*/
+        // console.log('[STATS_CALC_DEBUG_BXUX_7] Stan currentRatchet PO bloku if(currentRatchet):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
+
+        const jestSpecjalnyRatchet = currentRatchet && (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true);
+        // console.log('[STATS_CALC_DEBUG_BXUX_8] Sprawdzanie bita. jestSpecjalnyRatchet:', jestSpecjalnyRatchet, 'currentBit:', currentBit ? currentBit.nazwa : null);
+
+        if (currentBit && !jestSpecjalnyRatchet) {
+            // console.log(`[STATS_CALC_DEBUG_BXUX_9] Używam statystyk ze zwykłego bita "${currentBit.nazwa}"`);
+            suma.DASH += getStat(currentBit, 'DASH');
+            suma.B_RES += getStat(currentBit, 'BURST_RES');
+            suma.WAGA += getStat(currentBit, 'waga');
+        } /* else if (!currentBit && !jestSpecjalnyRatchet) {
+            console.log(`[STATS_CALC_WARN_BXUX_NO_BIT] Brak bita dla zwykłego racheta (lub brak racheta). DASH/B_RES mogą być niekompletne.`);
+        } else if (currentBit && jestSpecjalnyRatchet) {
+            console.log(`[STATS_CALC_INFO_BXUX_BIT_IGNORED] Bit "${currentBit.nazwa}" istnieje, ale został zignorowany z powodu specjalnego racheta.`);
+        }*/
+
+    } else if (seria === 'cx') {
+        // console.log('[STATS_CALC_DEBUG_CX_0] Wejście do bloku cx.');
+        // console.log('[STATS_CALC_DEBUG_CX_1] czesciZestawu PRZED destrukturyzacją:', JSON.parse(JSON.stringify(czesciZestawu)));
+
+        const { cx_lock_chip, cx_main_blade, cx_assist_blade, rachet, bit } = czesciZestawu;
+        currentCxLockChip = cx_lock_chip;
+        currentCxMainBlade = cx_main_blade;
+        currentCxAssistBlade = cx_assist_blade;
+        currentRatchet = rachet;
+        currentBit = bit;
+
+        // console.log('[STATS_CALC_DEBUG_CX_2] Po destrukturyzacji i przypisaniu:');
+        // console.log('  currentCxLockChip:', currentCxLockChip ? currentCxLockChip.nazwa : null);
+        // console.log('  currentCxMainBlade:', currentCxMainBlade ? currentCxMainBlade.nazwa : null);
+        // console.log('  currentCxAssistBlade:', currentCxAssistBlade ? currentCxAssistBlade.nazwa : null);
+        // console.log('  currentRatchet (CX):', currentRatchet ? currentRatchet.nazwa : null);
+        // console.log('  currentBit (CX):', currentBit ? currentBit.nazwa : null);
+
+        if (currentCxLockChip) {
+            // console.log('[STATS_CALC_DEBUG_CX_3A] Przetwarzanie LockChip:', currentCxLockChip.nazwa);
+            suma.WAGA += getStat(currentCxLockChip, 'waga');
+            suma.CX_LC_WYTRZ += getStat(currentCxLockChip, 'cx_lc_wytrz');
+            suma.ATK += getStat(currentCxLockChip, 'cx_lc_atk_bonus');
+            suma.DEF += getStat(currentCxLockChip, 'cx_lc_def_bonus');
+        }
+        if (currentCxMainBlade) {
+            // console.log('[STATS_CALC_DEBUG_CX_3B] Przetwarzanie MainBlade:', currentCxMainBlade.nazwa);
+            suma.ATK += getStat(currentCxMainBlade, 'ATK');
+            suma.DEF += getStat(currentCxMainBlade, 'DEF');
+            suma.STM += getStat(currentCxMainBlade, 'STM');
+            suma.WAGA += getStat(currentCxMainBlade, 'waga');
+        }
+        if (currentCxAssistBlade) {
+            // console.log('[STATS_CALC_DEBUG_CX_3C] Przetwarzanie AssistBlade:', currentCxAssistBlade.nazwa);
+            suma.ATK += getStat(currentCxAssistBlade, 'ATK');
+            suma.DEF += getStat(currentCxAssistBlade, 'DEF');
+            suma.STM += getStat(currentCxAssistBlade, 'STM');
+            suma.WAGA += getStat(currentCxAssistBlade, 'waga');
+        }
+
+        // console.log('[STATS_CALC_DEBUG_CX_4] Stan currentRatchet PRZED blokiem if(currentRatchet) (CX):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
+        if (currentRatchet) {
+            // console.log('[STATS_CALC_DEBUG_CX_5] Wewnątrz if(currentRatchet) (CX). Nazwa:', currentRatchet.nazwa, 'ID:', currentRatchet.id);
+            suma.ATK += getStat(currentRatchet, 'ATK');
+            suma.DEF += getStat(currentRatchet, 'DEF');
+            suma.STM += getStat(currentRatchet, 'STM');
+            suma.WAGA += getStat(currentRatchet, 'waga');
+
+            if (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true) {
+                // console.log('[STATS_CALC_DEBUG_CX_6] Specjalny ratchet wykryty (CX):', currentRatchet.nazwa);
+                suma.DASH = getStat(currentRatchet, 'DASH');
+                suma.B_RES = getStat(currentRatchet, 'BURST_RES');
+                // console.log(`[STATS_CALC_2_CX_SPEC_RACHET] Ratchet "${currentRatchet.nazwa}" integruje bit. DASH: ${suma.DASH}, B_RES: ${suma.B_RES}`);
+            } /* else {
+                console.log('[STATS_CALC_DEBUG_CX_6] To jest zwykły ratchet (CX):', currentRatchet.nazwa);
+            }*/
+        } /* else {
+            console.log('[STATS_CALC_DEBUG_CX_5_WARN] currentRatchet (CX) jest null/undefined.');
+        }*/
+        // console.log('[STATS_CALC_DEBUG_CX_7] Stan currentRatchet PO bloku if(currentRatchet) (CX):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
+
+        const jestSpecjalnyRatchetCX = currentRatchet && (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true);
+        // console.log('[STATS_CALC_DEBUG_CX_8] Sprawdzanie bita (CX). jestSpecjalnyRatchetCX:', jestSpecjalnyRatchetCX, 'currentBit:', currentBit ? currentBit.nazwa : null);
+
+        if (currentBit && !jestSpecjalnyRatchetCX) {
+            // console.log(`[STATS_CALC_DEBUG_CX_9] Używam statystyk ze zwykłego bita "${currentBit.nazwa}" (CX)`);
+            suma.DASH += getStat(currentBit, 'DASH');
+            suma.B_RES += getStat(currentBit, 'BURST_RES');
+            suma.WAGA += getStat(currentBit, 'waga');
+        } /* else if (!currentBit && !jestSpecjalnyRatchetCX) {
+            console.log(`[STATS_CALC_WARN_CX_NO_BIT] Brak bita dla zwykłego racheta w CX (lub brak racheta).`);
+        } else if (currentBit && jestSpecjalnyRatchetCX) {
+            console.log(`[STATS_CALC_INFO_CX_BIT_IGNORED] Bit "${currentBit.nazwa}" (CX) istnieje, ale został zignorowany z powodu specjalnego racheta.`);
+        }*/
+    }
+
+    // Zaokrąglenie wszystkich wartości numerycznych w obiekcie suma
+    for (const key in suma) {
+        if (typeof suma[key] === 'number') {
+            // Zaokrąglij do 1 miejsca po przecinku.
+            // Jeśli CX_LC_WYTRZ ma być zawsze całkowitą, można dodać warunek:
+            // if (key === 'CX_LC_WYTRZ') {
+            //     suma[key] = parseFloat(suma[key].toFixed(0));
+            // } else {
+            //     suma[key] = parseFloat(suma[key].toFixed(1));
+            // }
+            // Dla uproszczenia, na razie wszystko do 1 miejsca:
+            suma[key] = parseFloat(suma[key].toFixed(1));
+        }
+    }
+
+    console.log("[STATS_CALC_FINAL_ROUNDED] Końcowa ZAOKRĄGLONA suma statystyk:", JSON.parse(JSON.stringify(suma)));
+    return suma;
+}
+
+function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
+    const { seria, czesci, statystyki, idZestawu } = zestaw;
+    
+    // Funkcja pomocnicza do generowania tagu obrazka lub placeholdera
+    // Ta sama funkcja jest używana w displaySavedDecks, można ją wynieść globalnie jeśli chcesz
+    const getPartAndHTML = (partObj, partTypeDefaultName) => {
+        const imgHTML = partObj && partObj.img ? 
+                        `<img src="${partObj.img}" alt="${partObj.nazwa || partTypeDefaultName}" class="deck-part-img">` : // Użyj .deck-part-img dla spójności ze stylami podglądu decku
+                        `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
+        const nameText = partObj ? (partObj.nazwa || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`;
+        return { html: imgHTML, name: nameText };
+    };
+
+    let setImagesHTML = ''; 
+    let setNameParts = []; // Tablica stringów dla nazw części
+
+    const ratchetWylosowany = czesci.rachet;
+    const czySpecjalnyRatchetZostalWylosowany = ratchetWylosowany && (String(ratchetWylosowany.id) === "205" || ratchetWylosowany.integrujeBit === true);
+
+    if (seria === 'bx_ux') {
+        const bladeInfo = getPartAndHTML(czesci.blade, 'Blade');
+        const ratchetInfo = getPartAndHTML(ratchetWylosowany, 'Ratchet');
+        let bitInfo;
+
+        if (czySpecjalnyRatchetZostalWylosowany) {
+            // Dla specjalnego racheta, bit jest zintegrowany. Możemy pokazać placeholder lub nic.
+            // Tutaj pokazujemy specjalny tekst zamiast obrazka bita.
+            bitInfo = { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` };
+        } else {
+            bitInfo = getPartAndHTML(czesci.bit, 'Bit');
+        }
+        
+        setImagesHTML = `<div class="wynik-zestaw-obrazki">
+                           ${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}
+                         </div>`;
+        setNameParts = [
+            `<strong>Blade:</strong> ${bladeInfo.name}`, 
+            `<strong>Ratchet:</strong> ${ratchetInfo.name}`, 
+            `<strong>Bit:</strong> ${bitInfo.name}`
+        ];
+
+    } else if (seria === 'cx') {
+        const lockChipInfo = getPartAndHTML(czesci.cx_lock_chip, 'LockChip');
+        const mainBladeInfo = getPartAndHTML(czesci.cx_main_blade, 'MainBlade');
+        const assistBladeInfo = getPartAndHTML(czesci.cx_assist_blade, 'AssistBlade');
+        const ratchetInfo = getPartAndHTML(ratchetWylosowany, 'Ratchet');
+        let bitInfo;
+
+        if (czySpecjalnyRatchetZostalWylosowany) {
+            bitInfo = { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` };
+        } else {
+            bitInfo = getPartAndHTML(czesci.bit, 'Bit');
+        }
+        
+        // Struktura dla CX może być bardziej złożona, np. dwa rzędy obrazków
+        setImagesHTML = `
+            <div class="cx-images-container">
+                <div class="cx-blade-row wynik-zestaw-obrazki">
+                    ${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}
+                </div>
+                <div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">
+                    ${ratchetInfo.html} ${bitInfo.html}
+                </div>
+            </div>`;
+        setNameParts = [
+            `<strong>LockChip:</strong> ${lockChipInfo.name}`,   
+            `<strong>Main Blade:</strong> ${mainBladeInfo.name}`,  
+            `<strong>Assist Blade:</strong> ${assistBladeInfo.name}`,
+            `<strong>Ratchet:</strong> ${ratchetInfo.name}`,    
+            `<strong>Bit:</strong> ${bitInfo.name}`
+        ];
+    }
+    
+    let setNameHTML = setNameParts.join('<br>'); // Nazwy części jedna pod drugą
+
+    // Tworzenie stringu statystyk - SUMARYCZNYCH w stylu .stat-grid
+    let statySumaryczneHTML = '<div class="stat-grid">'; 
+        statySumaryczneHTML += `<span>ATK: ${(statystyki.ATK || 0).toFixed(1)}</span>`;
+        statySumaryczneHTML += `<span>DEF: ${(statystyki.DEF || 0).toFixed(1)}</span>`;
+        statySumaryczneHTML += `<span>STM: ${(statystyki.STM || 0).toFixed(1)}</span>`;
+        statySumaryczneHTML += `<span>Waga: ${(statystyki.WAGA || 0).toFixed(1)}g</span>`;
+        
+        const dashValue = parseFloat((statystyki.DASH || 0).toFixed(1));
+        const bResValue = parseFloat((statystyki.B_RES || 0).toFixed(1));
+
+        if (dashValue !== 0) statySumaryczneHTML += `<span>DASH: ${dashValue.toFixed(1)}</span>`;
+        if (bResValue !== 0) statySumaryczneHTML += `<span>B-RES: ${bResValue.toFixed(1)}</span>`;
+        
+        if (seria === 'cx') {
+            const lcWytrzValue = parseInt((statystyki.CX_LC_WYTRZ || 0).toFixed(0));
+            if (lcWytrzValue !== 0) {
+                statySumaryczneHTML += `<span>LC-W: ${lcWytrzValue}</span>`;
+            }
+        }
+    statySumaryczneHTML += `</div>`;
+
+    // Informacje o zmiennych statystykach racheta (jeśli istnieją)
+    // Można to również inaczej sformatować, jeśli jest potrzebne
+    let zmienneStatyRatchetHTML = '';
+    if (ratchetWylosowany && ratchetWylosowany.zmienneStaty && typeof ratchetWylosowany.zmienneStaty === 'object' && Object.keys(ratchetWylosowany.zmienneStaty).length > 0) {
+        zmienneStatyRatchetHTML = `<div class="zmienne-staty-info" style="font-size: 0.8em; margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: left;">
+                                     <strong style="display:block; margin-bottom:4px; color:#e0e0e0;">${ratchetWylosowany.nazwa} - Tryby:</strong>`;
+        for (const trybKey in ratchetWylosowany.zmienneStaty) {
+            if (Object.hasOwnProperty.call(ratchetWylosowany.zmienneStaty, trybKey)) {
+                const tryb = ratchetWylosowany.zmienneStaty[trybKey];
+                zmienneStatyRatchetHTML += `<div style="margin-bottom:3px;"><em style="color:#c0a0ff;">${tryb.opis || trybKey}:</em> `;
+                let statyTrybuArray = [];
+                if (typeof tryb.ATK === 'number') statyTrybuArray.push(`ATK ${tryb.ATK.toFixed(1)}`);
+                if (typeof tryb.DEF === 'number') statyTrybuArray.push(`DEF ${tryb.DEF.toFixed(1)}`);
+                if (typeof tryb.STM === 'number') statyTrybuArray.push(`STM ${tryb.STM.toFixed(1)}`);
+                if (typeof tryb.wysokosc === 'number') statyTrybuArray.push(`H ${tryb.wysokosc.toFixed(1)}`);
+                if (typeof tryb.DASH === 'number') statyTrybuArray.push(`DASH ${tryb.DASH.toFixed(1)}`);
+                if (typeof tryb.BURST_RES === 'number') statyTrybuArray.push(`B-Res ${tryb.BURST_RES.toFixed(1)}`);
+                zmienneStatyRatchetHTML += statyTrybuArray.join(' / ') + '</div>';
+            }
+        }
+        if (ratchetWylosowany.opisSpecjalny) {
+             zmienneStatyRatchetHTML += `<small style="display:block; margin-top:5px; color:#aaa;"><em>${ratchetWylosowany.opisSpecjalny}</em></small>`;
+        }
+        zmienneStatyRatchetHTML += `</div>`;
+    }
+
+    // Zwróć HTML karty w nowym, bardziej estetycznym formacie
+    // Używamy klasy .saved-deck-card dla głównego kontenera, aby odziedziczyć część stylów
+    // ale możemy też dodać dodatkową klasę np. .generated-set-card dla specyficznych dostosowań
+    return `
+        <div class="card saved-deck-card generated-set-card ${seria === 'cx' ? 'wylosowany-zestaw-cx' : ''}" data-zestaw-id="${idZestawu}">
+            <h4 style="text-align:center; color:#d1b3ff; margin-bottom: 10px;">
+                Wylosowany Zestaw ${seria.toUpperCase().replace('_','/')} #${indexZestawu + 1}
+            </h4>
+            
+            ${setImagesHTML}
+
+            <div style="font-size:0.85em; color:#ddd; margin-top: 8px; margin-bottom:12px; word-break: break-word; text-align:center; line-height: 1.4;">
+                ${setNameHTML} 
+            </div>
+
+            <div style="margin-top:10px; padding-top:10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <strong style="display:block; text-align:center; font-size:0.9em; margin-bottom:5px; color:#c080ff;">SUMA STATYSTYK:</strong>
+                ${statySumaryczneHTML}
+            </div>
+            ${zmienneStatyRatchetHTML}
+        </div>
+    `;
+}
+
+
+// =================================
+// Generator Zestawów Losowych (GŁÓWNA LOGIKA Z CX)
+// =================================
+function wyczyscLosowanie() {
+    // Użyj nowej zmiennej dla diva wyników generatora
+    if (wynikiDivGenerator) wynikiDivGenerator.innerHTML = ''; 
+    // Użyj nowej zmiennej dla obrazka tła generatora
+    if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; 
+
+    ostatnioWylosowaneZestawyGlobalnie = []; // Wyczyść globalną tablicę
+    
+    // Ukryj kontrolki zapisu głównego zestawu
+    const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
+    if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
+
+    showNotification('Wyniki losowania wyczyszczone.', 2000, 'info');
+}
+function LOSUJ() {
+    console.log("[LOSUJ_1] Funkcja LOSUJ - START");
+    if (!wynikiDivGenerator) {
+        showNotification("Błąd krytyczny: Element wyników generatora nie istnieje.", 3000, 'error');
+        console.error("[LOSUJ_X1] wynikiDivGenerator jest niezdefiniowany");
+        return;
+    }
+    if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'none';
+    wynikiDivGenerator.innerHTML = '';
+    ostatnioWylosowaneZestawyGlobalnie = [];
+
+    const iloscZestawowDoWylosowania = parseInt(document.getElementById('ilosc')?.value) || 1;
+    const wybranaSeria = document.getElementById('seriaLosowania')?.value;
+
+    console.log(`[LOSUJ_2] Ilość zestawów: ${iloscZestawowDoWylosowania}, Seria: ${wybranaSeria}`);
+
+    if (!wybranaSeria) {
+        showNotification("Błąd: Nie wybrano serii do losowania.", 3000, 'warning');
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        return;
+    }
+
+    const magazyn = getMagazyn();
+    if (!magazyn || magazyn.length === 0) {
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty! Dodaj części, aby móc losować.</p></div>';
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        console.log("[LOSUJ_3] Magazyn pusty.");
+        return;
+    }
+    console.log(`[LOSUJ_4] Liczba części w magazynie: ${magazyn.length}`);
+
+    // Przygotowanie puli części dostępnych do losowania
+    const dostepneCzesci = {
+        blade: [], rachet: [], bit: [],
+        'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': []
+    };
+
+    magazyn.forEach(czesc => {
+        const ilosc = parseInt(czesc.ilosc) || 0;
+        if (ilosc > 0 && dostepneCzesci.hasOwnProperty(czesc.typ)) {
+            for (let i = 0; i < ilosc; i++) {
+                dostepneCzesci[czesc.typ].push({ ...czesc, _instanceId: `${czesc.id}_${i}` });
+            }
+        }
+    });
+    console.log("[LOSUJ_5] Pule dostępnych części:", JSON.parse(JSON.stringify(Object.keys(dostepneCzesci).reduce((acc, key) => { acc[key] = dostepneCzesci[key].length; return acc; }, {}))));
+
+
+    // Sprawdzenie, czy mamy wystarczająco części dla wybranej serii
+    let czyWystarczajacoCzesci = false;
+    let komunikatBrakuCzesci = '';
+
+    if (wybranaSeria === 'bx_ux') {
+        const potrzebne = { blade: iloscZestawowDoWylosowania, rachet: iloscZestawowDoWylosowania, bit: iloscZestawowDoWylosowania };
+        if (dostepneCzesci.blade.length >= potrzebne.blade &&
+            dostepneCzesci.rachet.length >= potrzebne.rachet &&
+            dostepneCzesci.bit.length >= potrzebne.bit) {
+            // Dodatkowe sprawdzenie: jeśli wszystkie dostępne ratchety to ID "205", a potrzebujemy losować bitów,
+            // to musimy mieć wystarczająco "normalnych" ratchetów LUB wystarczająco bitów do sparowania z "normalnymi" ratchetami.
+            // To jest skomplikowane do dokładnego policzenia bez iteracji losowania.
+            // Na razie uproszczone sprawdzenie. Jeśli JEDYNYM dostępnym ratchetem jest ID "205" i potrzebujemy więcej niż 1 zestaw,
+            // to pula bitów może nie być potrzebna dla tych zestawów z ID "205".
+            // Dla uproszczenia, zakładamy, że pula bitów jest potrzebna, a logika losowania obsłuży specjalny ratchet.
+            czyWystarczajacoCzesci = true;
+        } else {
+            komunikatBrakuCzesci = '<div class="card" style="text-align:left; padding-left:25px;"><p><strong>Za mało części BX/UX do wylosowania żądanej ilości:</strong></p><ul>';
+            if (dostepneCzesci.blade.length < potrzebne.blade) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.blade - dostepneCzesci.blade.length} Blade (jest: ${dostepneCzesci.blade.length})</li>`;
+            if (dostepneCzesci.rachet.length < potrzebne.rachet) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.rachet - dostepneCzesci.rachet.length} Ratchet (jest: ${dostepneCzesci.rachet.length})</li>`;
+            if (dostepneCzesci.bit.length < potrzebne.bit) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.bit - dostepneCzesci.bit.length} Bit (jest: ${dostepneCzesci.bit.length})</li>`;
+            komunikatBrakuCzesci += '</ul></div>';
+        }
+    } else if (wybranaSeria === 'cx') {
+        const potrzebne = {
+            'cx-lock-chip': iloscZestawowDoWylosowania, 'cx-main-blade': iloscZestawowDoWylosowania,
+            'cx-assist-blade': iloscZestawowDoWylosowania, rachet: iloscZestawowDoWylosowania, bit: iloscZestawowDoWylosowania
+        };
+        if (dostepneCzesci['cx-lock-chip'].length >= potrzebne['cx-lock-chip'] &&
+            dostepneCzesci['cx-main-blade'].length >= potrzebne['cx-main-blade'] &&
+            dostepneCzesci['cx-assist-blade'].length >= potrzebne['cx-assist-blade'] &&
+            dostepneCzesci.rachet.length >= potrzebne.rachet &&
+            dostepneCzesci.bit.length >= potrzebne.bit) {
+            czyWystarczajacoCzesci = true;
+        } else {
+            komunikatBrakuCzesci = '<div class="card" style="text-align:left; padding-left:25px;"><p><strong>Za mało części CX do wylosowania żądanej ilości:</strong></p><ul>';
+            if (dostepneCzesci['cx-lock-chip'].length < potrzebne['cx-lock-chip']) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne['cx-lock-chip'] - dostepneCzesci['cx-lock-chip'].length} CX Lock Chip (jest: ${dostepneCzesci['cx-lock-chip'].length})</li>`;
+            if (dostepneCzesci['cx-main-blade'].length < potrzebne['cx-main-blade']) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne['cx-main-blade'] - dostepneCzesci['cx-main-blade'].length} CX Main Blade (jest: ${dostepneCzesci['cx-main-blade'].length})</li>`;
+            if (dostepneCzesci['cx-assist-blade'].length < potrzebne['cx-assist-blade']) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne['cx-assist-blade'] - dostepneCzesci['cx-assist-blade'].length} CX Assist Blade (jest: ${dostepneCzesci['cx-assist-blade'].length})</li>`;
+            if (dostepneCzesci.rachet.length < potrzebne.rachet) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.rachet - dostepneCzesci.rachet.length} Ratchet (jest: ${dostepneCzesci.rachet.length})</li>`;
+            if (dostepneCzesci.bit.length < potrzebne.bit) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.bit - dostepneCzesci.bit.length} Bit (jest: ${dostepneCzesci.bit.length})</li>`;
+            komunikatBrakuCzesci += '</ul></div>';
+        }
+    }
+
+    if (!czyWystarczajacoCzesci) {
+        wynikiDivGenerator.innerHTML = komunikatBrakuCzesci;
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
+        if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
+        console.log("[LOSUJ_6] Niewystarczająca liczba części.");
+        return;
+    }
+    console.log("[LOSUJ_7] Wystarczająca liczba części. Rozpoczynam losowanie...");
+
+    // Logika losowania
+    const wylosowaneZestawyFragment = document.createDocumentFragment();
+    for (let i = 0; i < iloscZestawowDoWylosowania; i++) {
+        console.log(`[LOSUJ_ZESTAW_${i+1}_1] Rozpoczynam losowanie zestawu #${i + 1}`);
+        let wylosowanyZestawCzesci = {};
+        let czyZestawKompletny = true;
+        let wylosowanoSpecjalnyRatchet = false; // Flaga dla specjalnego racheta
+
+        // Funkcja do losowania i usuwania z puli
+        const losujCzescZPulli = (typCzesci) => {
+            if (dostepneCzesci[typCzesci] && dostepneCzesci[typCzesci].length > 0) {
+                const randomIndex = Math.floor(Math.random() * dostepneCzesci[typCzesci].length);
+                const wylosowana = dostepneCzesci[typCzesci].splice(randomIndex, 1)[0]; // Losuj i usuń
+                console.log(`[LOSUJ_ZESTAW_${i+1}_LOS] Wylosowano dla typu '${typCzesci}': ID '${wylosowana.id}', Nazwa: '${wylosowana.nazwa}'`);
+                return wylosowana;
+            }
+            console.warn(`[LOSUJ_ZESTAW_${i+1}_LOS_WARN] Pula dla typu '${typCzesci}' jest pusta.`);
+            return null; // Zwróć null, jeśli pula jest pusta
+        };
+
+        if (wybranaSeria === 'bx_ux') {
+            wylosowanyZestawCzesci.blade = losujCzescZPulli('blade');
+            wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
+
+            if (wylosowanyZestawCzesci.rachet) {
+                // Sprawdź, czy wylosowany ratchet to ten specjalny (ID "205") LUB ma flagę integrujeBit
+                if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
+                    wylosowanoSpecjalnyRatchet = true;
+                    wylosowanyZestawCzesci.bit = null; 
+                    console.log(`[LOSUJ_ZESTAW_${i+1}_SPEC_RACHET] Wylosowano specjalny ratchet "${wylosowanyZestawCzesci.rachet.nazwa}" (ID: ${wylosowanyZestawCzesci.rachet.id}). Pomijam losowanie osobnego bita.`);
+                } else {
+                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+                }
+            } else { // Nie udało się wylosować racheta, więc bit też nie może być dobrany logicznie
+                wylosowanyZestawCzesci.bit = null; 
+                czyZestawKompletny = false; // Jeśli nie ma racheta, zestaw jest niekompletny
+            }
+
+            // Sprawdzenie kompletności
+            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet ||
+                (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet /*tylko jeśli był ratchet, a nie jest specjalny*/)) {
+                czyZestawKompletny = false;
+                console.warn(`[LOSUJ_ZESTAW_${i+1}_NIEKOMPLETNY_BXUX] Blade: ${!!wylosowanyZestawCzesci.blade}, Ratchet: ${!!wylosowanyZestawCzesci.rachet}, Bit (potrzebny i jest): ${!wylosowanoSpecjalnyRatchet && !!wylosowanyZestawCzesci.bit}`);
+            }
+
+        } else if (wybranaSeria === 'cx') {
+            wylosowanyZestawCzesci.cx_lock_chip = losujCzescZPulli('cx-lock-chip');
+            wylosowanyZestawCzesci.cx_main_blade = losujCzescZPulli('cx-main-blade');
+            wylosowanyZestawCzesci.cx_assist_blade = losujCzescZPulli('cx-assist-blade');
+            wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
+
+            if (wylosowanyZestawCzesci.rachet) {
+                if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
+                    wylosowanoSpecjalnyRatchet = true;
+                    wylosowanyZestawCzesci.bit = null;
+                    console.log(`[LOSUJ_ZESTAW_${i+1}_SPEC_RACHET_CX] Wylosowano specjalny ratchet "${wylosowanyZestawCzesci.rachet.nazwa}" (ID: ${wylosowanyZestawCzesci.rachet.id}). Pomijam losowanie osobnego bita.`);
+                } else {
+                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+                }
+            } else {
+                wylosowanyZestawCzesci.bit = null;
+                czyZestawKompletny = false;
+            }
+
+            // Sprawdzenie kompletności dla CX
+            if (!wylosowanyZestawCzesci.cx_lock_chip || !wylosowanyZestawCzesci.cx_main_blade ||
+                !wylosowanyZestawCzesci.cx_assist_blade || !wylosowanyZestawCzesci.rachet ||
+                (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) {
+                czyZestawKompletny = false;
+                 console.warn(`[LOSUJ_ZESTAW_${i+1}_NIEKOMPLETNY_CX] LockChip: ${!!wylosowanyZestawCzesci.cx_lock_chip}, Main: ${!!wylosowanyZestawCzesci.cx_main_blade}, Assist: ${!!wylosowanyZestawCzesci.cx_assist_blade}, Ratchet: ${!!wylosowanyZestawCzesci.rachet}, Bit (potrzebny i jest): ${!wylosowanoSpecjalnyRatchet && !!wylosowanyZestawCzesci.bit}`);
+            }
+        }
+
+        if (czyZestawKompletny) {
+            console.log(`[LOSUJ_ZESTAW_${i+1}_2] Zestaw #${i + 1} skompletowany. Obliczanie statystyk.`);
+            const statystykiZestawu = obliczSumeStatystykZestawu(wylosowanyZestawCzesci, wybranaSeria);
+            const idUnikalnyZestawu = `wylosowany-${Date.now()}-${i}-${Math.random().toString(16).slice(2)}`;
+            const pelnyZestaw = {
+                idZestawu: idUnikalnyZestawu,
+                seria: wybranaSeria,
+                czesci: wylosowanyZestawCzesci,
+                statystyki: statystykiZestawu
+            };
+            ostatnioWylosowaneZestawyGlobalnie.push(pelnyZestaw);
+            console.log(`[LOSUJ_ZESTAW_${i+1}_3] Pełny zestaw #${i+1} (do zapisu globalnego):`, JSON.parse(JSON.stringify(pelnyZestaw)));
+
+
+            const kartaHTML = generujHTMLDlaKartyZestawu(pelnyZestaw, i);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = kartaHTML.trim();
+            wylosowaneZestawyFragment.appendChild(tempDiv.firstChild);
+        } else {
+            console.warn(`[LOSUJ_ZESTAW_${i+1}_ERR] Nie udało się skompletować zestawu #${i + 1} dla serii ${wybranaSeria} z powodu braku części w puli lub błędu losowania.`);
+            showNotification(`Nie udało się wylosować wszystkich ${iloscZestawowDoWylosowania} zestawów. Sprawdź dostępność części.`, 3000, 'warning');
+            break; 
+        }
+    }
+
+    if (wylosowaneZestawyFragment.childNodes.length > 0) {
+        wynikiDivGenerator.appendChild(wylosowaneZestawyFragment);
+        showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów) ${wybranaSeria.toUpperCase()}!`, 2500, 'success');
+        console.log(`[LOSUJ_8] Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów). Wyświetlam.`);
+        
+        const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
+        if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'block';
+    } else if (iloscZestawowDoWylosowania > 0 && czyWystarczajacoCzesci) {
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Wystąpił nieoczekiwany błąd podczas losowania zestawów lub nie udało się skompletować żadnego.</p></div>';
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
+        if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
+        console.log("[LOSUJ_9] Wystarczająco części, ale nie udało się stworzyć fragmentu z wynikami.");
+    }
+    console.log("[LOSUJ_10] Funkcja LOSUJ - KONIEC");
+}
+
+// =================================
+// Zapisywanie Wylosowanych Zestawów i Decków (NOWA FUNKCJA saveCurrentGeneratedDeck)
+// =================================
+const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3'; // Ten sam klucz co dla Deck Generatora
+
+// Funkcja getSavedDecks() i setSavedDecks() będą używane przez obie metody zapisu
+
+function saveCurrentGeneratedDeck() { // Zapisuje pierwszy zestaw z ostatnioWylosowaneZestawyGlobalnie
+    if (!ostatnioWylosowaneZestawyGlobalnie || ostatnioWylosowaneZestawyGlobalnie.length === 0) {
+        showNotification("Brak wylosowanych zestawów do zapisania. Użyj generatora najpierw.", 3000, 'warning');
+        return;
+    }
+    
+    const zestawDoZapisu = ostatnioWylosowaneZestawyGlobalnie[0]; // Bierzemy pierwszy wylosowany zestaw
+
+    if (!zestawDoZapisu || !zestawDoZapisu.czesci || !zestawDoZapisu.seria) {
+        showNotification("Błąd: Dane pierwszego wylosowanego zestawu są niekompletne lub uszkodzone.", 3000, 'error');
+        console.error("Problem z zestawDoZapisu w saveCurrentGeneratedDeck:", zestawDoZapisu);
+        return;
+    }
+
+    const nazwaInput = document.getElementById('nazwa-glownego-decku');
+    let nazwaDecku = `Wylosowany ${zestawDoZapisu.seria.toUpperCase()} ${new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}`; // Domyślna nazwa
+
+    if (nazwaInput && nazwaInput.value.trim() !== '') {
+        nazwaDecku = nazwaInput.value.trim();
+    }
+
+    // Struktura decku będzie taka sama jak dla decków z Deck Generatora
+    // czyli deck składa się z tablicy 'sets', nawet jeśli zapisujemy tylko jeden zestaw.
+    const pojedynczyZestawKonfiguracja = { // Konfiguracja tego jednego zestawu
+        // Mapowanie ID części z obiektu `zestawDoZapisu.czesci` na `czesciIds`
+    };
+
+    if (zestawDoZapisu.seria === 'bx_ux') {
+        pojedynczyZestawKonfiguracja.seria = 'bx_ux'; // Dodajemy serię do konfiguracji zestawu
+        pojedynczyZestawKonfiguracja.bladeId = zestawDoZapisu.czesci.blade?.id || null;
+        pojedynczyZestawKonfiguracja.ratchetId = zestawDoZapisu.czesci.rachet?.id || null;
+        pojedynczyZestawKonfiguracja.bitId = zestawDoZapisu.czesci.bit?.id || null;
+    } else if (zestawDoZapisu.seria === 'cx') {
+        pojedynczyZestawKonfiguracja.seria = 'cx'; // Dodajemy serię do konfiguracji zestawu
+        pojedynczyZestawKonfiguracja.cx_lock_chipId = zestawDoZapisu.czesci.cx_lock_chip?.id || null;
+        pojedynczyZestawKonfiguracja.cx_main_bladeId = zestawDoZapisu.czesci.cx_main_blade?.id || null;
+        pojedynczyZestawKonfiguracja.cx_assist_bladeId = zestawDoZapisu.czesci.cx_assist_blade?.id || null;
+        pojedynczyZestawKonfiguracja.ratchetId = zestawDoZapisu.czesci.rachet?.id || null;
+        pojedynczyZestawKonfiguracja.bitId = zestawDoZapisu.czesci.bit?.id || null;
+    } else {
+        showNotification("Błąd: Nieznana seria wylosowanego zestawu.", 3000, 'error');
+        return;
+    }
+    
+    // Dodajemy też obliczone statystyki do obiektu zestawu, aby były dostępne w galerii
+    pojedynczyZestawKonfiguracja.statystykiObliczone = zestawDoZapisu.statystyki;
+
+
+    const nowyDeck = {
+        id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        name: nazwaDecku,
+        timestamp: Date.now(),
+        lastModified: Date.now(),
+        sets: [pojedynczyZestawKonfiguracja] // Deck zawiera listę zestawów, tutaj tylko jeden
+    };
+
+    const zapisaneDecki = getSavedDecks();
+    zapisaneDecki.push(nowyDeck);
+    setSavedDecks(zapisaneDecki);
+
+    showNotification(`Deck "${nowyDeck.name}" (z 1 zestawem) został zapisany!`, 3000, 'success');
+
+    if (nazwaInput) nazwaInput.value = ''; // Wyczyść pole nazwy po zapisie
+    
+    // Opcjonalnie: ukryj lub dezaktywuj przycisk zapisu głównego po sukcesie
+    const zapiszGlownyButton = document.querySelector('#zapisz-glowny-zestaw-controls button');
+    if(zapiszGlownyButton) {
+        zapiszGlownyButton.textContent = 'Zapisano!';
+        zapiszGlownyButton.disabled = true;
+        setTimeout(() => { // Przywróć przycisk po chwili
+            zapiszGlownyButton.textContent = 'Zapisz Ten Wylosowany Zestaw';
+            zapiszGlownyButton.disabled = false;
+             // Można też ukryć całą sekcję:
+             // const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
+             // if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
+        }, 2500);
+    }
+}
+
+
+// =================================
+// Zarządzanie Zapisanymi Deckami (localStorage) - funkcje get i set są już wyżej
+// =================================
+// const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3'; // Już zdefiniowany
+
+function getSavedDecks() { // Powtórzenie dla spójności, jeśli wklejasz fragmenty
+    try {
+        const decksString = localStorage.getItem(SAVED_DECKS_KEY);
+        return decksString ? JSON.parse(decksString) : [];
+    } catch (e) { 
+        showNotification("Błąd odczytu zapisanych decków.", 3000, 'error'); 
+        console.error("getSavedDecks Błąd:", e);
+        return []; 
+    }
+}
+
+function setSavedDecks(decksArray) { // Powtórzenie dla spójności
+    try {
+        if (Array.isArray(decksArray)) {
+            localStorage.setItem(SAVED_DECKS_KEY, JSON.stringify(decksArray));
+        } else {
+            showNotification("Błąd zapisu decków: Nieprawidłowe dane (nie jest tablicą).", 3000, 'error');
+            console.error("setSavedDecks: Próba zapisu nie-tablicy:", decksArray);
+        }
+    } catch (e) { 
+        showNotification("Błąd zapisu decków do localStorage.", 3000, 'error'); 
+        console.error("setSavedDecks Błąd:", e);
+    }
+}
+
+
+function saveCurrentDeck() { // Dla Deck Generatora
+    const deckNameInput = document.getElementById('deckName');
+    const deckName = deckNameInput ? deckNameInput.value.trim() : '';
+
+    if (!deckName && !currentEditingDeckId) { 
+        showNotification("Wpisz nazwę dla nowego decku (Deck Generator).", 3000, 'warning');
+        deckNameInput?.focus(); 
+        return;
+    }
+
+    const currentDeckSetsConfig = []; 
+    const magazynDanych = getMagazyn(); // Potrzebny do updateDeckStats
+
+    for (let i = 1; i <= 3; i++) {
+        const seriaSelect = document.getElementById(`deck-seria-${i}`);
+        if (!seriaSelect) {
+            console.warn(`Brak selecta serii dla zestawu ${i} podczas zapisu.`);
+            continue; // Pomiń ten zestaw, jeśli brakuje kluczowego elementu
+        }
+        const wybranaSeria = seriaSelect.value;
+        const partsConfig = { seria: wybranaSeria };
+
+        if (wybranaSeria === 'bx_ux') {
+            partsConfig.bladeId = document.getElementById(`deck-blade-${i}`)?.value || null;
+            partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
+            partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
+        } else if (wybranaSeria === 'cx') {
+            partsConfig.cx_lock_chipId = document.getElementById(`deck-cx-lock-chip-${i}`)?.value || null;
+            partsConfig.cx_main_bladeId = document.getElementById(`deck-cx-main-blade-${i}`)?.value || null;
+            partsConfig.cx_assist_bladeId = document.getElementById(`deck-cx-assist-blade-${i}`)?.value || null;
+            partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
+            partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
+        } else {
+            console.warn(`Nieznana seria ${wybranaSeria} dla zestawu ${i} podczas zapisu.`);
+            continue;
+        }
+        
+        // Zapisz obliczone statystyki dla tego zestawu
+        partsConfig.statystykiObliczone = updateDeckStats(i, magazynDanych, true); // true, aby zwróciło staty
+
+        // Dodaj zestaw do konfiguracji, tylko jeśli wybrano przynajmniej jedną część
+        // (lub jeśli chcemy zapisywać puste sloty - do decyzji)
+        const czyJakakolwiekCzescWybrana = Object.values(partsConfig).some(val => 
+            typeof val === 'string' && val !== '' && val !== wybranaSeria && val !== null && !val.startsWith('statystyki')
+        );
+
+        if (czyJakakolwiekCzescWybrana) {
+             currentDeckSetsConfig.push(partsConfig);
+        } else {
+            // Opcjonalnie: można dodać pusty obiekt, jeśli chcemy reprezentować pusty slot
+            // currentDeckSetsConfig.push({ seria: wybranaSeria, statystykiObliczone: {ATK:0,...} });
+            console.log(`Zestaw ${i} był pusty i nie został dodany do zapisu.`);
+        }
+    }
+    
+    // Walidacja ilości części w magazynie (opcjonalne, ale dobre)
+    // Ta walidacja musiałaby być bardziej złożona, aby zliczać użycie tych samych ID części
+    // w różnych slotach tego samego decku i porównywać z `ilosc` w magazynie.
+    // Na razie pominiemy tę zaawansowaną walidację dla uproszczenia.
+
+    if (currentDeckSetsConfig.length === 0 && !currentEditingDeckId) {
+        showNotification("Nie skonfigurowano żadnych części w Deck Generatorze.", 3000, 'warning');
+        return;
+    }
+
+    let savedDecks = getSavedDecks();
+    let wiadomosc = ''; 
+    let nazwaDeckuOperacji = deckName || (currentEditingDeckId ? savedDecks.find(d=>d.id===currentEditingDeckId)?.name : `Deck ${new Date().toLocaleTimeString('pl-PL')}`);
+
+    if (currentEditingDeckId) { 
+        const deckIndex = savedDecks.findIndex(d => d.id === currentEditingDeckId);
+        if (deckIndex > -1) {
+            savedDecks[deckIndex].name = nazwaDeckuOperacji;
+            savedDecks[deckIndex].sets = currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : []; // Zapisz nowe zestawy lub pustą tablicę
+            savedDecks[deckIndex].lastModified = Date.now();
+            wiadomosc = `Deck "${nazwaDeckuOperacji}" zaktualizowany!`;
+        } else {
+            showNotification("Błąd: Nie znaleziono decku do edycji.", 3000, 'error');
+            currentEditingDeckId = null; 
+            const saveBtn = document.getElementById('saveDeckButton');
+            if(saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck'; 
+            return;
+        }
+    } else { 
+        const newDeck = {
+            id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+            name: nazwaDeckuOperacji, 
+            timestamp: Date.now(), 
+            lastModified: Date.now(),
+            sets: currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : []
+        };
+        savedDecks.push(newDeck);
+        wiadomosc = `Deck "${nazwaDeckuOperacji}" zapisany!`;
+    }
+    
+    setSavedDecks(savedDecks);
+    showNotification(wiadomosc, 3000, 'success');
+    
+    if (deckNameInput) deckNameInput.value = ''; 
+    currentEditingDeckId = null; 
+    const saveBtn = document.getElementById('saveDeckButton');
+    if(saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
+
+    renderDeckBuilder(); // Zresetuj/odśwież Deck Builder
+    
+    // Opcjonalnie: nawiguj do galerii
+    // const linkDoGalerii = document.querySelector('.sidebar a[onclick*="navigateTo(\'galeriaDeckow"]');
+    // if (linkDoGalerii) navigateTo('galeriaDeckow', linkDoGalerii);
+}
+
+
+function fillDropdown(selectId, type, magazynData, currentVal = null) { // Dodano currentVal
+  const selectElement = document.getElementById(selectId);
+  if (!selectElement) { 
+      console.error(`FillDropdown: Select o ID '${selectId}' nie istnieje.`); 
+      return; 
+  }
+  selectElement.innerHTML = "<option value=''>-- wybierz --</option>";
+
+  if (!Array.isArray(magazynData)) { 
+      console.error(`FillDropdown: Magazyn dla typu '${type}' nie jest listą.`); 
+      return; 
+  }
+
+  // Filtruj części tylko dla danego typu i z dostępną ilością
+  const parts = magazynData.filter(p => p && p.typ === type && (p.ilosc === undefined || parseInt(p.ilosc) > 0));
+  
+  parts.sort((a, b) => (a.nazwa || "").localeCompare(b.nazwa || ""));
+
+  parts.forEach(p => { 
+    const option = document.createElement('option');
+    option.value = p.id || `brak_id_${Math.random().toString(36).substring(2,7)}`;
+    option.textContent = `${p.nazwa || 'Część Bez Nazwy'} (Ilość: ${p.ilosc === undefined ? 'N/A' : p.ilosc})`;
+    if (currentVal && option.value === currentVal) { // Ustawienie zaznaczonej opcji
+        option.selected = true;
+    }
+    selectElement.appendChild(option);
+  });
+}
+
+// updateDeckStats dla Deck Generatora
+function updateDeckStats(setIndex, magazynData, returnStatsOnly = false) {
+    const seriaSelect = document.getElementById(`deck-seria-${setIndex}`);
+    if (!seriaSelect) {
+        console.error(`updateDeckStats: Brak selecta serii dla zestawu ${setIndex}`);
+        if (!returnStatsOnly) {
+            const statsDivFallback = document.getElementById(`deck-stats-${setIndex}`);
+            if (statsDivFallback) statsDivFallback.innerHTML = '<p style="color:red;">Błąd konfiguracji serii.</p>';
+        }
+        return returnStatsOnly ? { ATK: 0, DEF: 0, STM: 0, WAGA: 0, DASH: 0, B_RES: 0, CX_LC_WYTRZ: 0 } : undefined;
+    }
+    const wybranaSeria = seriaSelect.value;
+    
+    let czesciDoObliczen = {};
+    let nazwyCzesciDoWyswietlenia = []; // Tablica stringów dla nazw
+
+    // Zbieranie ID części w zależności od serii
+    if (wybranaSeria === 'bx_ux') {
+        const bladeId = document.getElementById(`deck-blade-${setIndex}`)?.value;
+        const ratchetId = document.getElementById(`deck-ratchet-${setIndex}`)?.value;
+        const bitId = document.getElementById(`deck-bit-${setIndex}`)?.value;
+
+        czesciDoObliczen.blade = bladeId ? magazynData.find(p => p.id === bladeId) : null;
+        czesciDoObliczen.rachet = ratchetId ? magazynData.find(p => p.id === ratchetId) : null;
+        czesciDoObliczen.bit = bitId ? magazynData.find(p => p.id === bitId) : null;
+        
+        nazwyCzesciDoWyswietlenia.push(`Blade: ${czesciDoObliczen.blade?.nazwa || 'N/A'}`);
+        nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || 'N/A'}`);
+        nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || 'N/A'}`);
+
+    } else if (wybranaSeria === 'cx') {
+        const lockChipId = document.getElementById(`deck-cx-lock-chip-${setIndex}`)?.value;
+        const mainBladeId = document.getElementById(`deck-cx-main-blade-${setIndex}`)?.value;
+        const assistBladeId = document.getElementById(`deck-cx-assist-blade-${setIndex}`)?.value;
+        const ratchetId = document.getElementById(`deck-ratchet-${setIndex}`)?.value; // Wspólny
+        const bitId = document.getElementById(`deck-bit-${setIndex}`)?.value;         // Wspólny
+
+        czesciDoObliczen.cx_lock_chip = lockChipId ? magazynData.find(p => p.id === lockChipId) : null;
+        czesciDoObliczen.cx_main_blade = mainBladeId ? magazynData.find(p => p.id === mainBladeId) : null;
+        czesciDoObliczen.cx_assist_blade = assistBladeId ? magazynData.find(p => p.id === assistBladeId) : null;
+        czesciDoObliczen.rachet = ratchetId ? magazynData.find(p => p.id === ratchetId) : null;
+        czesciDoObliczen.bit = bitId ? magazynData.find(p => p.id === bitId) : null;
+
+        nazwyCzesciDoWyswietlenia.push(`LockChip: ${czesciDoObliczen.cx_lock_chip?.nazwa || 'N/A'}`);
+        nazwyCzesciDoWyswietlenia.push(`MainBlade: ${czesciDoObliczen.cx_main_blade?.nazwa || 'N/A'}`);
+        nazwyCzesciDoWyswietlenia.push(`AssistBlade: ${czesciDoObliczen.cx_assist_blade?.nazwa || 'N/A'}`);
+        nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || 'N/A'}`);
+        nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || 'N/A'}`);
+    }
+
+    const obliczoneStatystyki = obliczSumeStatystykZestawu(czesciDoObliczen, wybranaSeria);
+
+    if (returnStatsOnly) {
+        return obliczoneStatystyki;
+    }
+
+    const statsDiv = document.getElementById(`deck-stats-${setIndex}`);
+    if (statsDiv) {
+        let statsTextHTML = `<b>Wybrane części:</b><br><small>${nazwyCzesciDoWyswietlenia.join('<br>')}</small><br><br>`;
+        statsTextHTML += `<b>SUMA STATYSTYK (${wybranaSeria.toUpperCase().replace('_','/')}):</b><br>`;
+        statsTextHTML += `ATK: ${obliczoneStatystyki.ATK}, DEF: ${obliczoneStatystyki.DEF}, STM: ${obliczoneStatystyki.STM}, Waga: ${obliczoneStatystyki.WAGA}g`;
+        if (obliczoneStatystyki.DASH && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) { // DASH tylko jeśli jest bit
+             statsTextHTML += `, DASH: ${obliczoneStatystyki.DASH}`;
+        }
+        if (obliczoneStatystyki.B_RES && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) { // B_RES tylko jeśli jest bit
+             statsTextHTML += `, B-RES: ${obliczoneStatystyki.B_RES}`;
+        }
+        if (wybranaSeria === 'cx' && obliczoneStatystyki.CX_LC_WYTRZ) {
+            statsTextHTML += `, LC-Wytrz: ${obliczoneStatystyki.CX_LC_WYTRZ}`;
+        }
+        statsDiv.innerHTML = statsTextHTML;
+    }
+}
+// =================================
+// Deck Generator Functions (Builder) - ZMODYFIKOWANE DLA CX
+// =================================
+
+// Funkcja pomocnicza do renderowania slotów na części dla danego zestawu i serii
+function renderPartSelectorsForSet(setIndex, seria, magazynData, parentElement, currentValues = null) {
+    parentElement.innerHTML = ''; // Wyczyść poprzednie selecty części
+
+    let fields = [];
+    if (seria === 'bx_ux') {
+        fields = [
+            { idPrefix: `deck-blade-${setIndex}`, label: 'Blade (BX/UX)', type: 'blade', value: currentValues?.bladeId },
+            { idPrefix: `deck-ratchet-${setIndex}`, label: 'Ratchet', type: 'rachet', value: currentValues?.ratchetId },
+            { idPrefix: `deck-bit-${setIndex}`, label: 'Bit', type: 'bit', value: currentValues?.bitId }
+        ];
+    } else if (seria === 'cx') {
+        fields = [
+            { idPrefix: `deck-cx-lock-chip-${setIndex}`, label: 'CX Lock Chip', type: 'cx-lock-chip', value: currentValues?.cx_lock_chipId },
+            { idPrefix: `deck-cx-main-blade-${setIndex}`, label: 'CX Main Blade', type: 'cx-main-blade', value: currentValues?.cx_main_bladeId },
+            { idPrefix: `deck-cx-assist-blade-${setIndex}`, label: 'CX Assist Blade', type: 'cx-assist-blade', value: currentValues?.cx_assist_bladeId },
+            { idPrefix: `deck-ratchet-${setIndex}`, label: 'Ratchet', type: 'rachet', value: currentValues?.ratchetId }, // Wspólny Ratchet
+            { idPrefix: `deck-bit-${setIndex}`, label: 'Bit', type: 'bit', value: currentValues?.bitId }         // Wspólny Bit
+        ];
+    }
+
+    fields.forEach(field => {
+        const div = document.createElement('div');
+        div.style.marginBottom = "10px";
+
+        const labelEl = document.createElement('label');
+        labelEl.htmlFor = field.idPrefix;
+        labelEl.textContent = `${field.label}:`;
+        labelEl.style.display = 'block'; 
+        labelEl.style.marginBottom = '3px';
+
+        const selectEl = document.createElement('select');
+        selectEl.id = field.idPrefix;
+        selectEl.style.width = '100%';
+        selectEl.addEventListener('change', () => updateDeckStats(setIndex, magazynData)); // Aktualizuj staty przy zmianie
+
+        div.appendChild(labelEl);
+        div.appendChild(selectEl);
+        parentElement.appendChild(div);
+
+        fillDropdown(field.idPrefix, field.type, magazynData, field.value); // Wypełnij opcjami, przekaż aktualną wartość
+    });
+}
+
+
+function renderDeckBuilder(initialDeckData = null) {
+    if (!deckBuilderContainerDeckPage) {
+        deckBuilderContainerDeckPage = document.getElementById("deck-builder");
+        if (!deckBuilderContainerDeckPage) {
+            showNotification("Błąd krytyczny: Element #deck-builder nie istnieje.", 3000, 'error');
+            console.error("RenderDeckBuilder: Kontener #deck-builder nie został zainicjalizowany.");
+            return;
+        }
+    }
+    deckBuilderContainerDeckPage.innerHTML = "";
+    const aktualnyMagazyn = getMagazyn();
+
+    if (!aktualnyMagazyn || aktualnyMagazyn.length === 0) {
+        deckBuilderContainerDeckPage.innerHTML = '<div class="card" style="text-align:center;"><p>Magazyn jest pusty. Dodaj części, aby móc budować Decki.</p></div>';
+        return;
+    }
+
+    for (let i = 1; i <= 3; i++) {
+        const deckSetCard = document.createElement("div");
+        deckSetCard.className = "deck-set card";
+        deckSetCard.style.marginBottom = "25px";
+        deckSetCard.style.padding = "20px";
+
+        const initialSetData = initialDeckData?.sets?.[i - 1];
+        const currentSeria = initialSetData?.seria || 'bx_ux'; // Domyślnie BX/UX lub z wczytywanych danych
+
+        // --- Select dla Serii ---
+        const seriaSelectDiv = document.createElement('div');
+        seriaSelectDiv.style.marginBottom = "15px";
+        
+        const seriaLabel = document.createElement('label');
+        seriaLabel.htmlFor = `deck-seria-${i}`;
+        seriaLabel.textContent = `Seria dla Zestawu ${i}:`;
+        
+        const seriaSelect = document.createElement('select');
+        seriaSelect.id = `deck-seria-${i}`;
+        seriaSelect.innerHTML = `
+            <option value="bx_ux" ${currentSeria === 'bx_ux' ? 'selected' : ''}>BX / UX</option>
+            <option value="cx" ${currentSeria === 'cx' ? 'selected' : ''}>CX</option>
+        `;
+        
+        // Kontener na dynamiczne selecty części
+        const partSelectorsContainer = document.createElement('div');
+        partSelectorsContainer.id = `part-selectors-container-${i}`;
+        
+        seriaSelect.addEventListener('change', (event) => {
+            const nowaSeria = event.target.value;
+            // Przekaż null jako currentValues, aby selecty były puste po zmianie serii
+            renderPartSelectorsForSet(i, nowaSeria, aktualnyMagazyn, partSelectorsContainer, null); 
+            updateDeckStats(i, aktualnyMagazyn); // Zaktualizuj statystyki (prawdopodobnie będą zerowe)
+        });
+
+        seriaSelectDiv.appendChild(seriaLabel);
+        seriaSelectDiv.appendChild(seriaSelect);
+
+        // --- Kontener na statystyki ---
+        const statsDiv = document.createElement('div');
+        statsDiv.id = `deck-stats-${i}`;
+        statsDiv.className = "deck-stats"; // Użyj swojej klasy .deck-stats
+        statsDiv.style.cssText = "margin-top: 15px; font-weight: normal; font-size: 0.9em; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 6px; text-align: left; line-height: 1.6;";
+
+        // --- Składanie karty zestawu ---
+        const heading = document.createElement('h3');
+        heading.textContent = `Zestaw ${i}`;
+        
+        deckSetCard.appendChild(heading);
+        deckSetCard.appendChild(seriaSelectDiv);
+        deckSetCard.appendChild(partSelectorsContainer); // Kontener na selektory części
+        deckSetCard.appendChild(statsDiv);
+        
+        deckBuilderContainerDeckPage.appendChild(deckSetCard);
+
+        // Inicjalne renderowanie selektorów części dla aktualnej (lub domyślnej) serii
+        renderPartSelectorsForSet(i, currentSeria, aktualnyMagazyn, partSelectorsContainer, initialSetData);
+        updateDeckStats(i, aktualnyMagazyn); // Inicjalne obliczenie statystyk
+    }
+}
+
+// =================================
+// Wyświetlanie Zapisanych Decków (ZAKTUALIZOWANE DLA CX)
+// =================================
+
+function displaySavedDecks() {
+    const container = document.getElementById('savedDecksContainer');
+    if (!container) { 
+        console.error("Błąd: Element #savedDecksContainer nie istnieje."); 
+        return; 
+    }
+    container.innerHTML = ''; 
+
+    const savedDecks = getSavedDecks();
+    if (!savedDecks || savedDecks.length === 0) {
+        container.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align: center;"><p>Nie masz żadnych zapisanych decków.</p></div>';
+        return;
+    }
+
+    savedDecks.sort((a, b) => (b.lastModified || b.timestamp || 0) - (a.lastModified || a.timestamp || 0));
+    
+    const magazynCzesci = getMagazyn(); 
+
+    savedDecks.forEach(deck => {
+        if (!deck || !deck.id || !Array.isArray(deck.sets)) { 
+            console.warn("Wykryto nieprawidłowy deck w danych, pomijam:", deck);
+            return; 
+        }
+
+        const deckCard = document.createElement('div');
+        deckCard.className = 'card saved-deck-card'; 
+        deckCard.dataset.deckId = deck.id;
+
+        let setsHTML = '';
+        deck.sets.forEach((set, index) => {
+            if (!set) {
+                console.warn(`Pusty zestaw w decku ${deck.name}, index ${index}`);
+                setsHTML += `<div class="deck-card-set-preview"><p style="color:red;">Błąd danych zestawu ${index + 1}</p></div>`;
+                return;
+            }
+
+            const seriaZestawu = set.seria || deck.seria || 'bx_ux'; 
+            
+            let setImagesHTML = ''; 
+            let setNameParts = [];
+            let currentSetStats = set.statystykiObliczone; 
+
+            const getPartAndHTML = (partId, partTypeDefaultName) => {
+                const part = partId ? magazynCzesci.find(p => p.id === partId) : null;
+                const imgHTML = part && part.img ? 
+                                `<img src="${part.img}" alt="${part.nazwa || partTypeDefaultName}" class="deck-part-img">` : 
+                                `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
+                const nameText = part ? (part.nazwa || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`;
+                return { html: imgHTML, name: nameText, partObj: part };
+            };
+
+            if (seriaZestawu === 'bx_ux') {
+                const bladeInfo = getPartAndHTML(set.bladeId, 'Blade');
+                const ratchetInfo = getPartAndHTML(set.ratchetId, 'Ratchet');
+                const bitInfo = getPartAndHTML(set.bitId, 'Bit');
+                
+                setImagesHTML = `<div class="wynik-zestaw-obrazki">
+                                   ${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}
+                                 </div>`;
+                setNameParts = [bladeInfo.name, ratchetInfo.name, bitInfo.name];
+
+                if (!currentSetStats && (bladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) {
+                    currentSetStats = obliczSumeStatystykZestawu({ 
+                        blade: bladeInfo.partObj, 
+                        rachet: ratchetInfo.partObj, 
+                        bit: bitInfo.partObj 
+                    }, 'bx_ux'); // obliczSumeStatystykZestawu już zaokrągla
+                }
+            } else if (seriaZestawu === 'cx') {
+                const lockChipInfo = getPartAndHTML(set.cx_lock_chipId, 'LockChip');
+                const mainBladeInfo = getPartAndHTML(set.cx_main_bladeId, 'MainBlade');
+                const assistBladeInfo = getPartAndHTML(set.cx_assist_bladeId, 'AssistBlade');
+                const ratchetInfo = getPartAndHTML(set.ratchetId, 'Ratchet');
+                const bitInfo = getPartAndHTML(set.bitId, 'Bit');
+                
+                setImagesHTML = `
+                    <div class="cx-images-container">
+                        <div class="cx-blade-row wynik-zestaw-obrazki">
+                            ${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}
+                        </div>
+                        <div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">
+                            ${ratchetInfo.html} ${bitInfo.html}
+                        </div>
+                    </div>
+                `;
+                setNameParts = [
+                    lockChipInfo.name,   
+                    mainBladeInfo.name,  
+                    assistBladeInfo.name,
+                    ratchetInfo.name,    
+                    bitInfo.name         
+                ];
+
+                if (!currentSetStats && (lockChipInfo.partObj || mainBladeInfo.partObj || assistBladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) {
+                     currentSetStats = obliczSumeStatystykZestawu({ 
+                        cx_lock_chip: lockChipInfo.partObj, 
+                        cx_main_blade: mainBladeInfo.partObj,
+                        cx_assist_blade: assistBladeInfo.partObj,
+                        rachet: ratchetInfo.partObj, 
+                        bit: bitInfo.partObj 
+                    }, 'cx'); // obliczSumeStatystykZestawu już zaokrągla
+                }
+            }
+            
+            let setNameHTML = setNameParts.join(' | ');
+
+            let setStatsSummaryHTML = '<div class="stat-grid">'; 
+            if (currentSetStats) {
+                // Wyświetlamy bezpośrednio, bo są już zaokrąglone w currentSetStats
+                setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span>`; // .toFixed(1) nie jest już tu potrzebne
+                setStatsSummaryHTML += `<span>DEF: ${currentSetStats.DEF || 0}</span>`;
+                setStatsSummaryHTML += `<span>STM: ${currentSetStats.STM || 0}</span>`;
+                setStatsSummaryHTML += `<span>Waga: ${(currentSetStats.WAGA || currentSetStats.waga || 0)}g</span>`;
+                
+                const dashValue = parseFloat(currentSetStats.DASH || 0); // Konwertuj na liczbę do porównania
+                const bResValue = parseFloat(currentSetStats.B_RES || 0);
+
+                if (dashValue !== 0) setStatsSummaryHTML += `<span>DASH: ${currentSetStats.DASH || 0}</span>`;
+                if (bResValue !== 0) setStatsSummaryHTML += `<span>B-RES: ${currentSetStats.B_RES || 0}</span>`;
+                
+                if (seriaZestawu === 'cx') {
+                    const lcWytrzValue = parseInt(currentSetStats.CX_LC_WYTRZ || 0); // Konwertuj na liczbę do porównania
+                    if (lcWytrzValue !== 0) {
+                        setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`;
+                    }
+                }
+            } else {
+                setStatsSummaryHTML += '<span>Brak danych statystyk</span>';
+            }
+            setStatsSummaryHTML += `</div>`;
+            
+            setsHTML += `
+                <div class="deck-card-set-preview"> 
+                    <strong style="text-transform: capitalize; display: block; text-align: center; margin-bottom: 8px;"> 
+                        Zestaw ${index + 1} (${seriaZestawu.toUpperCase().replace('_', '/')})
+                    </strong>
+                    ${setImagesHTML}
+                    <div style="font-size:0.8em; color:#ddd; margin-top: 8px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">
+                        ${setNameHTML} 
+                    </div>
+                    ${setStatsSummaryHTML} 
+                </div>`;
+        });
+        
+        const actionsHTML = `
+            <div class="item-actions" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
+                <button class="button-auto-width" onclick="wczytajDeckDoBuildera('${deck.id}')" title="Wczytaj '${deck.name || ''}' do Deck Generatora">Wczytaj</button>
+                <button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}' w Deck Generatorze">Edytuj</button>
+                <button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button>
+            </div>`;
+
+        deckCard.innerHTML = `
+            <h4 style="text-align:center; color:#e0e0e0; margin-bottom: 5px;">${deck.name || 'Deck bez nazwy'}</h4> 
+            <p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">
+                ${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')} ${new Date(deck.lastModified).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}` : 
+                                      `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')} ${new Date(deck.timestamp || Date.now()).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}`}
+            </p>
+            ${setsHTML}
+            ${actionsHTML}`;
+        container.appendChild(deckCard);
+    });
+}
+
+function wczytajDeckDoBuildera(deckId) {
+    const deckToLoad = getSavedDecks().find(d => d.id === deckId);
+    if (!deckToLoad) {
+        showNotification("Nie znaleziono decku do wczytania.", 3000, 'error');
+        return;
+    }
+    
+    currentEditingDeckId = null; // Resetujemy, bo tylko wczytujemy
+    
+    const deckNameInput = document.getElementById('deckName');
+    if (deckNameInput) deckNameInput.value = deckToLoad.name || '';
+
+    // Nawiguj do strony Deck Generatora, ale NIE wymuszaj renderowania przez navigateTo,
+    // bo renderDeckBuilder zostanie wywołany poniżej z danymi decku.
+    const linkDoDeckBuildera = document.querySelector('.sidebar a[onclick*="navigateTo(\'deck"]');
+    if(linkDoDeckBuildera) navigateTo('deck', linkDoDeckBuildera, false); 
+    else {
+        showNotification("Błąd: Brak linku do Deck Generatora w sidebarze.", 3000, 'error');
+        return;
+    }
+
+    // Użyj setTimeout, aby dać czas na nawigację i przygotowanie DOM
+    setTimeout(() => {
+        // Renderuj Deck Builder przekazując dane wczytywanego decku
+        renderDeckBuilder(deckToLoad); 
+        
+        // Po renderDeckBuilder, który użył danych do ustawienia selectów serii i części,
+        // musimy jeszcze raz wywołać updateDeckStats dla każdego zestawu, aby odświeżyć wyświetlane sumy.
+        if (deckToLoad.sets && deckToLoad.sets.length > 0) {
+            const magazyn = getMagazyn();
+            for (let i = 0; i < deckToLoad.sets.length; i++) {
+                if (i < 3) { // Ogranicz do 3 zestawów w builderze
+                    updateDeckStats(i + 1, magazyn);
+                }
+            }
+        }
+        
+        showNotification(`Wczytano deck: "${deckToLoad.name || 'Bez nazwy'}". Przewiń, aby zobaczyć w Deck Generatorze.`, 3500, 'info');
+        document.getElementById('deck-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Upewnij się, że przycisk zapisu jest w stanie "Zapisz Aktualny Deck"
+        const saveButton = document.getElementById('saveDeckButton');
+        if (saveButton) saveButton.textContent = 'Zapisz Aktualny Deck';
+
+    }, 250); // Opóźnienie, aby DOM był gotowy
+}
+
+function edytujDeck(deckId) {
+    const deckToEdit = getSavedDecks().find(d => d.id === deckId);
+    if (!deckToEdit) {
+        showNotification("Nie znaleziono decku do edycji.", 3000, 'error');
+        return;
+    }
+    
+    // Wczytaj dane do buildera (tak jak w wczytajDeckDoBuildera)
+    const deckNameInput = document.getElementById('deckName');
+    if (deckNameInput) deckNameInput.value = deckToEdit.name || '';
+
+    const linkDoDeckBuildera = document.querySelector('.sidebar a[onclick*="navigateTo(\'deck"]');
+    if(linkDoDeckBuildera) navigateTo('deck', linkDoDeckBuildera, false);
+    else {
+        showNotification("Błąd: Brak linku do Deck Generatora.", 3000, 'error');
+        return;
+    }
+    
+    currentEditingDeckId = deckId; // Ustaw ID edytowanego decku
+
+    setTimeout(() => {
+        renderDeckBuilder(deckToEdit); // Renderuj z danymi decku
+
+        if (deckToEdit.sets && deckToEdit.sets.length > 0) {
+            const magazyn = getMagazyn();
+            for (let i = 0; i < deckToEdit.sets.length; i++) {
+                 if (i < 3) updateDeckStats(i + 1, magazyn);
+            }
+        }
+
+        const saveButton = document.getElementById('saveDeckButton');
+        if (saveButton) saveButton.textContent = 'Zapisz Zmiany w Decku';
+    
+        showNotification(`Edytujesz deck: "${deckToEdit.name || 'Bez nazwy'}". Wprowadź zmiany i zapisz.`, 3000, 'info');
+        document.getElementById('deckName')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 250);
+}
+
+function usunZapisanyDeck(deckId) {
+    if (!deckId) { 
+        showNotification("Błąd: Nie podano ID decku do usunięcia.", 3000, 'info'); 
+        return; 
+    }
+    const savedDecks = getSavedDecks();
+    const deckToDelete = savedDecks.find(deck => deck.id === deckId);
+    if (!deckToDelete) { 
+        showNotification("Nie znaleziono decku do usunięcia.", 3000, 'info'); 
+        displaySavedDecks(); 
+        return; 
+    }
+    
+    // Usunięto confirm()
+    const updatedDecks = savedDecks.filter(deck => deck.id !== deckId);
+    setSavedDecks(updatedDecks);
+    showNotification(`Deck "${deckToDelete.name || 'Bez nazwy'}" usunięty.`, 3000, 'info');
+    displaySavedDecks(); // Odśwież widok kart
+}
+
+
+function eksportujDaneDoPolaTekstowego() {
+    const magazyn = getMagazyn();
+    const poleTekstowe = document.getElementById('poleDanychJsonMagazyn');
+    if (poleTekstowe) {
+        if (magazyn && magazyn.length > 0) {
+            poleTekstowe.value = JSON.stringify(magazyn, null, 2); 
+            showNotification('Dane magazynu skopiowane do pola.', 3000, 'success');
+            poleTekstowe.select(); 
+        } else {
+            poleTekstowe.value = ''; 
+            showNotification('Magazyn jest pusty. Nic do eksportu.', 3000, 'info');
+        }
+    } else {
+        showNotification('Błąd: Pole tekstowe JSON dla magazynu nie znalezione.', 3000, 'error');
+    }
+}
+
+function importujDaneZPolaTekstowego() {
+    const poleTekstowe = document.getElementById('poleDanychJsonMagazyn');
+    if (!poleTekstowe || !poleTekstowe.value.trim()) {
+        showNotification('Pole danych magazynu jest puste. Wklej dane JSON do importu.', 3000, 'warning');
+        return;
+    }
+
+    let daneDoImportu;
+    try { 
+        daneDoImportu = JSON.parse(poleTekstowe.value); 
+    } catch (e) { 
+        showNotification('Błąd importu danych magazynu: Nieprawidłowy format JSON.', 3000, 'error'); 
+        console.error("Błąd parsowania JSON (magazyn):", e); 
+        return; 
+    }
+
+    // Walidacja, czy daneDoImportu to tablica - już jest w przetworzIDopiszDaneMagazynu
+
+    console.log("Import z pola tekstowego: Wywołanie przetworzIDopiszDaneMagazynu z ustawDomyslnaIloscNaZero = false...");
+    //                                  👇 TUTAJ ZMIANA (lub można pominąć, bo false jest domyślne)
+    przetworzIDopiszDaneMagazynu(daneDoImportu, 'Pole Tekstowe JSON', false);
+
+    // Nie ma potrzeby dodatkowego czyszczenia pola czy odświeżania, bo robi to `przetworzIDopiszDaneMagazynu`
+    // (chociaż można by dodać czyszczenie pola tekstowego tutaj po wywołaniu, jeśli jest taka potrzeba)
+    // if (poleTekstowe) poleTekstowe.value = ''; // Opcjonalnie
+}
+
+
+function eksportujDeckiDoPolaTekstowego() {
+    const savedDecks = getSavedDecks(); // Pobierz aktualnie zapisane decki (powinny mieć zestawy CX z poprawną strukturą)
+    const poleTekstoweDecki = document.getElementById('poleDanychJsonDecki');
+
+    if (poleTekstoweDecki) {
+        if (savedDecks && savedDecks.length > 0) {
+            try {
+                const jsonString = JSON.stringify(savedDecks, null, 2); // Formatuj JSON
+                poleTekstoweDecki.value = jsonString;
+                showNotification('Zapisane decki skopiowane do pola tekstowego.', 3000, 'success');
+                poleTekstoweDecki.focus();
+                poleTekstoweDecki.select();
+                // Opcjonalnie: automatyczne kopiowanie do schowka
+                // navigator.clipboard.writeText(jsonString).then(() => {
+                //     showNotification('Zapisane decki skopiowane do schowka i pola tekstowego!', 2500, 'success');
+                // }).catch(err => {
+                //     console.warn('Nie udało się automatycznie skopiować do schowka (decki):', err);
+                // });
+            } catch (e) {
+                showNotification('Błąd podczas konwersji danych decków do JSON.', 3000, 'error');
+                console.error("Błąd JSON.stringify (decki):", e);
+                poleTekstoweDecki.value = 'Błąd generowania danych JSON.';
+            }
+        } else {
+            poleTekstoweDecki.value = ''; 
+            showNotification('Brak zapisanych decków do eksportu.', 3000, 'info');
+        }
+    } else {
+        showNotification('Błąd krytyczny: Pole tekstowe JSON dla decków (#poleDanychJsonDecki) nie znalezione.', 3000, 'error');
+    }
+}
+
+function importujDeckiZPolaTekstowego() {
+    const poleTekstoweDecki = document.getElementById('poleDanychJsonDecki');
+    if (!poleTekstoweDecki || !poleTekstoweDecki.value.trim()) {
+        showNotification('Pole danych decków jest puste. Wklej dane JSON do importu.', 3000, 'warning');
+        return;
+    }
+
+    let daneDeckowDoImportu;
+    try { 
+        daneDeckowDoImportu = JSON.parse(poleTekstoweDecki.value); 
+    } catch (e) { 
+        showNotification('Błąd importu decków: Nieprawidłowy format JSON.', 3000, 'error'); 
+        console.error("Błąd parsowania JSON (decki):", e); 
+        return; 
+    }
+
+    if (!Array.isArray(daneDeckowDoImportu)) { 
+        showNotification('Błąd importu decków: Dane muszą być listą (tablicą).', 3000, 'error'); 
+        return; 
+    }
+
+    const poprawneDecki = [];
+    let bledneDeckiCount = 0;
+    const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+    const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
+
+    daneDeckowDoImportu.forEach((deck, index) => {
+        // Podstawowa walidacja struktury decku
+        if (deck && typeof deck.id === 'string' && 
+            (typeof deck.name === 'string' || deck.name === null || deck.name === undefined) && // Nazwa może być pusta
+            Array.isArray(deck.sets)) {
+
+            const czyZestawyPoprawne = deck.sets.every(set => {
+                if (!set || typeof set.seria !== 'string') {
+                    console.warn(`Nieprawidłowy zestaw w decku (ID: ${deck.id}, Nazwa: ${deck.name || 'Brak Nazwy'}) - brak lub zły typ pola 'seria'.`, set);
+                    return false;
+                }
+                
+                // Walidacja ID części: muszą być stringiem lub null lub undefined (dla elastyczności)
+                const isValidPartId = (id) => (id === null || typeof id === 'string' || typeof id === 'undefined');
+
+                if (set.seria === 'bx_ux') {
+                    return isValidPartId(set.bladeId) &&
+                           isValidPartId(set.ratchetId) &&
+                           isValidPartId(set.bitId);
+                } else if (set.seria === 'cx') {
+                    return isValidPartId(set.cx_lock_chipId) &&
+                           isValidPartId(set.cx_main_bladeId) &&
+                           isValidPartId(set.cx_assist_bladeId) &&
+                           isValidPartId(set.ratchetId) && 
+                           isValidPartId(set.bitId);      
+                }
+                console.warn(`Nieznana seria '${set.seria}' w zestawie decku (ID: ${deck.id}, Nazwa: ${deck.name || 'Brak Nazwy'}).`, set);
+                return false; // Nieznana seria
+            });
+
+            if (czyZestawyPoprawne) {
+                // Upewnij się, że nazwa jest stringiem, nawet jeśli była null/undefined
+                deck.name = String(deck.name || `Importowany Deck ${index + 1}_${Date.now() % 10000}`);
+                deck.timestamp = parseInt(deck.timestamp, 10) || Date.now();
+                deck.lastModified = parseInt(deck.lastModified, 10) || deck.timestamp;
+                
+                // Walidacja/oczyszczenie 'statystykiObliczone' w każdym zestawie
+                deck.sets.forEach(s => {
+                    if (s.statystykiObliczone && typeof s.statystykiObliczone === 'object') {
+                        const stats = s.statystykiObliczone;
+                        s.statystykiObliczone = { // Stwórz nowy obiekt, aby uniknąć modyfikacji oryginalnych danych wejściowych
+                            ATK: parseFloatOrZero(stats.ATK),
+                            DEF: parseFloatOrZero(stats.DEF),
+                            STM: parseFloatOrZero(stats.STM),
+                            WAGA: parseFloatOrZero(stats.WAGA || stats.waga), 
+                            DASH: parseFloatOrZero(stats.DASH),
+                            B_RES: parseFloatOrZero(stats.B_RES || stats.BURST_RES), 
+                            CX_LC_WYTRZ: parseIntOrZero(stats.CX_LC_WYTRZ)
+                        };
+                    } else {
+                        // Jeśli brak obiektu statystyk lub jest on nieprawidłowy, usuń go.
+                        // Funkcja displaySavedDecks spróbuje je obliczyć, jeśli ich nie ma.
+                        delete s.statystykiObliczone; 
+                    }
+
+                    // Upewnij się, że ID części są null, jeśli były undefined (dla spójności)
+                    if (s.seria === 'bx_ux') {
+                        s.bladeId = s.bladeId === undefined ? null : s.bladeId;
+                        s.ratchetId = s.ratchetId === undefined ? null : s.ratchetId;
+                        s.bitId = s.bitId === undefined ? null : s.bitId;
+                    } else if (s.seria === 'cx') {
+                        s.cx_lock_chipId = s.cx_lock_chipId === undefined ? null : s.cx_lock_chipId;
+                        s.cx_main_bladeId = s.cx_main_bladeId === undefined ? null : s.cx_main_bladeId;
+                        s.cx_assist_bladeId = s.cx_assist_bladeId === undefined ? null : s.cx_assist_bladeId;
+                        s.ratchetId = s.ratchetId === undefined ? null : s.ratchetId;
+                        s.bitId = s.bitId === undefined ? null : s.bitId;
+                    }
+                });
+
+                poprawneDecki.push(deck);
+            } else {
+                console.warn(`Deck (ID: ${deck.id}, Nazwa: ${deck.name || 'Brak Nazwy'}) ma nieprawidłową strukturę co najmniej jednego zestawu i został pominięty.`);
+                bledneDeckiCount++;
+            }
+        } else {
+            console.warn(`Deck o indeksie ${index} ma nieprawidłową podstawową strukturę (brak id, name lub sets) i został pominięty.`, deck);
+            bledneDeckiCount++;
+        }
+    });
+
+    // Informowanie użytkownika o wynikach importu
+    if (bledneDeckiCount > 0 && poprawneDecki.length > 0) {
+        showNotification(`Zaimportowano ${poprawneDecki.length} deck(ów). Pominięto ${bledneDeckiCount} nieprawidłowo sformatowanych.`, 3500, 'warning');
+    } else if (bledneDeckiCount > 0 && poprawneDecki.length === 0) {
+        showNotification(`Pominięto ${bledneDeckiCount} nieprawidłowo sformatowanych decków. Żaden deck nie został zaimportowany.`, 3500, 'error');
+    } else if (poprawneDecki.length > 0) {
+        showNotification(`Zaimportowano ${poprawneDecki.length} deck(ów)!`, 3000, 'success');
+    } else if (daneDeckowDoImportu.length > 0) { // Były dane, ale żadne nie przeszły walidacji
+         showNotification('Żaden z dostarczonych decków nie miał prawidłowego formatu do importu.', 3000, 'warning');
+    } else { // Plik JSON był pustą tablicą
+        showNotification('Plik JSON nie zawierał żadnych decków do importu.', 3000, 'info');
+    }
+    
+    // Zapisz tylko jeśli były jakieś poprawne decki
+    if (poprawneDecki.length > 0) {
+        setSavedDecks(poprawneDecki); 
+        if(poleTekstoweDecki) poleTekstoweDecki.value = ''; // Wyczyść pole po udanym imporcie
+    }
+
+    // Odśwież widok, jeśli użytkownik jest na stronie galerii decków
+    if (document.getElementById('galeriaDeckow')?.classList.contains('active')) {
+        displaySavedDecks();
+    }
+}
+
+
+function wykonajWyczyszczenieDanych() {
+    // Usunięto confirm() dla testów, można przywrócić:
+    // if (!confirm("CZY NA PEWNO chcesz usunąć WSZYSTKIE części z magazynu ORAZ WSZYSTKIE zapisane decki? Ta operacja jest NIEODWRACALNA!")) {
+    //     return;
+    // }
+    setMagazyn([]); 
+    setSavedDecks([]); 
+
+    showNotification('Wszystkie dane magazynu i zapisane decki zostały wyczyszczone!', 3000, 'success');
+    
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId) {
+        if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+        if (aktywnaStronaId === 'generator') wyczyscLosowanie();
+        if (aktywnaStronaId === 'deck') renderDeckBuilder(); 
+        if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
+    }
+
+    const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
+    const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
+    if (aktywnaStronaId === 'importexport') {
+         if(poleJsonMagazyn) poleJsonMagazyn.value = '';
+         if(poleJsonDecki) poleJsonDecki.value = '';
+    }
+}
+// ZMODYFIKOWANA funkcja WERSJA 4 - Z ROZBUDOWANYMI LOGAMI
+function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false) {
+    console.log(`[PRZETWORZ_V4_DEBUG_1] START. Źródło: ${zrodloDanychOpis}, UstawDomyslnaIloscNaZero: ${ustawDomyslnaIloscNaZero}`);
+    console.log(`[PRZETWORZ_V4_DEBUG_2] Dane wejściowe (daneDoImportu) (pierwsze 3):`, Array.isArray(daneDoImportu) ? daneDoImportu.slice(0, 3) : daneDoImportu);
+
+    if (!Array.isArray(daneDoImportu)) {
+        console.error(`[PRZETWORZ_V4_DEBUG_X1] BŁĄD: Dane do przetworzenia nie są tablicą.`);
+        showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format danych (oczekiwano tablicy).`, 3000, 'error');
+        return;
+    }
+
+    // Krok 1: Przetwórz dane wejściowe na listę obiektów części
+    const czesciImportowaneLista = daneDoImportu.map((item, index) => {
+        // ... (TA CZĘŚĆ POZOSTAJE DOKŁADNIE TAKA SAMA JAK W POPRZEDNIEJ WERSJI V4)
+        if (!item || typeof item !== 'object') { return null; }
+        if (typeof item.typ !== 'string') { return null; }
+        let id = String(item.id || `${zrodloDanychOpis.toLowerCase().replace(/\s/g, '_')}_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`);
+        id = String(id).trim();
+        if (!id) { return null; }
+        let typ = String(item.typ).trim().toLowerCase();
+        const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
+        if (!dozwoloneTypy.includes(typ)) { typ = 'blade'; }
+        let iloscOdczytanaZPliku;
+        const parsedIlosc = parseInt(item.ilosc, 10);
+        iloscOdczytanaZPliku = (isNaN(parsedIlosc) || parsedIlosc < 0) ? 0 : parsedIlosc;
+        const poczatkowaIloscDlaNowejCzesci = ustawDomyslnaIloscNaZero ? 0 : iloscOdczytanaZPliku;
+        const czesc = {
+            id: id, typ: typ, nazwa: String(item.nazwa || `Część bez nazwy ${index + 1}`).trim(),
+            ilosc: poczatkowaIloscDlaNowejCzesci, _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku,
+            img: String(item.img || '').trim(), ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0,
+            cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0
+        };
+        const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+        const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
+        if (typ === 'blade' || typ === 'rachet' || typ === 'cx-main-blade' || typ === 'cx-assist-blade') {
+            czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF);
+            czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga);
+        } else if (typ === 'bit') {
+            czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF);
+            czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga);
+            czesc.DASH = parseFloatOrZero(item.DASH); czesc.BURST_RES = parseFloatOrZero(item.BURST_RES);
+        } else if (typ === 'cx-lock-chip') {
+            czesc.waga = parseFloatOrZero(item.waga); czesc.cx_lc_wytrz = parseIntOrZero(item.cx_lc_wytrz);
+            czesc.cx_lc_atk_bonus = parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus = parseFloatOrZero(item.cx_lc_def_bonus);
+        }
+        if (!czesc.nazwa) { czesc.nazwa = `Automatyczna Nazwa ${index + 1}`; }
+        return czesc;
+    }).filter(item => item !== null && typeof item.nazwa === 'string' && item.nazwa.trim() !== '' && item.id.trim() !== '');
+
+    console.log(`[PRZETWORZ_V4_DEBUG_3] Po mapowaniu. Liczba części z importu do przetworzenia: ${czesciImportowaneLista.length}`);
+    if (czesciImportowaneLista.length > 0) {
+        console.log(`[PRZETWORZ_V4_DEBUG_4] Pierwsza część z importu:`, JSON.parse(JSON.stringify(czesciImportowaneLista[0])));
+    }
+
+
+    if (czesciImportowaneLista.length === 0 && daneDoImportu.length > 0) {
+        showNotification(`Żadna z części w '${zrodloDanychOpis}' nie miała prawidłowego formatu lub brakło danych. Magazyn nie został zmieniony.`, 3500, 'warning');
+        console.log(`[PRZETWORZ_V4_DEBUG_5] Brak poprawnych części z importu, mimo że dane wejściowe były.`);
+        return;
+    }
+    if (czesciImportowaneLista.length === 0 && daneDoImportu.length === 0) {
+        showNotification(`'${zrodloDanychOpis}' nie zawierał żadnych części do importu. Magazyn nie został zmieniony.`, 3000, 'info');
+        console.log(`[PRZETWORZ_V4_DEBUG_6] Brak danych wejściowych i brak części z importu.`);
+        return;
+    }
+
+    // Krok 2: Pobierz aktualny magazyn
+    let aktualnyMagazyn;
+    try {
+        aktualnyMagazyn = getMagazyn(); // Upewnij się, że getMagazyn() nie rzuca błędu i zwraca tablicę
+        if (!Array.isArray(aktualnyMagazyn)) {
+            console.error("[PRZETWORZ_V4_DEBUG_X2] getMagazyn() nie zwrócił tablicy!", aktualnyMagazyn);
+            aktualnyMagazyn = []; // Ustaw na pustą tablicę w razie błędu
+            showNotification("Błąd odczytu istniejącego magazynu! Import może być niekompletny.", 4000, "error");
+        }
+    } catch (e) {
+        console.error("[PRZETWORZ_V4_DEBUG_X3] Błąd podczas getMagazyn():", e);
+        aktualnyMagazyn = [];
+        showNotification("Krytyczny błąd odczytu istniejącego magazynu! Import może być niekompletny.", 4000, "error");
+    }
+    console.log(`[PRZETWORZ_V4_DEBUG_7] Aktualny magazyn użytkownika (przed importem). Liczba części: ${aktualnyMagazyn.length}`);
+    if (aktualnyMagazyn.length > 0) {
+        console.log(`[PRZETWORZ_V4_DEBUG_8] Pierwsza część z aktualnego magazynu:`, JSON.parse(JSON.stringify(aktualnyMagazyn[0])));
+    }
+
+
+    const nowyMagazynFinalny = [];
+    let dodanoNowychCzesci = 0;
+    let zaktualizowanoDaneCzesci = 0;
+    let zaktualizowanoIloscIstniejacych = 0;
+
+    const idCzesciJuzDodanychDoNowego = new Set(); // Aby uniknąć duplikatów, jeśli ID się powtarza w aktualnym magazynie
+
+    // Krok 3: Iteruj przez AKTUALNY MAGAZYN UŻYTKOWNIKA
+    console.log(`[PRZETWORZ_V4_DEBUG_9] Rozpoczynanie pętli po aktualnym magazynie (${aktualnyMagazyn.length} elementów)...`);
+    aktualnyMagazyn.forEach((istniejacaCzesc, idx) => {
+        if (!istniejacaCzesc || !istniejacaCzesc.id) {
+            console.warn(`[PRZETWORZ_V4_DEBUG_WARN_AKT] Pominięto nieprawidłową istniejącą część (indeks: ${idx}):`, istniejacaCzesc);
+            return;
+        }
+        const idIstniejacej = String(istniejacaCzesc.id).trim();
+        
+        if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) {
+            console.warn(`[PRZETWORZ_V4_DEBUG_WARN_DUP_AKT] Duplikat ID '${idIstniejacej}' w aktualnym magazynie już przetworzony. Pomijam.`);
+            return;
+        }
+
+        const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
+
+        if (pasujacaCzescZImportu) {
+            console.log(`[PRZETWORZ_V4_DEBUG_10] Przetwarzanie istniejącej części ID: ${idIstniejacej} - ZNALEZIONO w imporcie.`);
+            const iloscZPlikuDoAktualizacji = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
+            let finalnaIlosc = istniejacaCzesc.ilosc;
+
+            if (!ustawDomyslnaIloscNaZero) { // Import z pola tekstowego
+                if (finalnaIlosc !== iloscZPlikuDoAktualizacji) {
+                    zaktualizowanoIloscIstniejacych++;
+                    console.log(`[PRZETWORZ_V4_DEBUG_11] ID: ${idIstniejacej}. Ilość w magazynie: ${finalnaIlosc}, Ilość w pliku importu: ${iloscZPlikuDoAktualizacji}. Ilość zostanie zaktualizowana do wartości z pliku.`);
+                }
+                finalnaIlosc = iloscZPlikuDoAktualizacji;
+            } else { // Import z bazy domyślnej HTML
+                 console.log(`[PRZETWORZ_V4_DEBUG_12] ID: ${idIstniejacej}. Import z bazy domyślnej. Ilość użytkownika (${finalnaIlosc}) zachowana.`);
+            }
+
+            const zaktualizowanaCzesc = {
+                ...pasujacaCzescZImportu,
+                ilosc: finalnaIlosc
+            };
+            delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji;
+            nowyMagazynFinalny.push(zaktualizowanaCzesc);
+            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+
+            let daneZmienione = false;
+            for (const key in zaktualizowanaCzesc) {
+                if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) {
+                    daneZmienione = true; break;
+                }
+            }
+            if (daneZmienione) zaktualizowanoDaneCzesci++;
+        } else {
+            console.log(`[PRZETWORZ_V4_DEBUG_13] Przetwarzanie istniejącej części ID: ${idIstniejacej} - NIE ZNALEZIONO w imporcie. Zachowuję oryginalną.`);
+            nowyMagazynFinalny.push(istniejacaCzesc); // Dodaj oryginalną, nietkniętą część
+            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+        }
+    });
+    console.log(`[PRZETWORZ_V4_DEBUG_14] Zakończono pętlę po aktualnym magazynie. Liczba części w nowyMagazynFinalny: ${nowyMagazynFinalny.length}`);
+
+    // Krok 4: Dodaj części z importu, które NIE BYŁY w oryginalnym magazynie użytkownika
+    console.log(`[PRZETWORZ_V4_DEBUG_15] Rozpoczynanie pętli po częściach z importu w celu dodania nowych (${czesciImportowaneLista.length} elementów)...`);
+    czesciImportowaneLista.forEach(czescImportowana => {
+        if (!czescImportowana || !czescImportowana.id) {
+             console.warn(`[PRZETWORZ_V4_DEBUG_WARN_IMP] Pominięto nieprawidłową importowaną część przy dodawaniu nowych:`, czescImportowana);
+            return;
+        }
+        const idImportowany = String(czescImportowana.id).trim();
+        // Sprawdź, czy ta część (po ID) NIE ZOSTAŁA już dodana z poprzedniej pętli
+        if (!idCzesciJuzDodanychDoNowego.has(idImportowany)) {
+            const czescDoDodania = { ...czescImportowana };
+            delete czescDoDodania._iloscZPlikuDoAktualizacji;
+            
+            nowyMagazynFinalny.push(czescDoDodania);
+            idCzesciJuzDodanychDoNowego.add(idImportowany); // Dodaj do seta, na wypadek gdyby ID w pliku importu się powtarzały
+            dodanoNowychCzesci++;
+            console.log(`[PRZETWORZ_V4_DEBUG_16] ID: ${idImportowany} ("${czescImportowana.nazwa}") - DODANO JAKO NOWĄ z ilością ${czescDoDodania.ilosc}.`);
+        } else {
+            console.log(`[PRZETWORZ_V4_DEBUG_17] ID: ${idImportowany} ("${czescImportowana.nazwa}") - Już przetworzona/uwzględniona. Pomijam ponowne dodanie.`);
+        }
+    });
+    console.log(`[PRZETWORZ_V4_DEBUG_18] Zakończono pętlę dodawania nowych części. Liczba części w nowyMagazynFinalny: ${nowyMagazynFinalny.length}`);
+
+
+    console.log(`[PRZETWORZ_V4_DEBUG_19] Końcowy stan przed zapisem. Liczba części w nowyMagazynFinalny: ${nowyMagazynFinalny.length}`);
+    if (nowyMagazynFinalny.length > 5) { // Loguj tylko fragment, jeśli jest długi
+        console.log(`[PRZETWORZ_V4_DEBUG_20] Fragment nowyMagazynFinalny (pierwsze 2 i ostatnie 2):`, JSON.parse(JSON.stringify(nowyMagazynFinalny.slice(0,2))), '...', JSON.parse(JSON.stringify(nowyMagazynFinalny.slice(-2))));
+    } else {
+        console.log(`[PRZETWORZ_V4_DEBUG_20] Cały nowyMagazynFinalny:`, JSON.parse(JSON.stringify(nowyMagazynFinalny)));
+    }
+
+
+    try {
+        setMagazyn(nowyMagazynFinalny);
+        let msg = '';
+        if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
+        if (zaktualizowanoDaneCzesci > 0) msg += `Zaktualizowano dane dla ${zaktualizowanoDaneCzesci} istniejących części. `;
+        if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscNaZero) {
+            msg += `Zaktualizowano ilość dla ${zaktualizowanoIloscIstniejacych} istniejących części (zgodnie z plikiem importu). `;
+        }
+
+        if (msg) {
+            showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
+        } else {
+            showNotification(`Magazyn jest już aktualny lub dane w pliku '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
+        }
+        console.log(`[PRZETWORZ_V4_DEBUG_21] Magazyn zapisany. Całkowita liczba części: ${nowyMagazynFinalny.length}. Dodano: ${dodanoNowychCzesci}, Zakt. dane: ${zaktualizowanoDaneCzesci}, Zakt. ilość (z pola): ${zaktualizowanoIloscIstniejacych}`);
+
+    } catch (e) {
+        console.error("[PRZETWORZ_V4_DEBUG_X4] BŁĄD podczas wywołania setMagazyn lub showNotification:", e);
+        showNotification(`Krytyczny błąd zapisu danych z '${zrodloDanychOpis}'.`, 4000, 'error');
+    }
+
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId === 'magazyn') {
+        wyswietlMagazyn();
+    }
+    if (document.getElementById('deck')?.classList.contains('active')) {
+        renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
+    }
+    console.log(`[PRZETWORZ_V4_DEBUG_22] Funkcja przetworzIDopiszDaneMagazynu - KONIEC.`);
+}
+
+
+function importujMagazynZBazyDomyslnejHTML() {
+    console.log("[IMPORT_HTML_1] Funkcja importujMagazynZBazyDomyslnejHTML - START");
+    const nazwaZrodla = 'Domyślna Baza (z HTML)';
+
+    try {
+        console.log("[IMPORT_HTML_2] Wewnątrz bloku try...");
+        const scriptTag = document.getElementById('domyslnaBazaDanychJson');
+        
+        if (!scriptTag) {
+            console.error("[IMPORT_HTML_X1] BŁĄD KRYTYCZNY: Nie znaleziono tagu <script> z ID 'domyslnaBazaDanychJson'.");
+            showNotification("Błąd wewnętrzny: Brak źródła danych domyślnych.", 4000, 'error');
+            return;
+        }
+        // ... (reszta logiki wczytywania i parsowania jsonString - bez zmian) ...
+        const jsonString = scriptTag.textContent;
+        if (!jsonString || jsonString.trim() === '') {
+            console.error("[IMPORT_HTML_X2] BŁĄD: Tag <script> z ID 'domyslnaBazaDanychJson' jest pusty.");
+            showNotification("Błąd: Domyślna baza danych jest pusta.", 4000, 'error');
+            return;
+        }
+        
+        console.log("[IMPORT_HTML_5] Próba parsowania JSON...");
+        let daneDoImportu;
+        try {
+            daneDoImportu = JSON.parse(jsonString);
+        } catch (parseError) {
+            console.error("[IMPORT_HTML_X3] BŁĄD PARSOWANIA JSON:", parseError);
+            showNotification("Błąd: Nieprawidłowy format domyślnej bazy danych. Sprawdź JSON.", 5000, 'error');
+            return;
+        }
+        console.log("[IMPORT_HTML_6] Parsowanie JSON zakończone sukcesem. Liczba elementów:", Array.isArray(daneDoImportu) ? daneDoImportu.length : 'NIE JEST TABLICĄ');
+
+
+        console.log("[IMPORT_HTML_7] Wywołanie przetworzIDopiszDaneMagazynu z ustawDomyslnaIloscNaZero = true...");
+        //                             👇 TUTAJ ZMIANA
+        przetworzIDopiszDaneMagazynu(daneDoImportu, nazwaZrodla, true);
+        console.log("[IMPORT_HTML_8] Wywołanie przetworzIDopiszDaneMagazynu - ZAKOŃCZONE.");
+
+    } catch (error) {
+        // ... (obsługa błędów - bez zmian) ...
+        console.error("[IMPORT_HTML_X4] BŁĄD OGÓLNY w bloku try:", error);
+        showNotification(`Nieoczekiwany błąd podczas importu (${nazwaZrodla}): ${error.message}`, 4000, 'error');
+    }
+    console.log("[IMPORT_HTML_9] Funkcja importujMagazynZBazyDomyslnejHTML - KONIEC");
+}
+
+function zmienIloscCzesci(idCzesci, zmiana) {
+    console.log(`[ZMIEN_ILOSC_1] Start zmiany ilości dla ID: ${idCzesci}, zmiana: ${zmiana}`);
+    const magazyn = getMagazyn();
+    const indexCzesci = magazyn.findIndex(c => c && c.id === idCzesci);
+
+    if (indexCzesci === -1) {
+        showNotification("Błąd: Nie znaleziono części do aktualizacji ilości.", 3000, 'error');
+        console.error(`[ZMIEN_ILOSC_X1] Nie znaleziono części o ID: ${idCzesci}`);
+        return;
+    }
+
+    const czesc = magazyn[indexCzesci];
+    let nowaIlosc = (parseInt(czesc.ilosc, 10) || 0) + zmiana;
+
+    // Zapobiegnij ujemnej ilości
+    if (nowaIlosc < 0) {
+        nowaIlosc = 0;
+    }
+
+    console.log(`[ZMIEN_ILOSC_2] Stara ilość: ${czesc.ilosc}, Nowa obliczona ilość: ${nowaIlosc} dla "${czesc.nazwa}"`);
+
+    // Jeśli ilość się nie zmieniła (np. próba zmniejszenia z 0), nie rób nic więcej
+    if (czesc.ilosc === nowaIlosc && zmiana !== 0) { // zmiana !== 0 aby uniknąć braku odświeżenia, gdyby ktoś wywołał z 0
+        console.log(`[ZMIEN_ILOSC_3] Ilość bez zmian (prawdopodobnie próba zmniejszenia z 0).`);
+        // Można dodać notyfikację, jeśli chcemy
+        // showNotification(`Ilość "${czesc.nazwa}" jest już minimalna.`, 2000, 'info');
+        return;
+    }
+    
+    czesc.ilosc = nowaIlosc;
+    magazyn[indexCzesci] = czesc; // Zaktualizuj obiekt w tablicy
+    setMagazyn(magazyn); // Zapisz cały magazyn
+
+    //showNotification(`Zaktualizowano ilość dla "${czesc.nazwa}" na ${nowaIlosc}.`, 1500, 'success'); // Krótsza notyfikacja
+
+    // Odśwież widok magazynu, aby zmiany były widoczne natychmiast
+    // Sprawdź, czy jesteśmy na stronie magazynu, aby uniknąć niepotrzebnego renderowania
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId === 'magazyn') {
+        wyswietlMagazyn();
+    } else {
+        console.warn("[ZMIEN_ILOSC_4] Zmiana ilości wykonana, ale widok magazynu nie jest aktywny, więc nie został odświeżony.");
+    }
+
+    // Jeśli zmiana ilości części wpływa na Deck Builder (np. część staje się niedostępna),
+    // warto go również odświeżyć, jeśli jest aktywny.
+    if (document.getElementById('deck')?.classList.contains('active')) {
+        console.log("[ZMIEN_ILOSC_5] Odświeżanie Deck Buildera po zmianie ilości...");
+        renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
+    }
+}
+
+
+// =================================
+// Inicjalizacja Aplikacji po Załadowaniu DOM
+// =================================
+document.addEventListener('DOMContentLoaded', function() {
+    sidebar = document.getElementById('sidebar');
+    appContainer = document.getElementById('app-container');
+    sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+    menuIcon = document.getElementById('menu-icon');
+    menuBtnText = document.getElementById('menu-btn-text');
+    
+    // Inicjalizacja referencji specyficznych dla stron
+    wynikiDivGenerator = document.getElementById('wyniki'); // Dla LOSUJ()
+    placeholderActualImgGenerator = document.getElementById('placeholder-img'); // Dla LOSUJ()
+    deckBuilderContainerDeckPage = document.getElementById("deck-builder"); // Dla renderDeckBuilder()
+
+    if (typeof VANTA !== 'undefined' && VANTA.NET && typeof THREE !== 'undefined') {
+        try {
+            window.vantaEffect = VANTA.NET({
+                el: "#vanta-background", mouseControls: true, touchControls: true, gyroControls: false,
+                minHeight: 200.00, minWidth: 200.00, scale: 1.00, scaleMobile: 1.00,
+                backgroundColor: 0x101018, color: 0x8a2be2, points: 11.00, 
+                maxDistance: 20.00, spacing: 16.00, showDots: true
+            });
+        } catch (e) {
+            console.error("Błąd inicjalizacji VANTA:", e);
+            showNotification("Nie udało się załadować tła.", 3000, 'warning');
+        }
+    } else { console.warn("Biblioteki VANTA lub Three.js nie są dostępne."); }
+
+    if (appContainer) appContainer.style.marginLeft = sidebarWidthCollapsed + 'px';
+    
+    const domyslnyLink = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]'); 
+    if (domyslnyLink) navigateTo('generator', domyslnyLink); 
+    else { console.error("Nie znaleziono domyślnego linku nawigacyjnego."); navigateTo('generator', null); }
+
+    if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
+    else { console.error("Przycisk menu (#sidebarToggleBtn) nie znaleziony."); }
+
+    // Inicjalne pokazanie pustego formularza na stronie 'dodaj'
+    // jeśli to jest strona startowa (choć zwykle nie jest)
+    // if (document.getElementById('dodaj')?.classList.contains('active')) {
+    //     pokazFormularz();
+    // }
+});
+
+</script>
+<script id="domyslnaBazaDanychJson" type="application/json">
+[
+  {
+  "id": "1", "typ": "blade", "nazwa": "AeroPegasus", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/5/58/BladeAeroPegasus.png/revision/latest/scale-to-width-down/1000?cb=20250528202546", "ATK": 70, "DEF": 30, "STM": 35, "waga": 38.3},
+  {
+  "id": "2", "typ": "blade", "nazwa": "DranBuster", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/d/db/BladeDranBuster.png/revision/latest?cb=20250528202327", "ATK": 70, "DEF": 20, "STM": 10, "waga": 36.5},
+  {
+  "id": "3", "typ": "blade", "nazwa": "GhostCircle", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/7/7a/BladeGhostCircle.png/revision/latest?cb=20241115025132", "ATK": 5, "DEF": 40, "STM": 55, "waga": 26.7},
+  {
+  "id": "4", "typ": "blade", "nazwa": "GolemRock", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/27/BladeGolemRock.png/revision/latest?cb=20250115052241", "ATK": 30, "DEF": 60, "STM": 10, "waga": 34},
+  {
+  "id": "5", "typ": "blade", "nazwa": "HellsHammer", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/6/67/BladeHellsHammer.png/revision/latest?cb=20240215060611", "ATK": 50, "DEF": 25, "STM": 25, "waga": 33},
+  {
+  "id": "6", "typ": "blade", "nazwa": "ImpactDrake", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/b1/BladeImpactDrake.png/revision/latest?cb=20241115024018", "ATK": 75, "DEF": 25, "STM":10, "waga": 39},
+  {
+  "id": "7", "typ": "blade", "nazwa": "KnightMail", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/f/fc/BladeKnightMail.png/revision/latest?cb=20241015034144", "ATK": 10, "DEF": 65, "STM": 35, "waga": 36.7},
+  {
+  "id": "8", "typ": "blade", "nazwa": "LeonCrest", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/c7/BladeLeonCrest.png/revision/latest?cb=20240712055426", "ATK": 15, "DEF": 70, "STM": 15, "waga": 35},
+  {
+  "id": "9", "typ": "blade", "nazwa": "PhoenixRudder", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/0/0f/BladePhoenixRudder.png/revision/latest?cb=20250528203411", "ATK": 10, "DEF": 35, "STM": 55, "waga": 34.5},
+  {
+  "id": "10", "typ": "blade", "nazwa": "SamuraiSaber", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/d/de/BladeSamuraiSaber.png/revision/latest?cb=20241015033005", "ATK": 65, "DEF": 20, "STM": 25, "waga": 36.5},
+  {
+  "id": "11", "typ": "blade", "nazwa": "ScorpioSpear", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/89/BladeScorpioSpear.png/revision/latest?cb=20250614081207", "ATK": 25, "DEF": 55, "STM": 30, "waga": 39.6},
+  {
+  "id": "12", "typ": "blade", "nazwa": "SharkScale", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/e/e0/BladeSharkScale.png/revision/latest?cb=20250715051433", "ATK": 70, "DEF": 15, "STM": 15, "waga": 37.6},
+  {
+  "id": "13", "typ": "blade", "nazwa": "ShinobiShadow", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/4/48/BladeShinobiShadow.png/revision/latest?cb=20250528201917", "ATK": 10, "DEF": 70, "STM": 20, "waga": 28.2},
+  {
+  "id": "14", "typ": "blade", "nazwa": "SilverWolf", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/f/f1/BladeSilverWolf.png/revision/latest?cb=20240913034202", "ATK": 15, "DEF": 30, "STM": 65, "waga": 36.8},
+  {
+  "id": "15", "typ": "blade", "nazwa": "WizardRod", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/a3/BladeWizardRod.png/revision/latest?cb=20240222003334", "ATK": 15, "DEF": 25, "STM": 60, "waga": 35.3},
+  {
+  "id": "16", "typ": "blade", "nazwa": "WyvernHover", "ilosc": 0, "img": "https://iili.io/K2FvNCN.png", "ATK": 13, "DEF": 60, "STM": 27, "waga": 35},
+  {
+  "id": "17", "typ": "blade", "nazwa": "BlackShell", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/3c/BladeBlackShell.png/revision/latest?cb=20250528201216", "ATK": 10, "DEF": 65, "STM": 25, "waga": 32.4},
+  {
+  "id": "18", "typ": "blade", "nazwa": "CobaltDragoon", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/c2/BladeCobaltDragoon.png/revision/latest?cb=20250528202711", "ATK": 60, "DEF":15, "STM": 25, "waga": 37.8},
+  {
+  "id": "19", "typ": "blade", "nazwa": "CobaltDrake", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/2f/BladeCobaltDrake.png/revision/latest?cb=20250528202030", "ATK": 65, "DEF": 30, "STM": 20, "waga": 37.3},
+  {
+  "id": "20", "typ": "blade", "nazwa": "CrimsonGaruda", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/6/60/BladeCrimsonGaruda.png/revision/latest?cb=20241015052049", "ATK": 45, "DEF": 25, "STM": 30, "waga": 35},
+  {
+  "id": "21", "typ": "blade", "nazwa": "DranDagger", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/c8/BladeDranDagger.png/revision/latest?cb=20250528202141", "ATK": 50, "DEF": 25, "STM": 25, "waga": 36},
+  {
+  "id": "22", "typ": "blade", "nazwa": "DranSword", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/5/5f/BladeDranSword.png/revision/latest?cb=20250814202546", "ATK": 55, "DEF": 25, "STM": 20, "waga": 35.1},
+  {
+  "id": "23", "typ": "blade", "nazwa": "HellsChain", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/83/BladeHellsChain.png/revision/latest?cb=20250528203625", "ATK": 35, "DEF": 40, "STM": 25, "waga": 32.2},
+  {
+  "id": "24", "typ": "blade", "nazwa": "HellsScythe", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/e/e4/BladeHellsScythe.png/revision/latest?cb=20250817035337", "ATK": 30, "DEF": 35, "STM": 35, "waga": 33},
+  {
+  "id": "25", "typ": "blade", "nazwa": "KnightLance", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/cb/BladeKnightLance.png/revision/latest?cb=20230808063816", "ATK": 25, "DEF": 60, "STM": 15, "waga": 32.9},
+  {
+  "id": "26", "typ": "blade", "nazwa": "KnightShield", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/9/9c/BladeKnightShield.png/revision/latest?cb=20250609060142", "ATK": 20, "DEF": 55, "STM": 25, "waga": 34.8},
+  {
+  "id": "27", "typ": "blade", "nazwa": "LeonClaw", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/9/93/BladeLeonClaw.png/revision/latest?cb=20230918165658", "ATK": 40, "DEF": 40, "STM": 20, "waga": 31.4},
+  {
+  "id": "28", "typ": "blade", "nazwa": "PhoenixFeather", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/9/96/BladePhoenixFeather.png/revision/latest?cb=20231207074705", "ATK": 50, "DEF": 20, "STM": 30, "waga": 33.3},
+  {
+  "id": "29", "typ": "blade", "nazwa": "PhoenixWing", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/2d/BladePhoenixWing.png/revision/latest?cb=20231115091927", "ATK": 60, "DEF": 25, "STM": 15, "waga": 39},
+  {
+  "id": "30", "typ": "blade", "nazwa": "RhinoHorn", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/4/41/BladeRhinoHorn.png/revision/latest?cb=20250528201123", "ATK": 20, "DEF": 50, "STM": 30, "waga": 32.7},
+  {
+  "id": "31", "typ": "blade", "nazwa": "SamuraiCalibur", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/ab/BladeSamuraiCalibur.png/revision/latest?cb=20250715051328", "ATK": 0, "DEF": 0, "STM": 0, "waga":36},
+  {
+  "id": "32", "typ": "blade", "nazwa": "SharkEdge", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/2e/BladeSharkEdge.png/revision/latest?cb=20230812203549", "ATK": 60, "DEF": 25, "STM": 15, "waga": 34.5},
+  {
+  "id": "33", "typ": "blade", "nazwa": "ShelterDrake", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/89/BladeShelterDrake.png/revision/latest?cb=20250530222732", "ATK": 25, "DEF": 40, "STM": 35, "waga": 32.6},
+  {
+  "id": "34", "typ": "blade", "nazwa": "SphinxCowl", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/31/BladeSphinxCowl.png/revision/latest?cb=20250528201304", "ATK": 35, "DEF": 55, "STM": 10, "waga": 32.7},
+  {
+  "id": "35", "typ": "blade", "nazwa": "TriceraPress", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/4/48/BladeTriceraPress.png/revision/latest?cb=20250515033251", "ATK":20, "DEF": 65, "STM": 15, "waga": 36.5},
+  {
+  "id": "36", "typ": "blade", "nazwa": "TyrannoBeat", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/f/ff/BladeTyrannoBeat.png/revision/latest?cb=20240415173927", "ATK": 65, "DEF": 30, "STM": 5, "waga":37},
+  {
+  "id": "37", "typ": "blade", "nazwa": "UnicornSting", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/1/15/BladeUnicornSting.png/revision/latest?cb=20240115194629", "ATK": 35, "DEF": 35, "STM": 30, "waga": 34},
+  {
+  "id": "38", "typ": "blade", "nazwa": "ViperTail", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/9/9d/BladeViperTail.png/revision/latest?cb=20250818205656", "ATK": 30, "DEF": 20, "STM": 50, "waga": 34.7},
+  {
+  "id": "39", "typ": "blade", "nazwa": "WeissTiger", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/37/BladeWeissTiger.png/revision/latest?cb=20240515052303", "ATK": 45, "DEF": 30, "STM": 25, "waga": 34.6},
+  {
+  "id": "40", "typ": "blade", "nazwa": "WhaleWave", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/89/BladeWhaleWave.png/revision/latest?cb=20240812022438", "ATK": 45, "DEF": 35, "STM": 20, "waga": 38.2},
+  {
+  "id": "41", "typ": "blade", "nazwa": "WizardArrow", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/4/44/BladeWizardArrow.png/revision/latest?cb=20250626062049", "ATK": 15, "DEF": 30, "STM": 55, "waga": 31.8},
+  {
+  "id": "42", "typ": "blade", "nazwa": "WyvernGale", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/3d/BladeWyvernGale.png/revision/latest?cb=20231115091914", "ATK": 10, "DEF": 40, "STM": 50, "waga": 31.9},
+  {
+  "id": "43", "typ": "blade",
+    "nazwa": "Bite Croc",
+    "ilosc": 1,
+    "img": "https://iili.io/K2FgVKN.md.png",
+    "ATK": 60,
+    "DEF": 22,
+    "STM": 18,
+    "waga": 34.1
+  },
+{
+  "id": "44", "typ": "blade", "nazwa": "SharkTorso", "ilosc": 0, "img": "https://i.ibb.co/9k3FVVRz/Gill-Shark-4-70-O-removebg-preview.png", "ATK": 20, "DEF": 25, "STM": 55, "waga": 29.6},
+  {
+  "id": "45", "typ": "blade", "nazwa": "ShinobiKnife", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/25/BladeKnifeShinobi.png/revision/latest?cb=20250815182407", "ATK": 23, "DEF": 50, "STM": 27, "waga": 30.9},
+  {
+  "id": "46", "typ": "blade", "nazwa": "TriceraSpiky", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/6/64/Mosasaurus_9-60U.png/revision/latest?cb=20250308034736", "ATK": 32, "DEF": 55, "STM": 13, "waga": 29.9},
+  {
+  "id": "47", "typ": "blade", "nazwa": "TyrannoRoar", "ilosc": 0, "img": "https://i.ibb.co/tPBZWyBm/Roar-Tyranno-9-60-GF-removebg-preview.png", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
+  {
+  "id": "48", "typ": "blade", "nazwa": "BearScratch", "ilosc": 0, "img": "https://i.ibb.co/j9522psj/Savage-Bear-3-60-S-removebg-preview.png", "ATK": 25, "DEF": 45, "STM": 30, "waga": 29.6},
+  {
+  "id": "49", "typ": "blade", "nazwa": "SamuraiSteel", "ilosc": 0, "img": "https://i.ibb.co/DfnHcbRB/Steel-Samurai-4-80-T-removebg-preview.png", "ATK": 40, "DEF": 37, "STM": 23, "waga": 31.2},
+  {
+  "id": "50", "typ": "blade", "nazwa": "GoatTackle", "ilosc": 0, "img": "https://i.ibb.co/DP9tf85q/Tackle-Goat-2-70-N-removebg-preview.png", "ATK": 13, "DEF": 65, "STM": 22, "waga": 31.5},
+  {
+  "id": "51", "typ": "blade", "nazwa": "PteraSwing", "ilosc": 0, "img": "https://i.ibb.co/qGKsvTR/Talon-Ptera-3-80-B-removebg-preview.png", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.4},
+  {
+  "id": "52", "typ": "blade", "nazwa": "MammothTusk", "ilosc": 0, "img": "https://i.ibb.co/LdzJFYjL/Tusk-Mammoth-3-60-T-removebg-preview.png", "ATK": 33, "DEF": 35, "STM": 32, "waga": 32},
+  {
+  "id": "53", "typ": "blade", "nazwa": "KongYell", "ilosc": 0, "img": "https://i.ibb.co/6JNHw42Q/Yell-Kong-3-60-GB-removebg-preview.png", "ATK": 13, "DEF": 37, "STM": 50, "waga": 31.1},
+  {
+  "id": "54", "typ": "blade", "nazwa": "DragoonStorm", "ilosc": 0, "img": "https://i.ibb.co/SDMPrB3G/Dragoon-Storm-4-60-RA-removebg-preview.png", "ATK": 55, "DEF": 30, "STM": 15, "waga": 25.1},
+  {
+  "id": "55", "typ": "blade", "nazwa": "DranzerSpiral", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/ce/BladeDranzerSpiral.png/revision/latest?cb=20230807194254", "ATK": 35, "DEF": 30, "STM": 35, "waga": 27.7},
+  {
+  "id": "56", "typ": "blade", "nazwa": "DrigerSlash", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/c5/BladeDrigerSlash.png/revision/latest?cb=20240322182711", "ATK": 40, "DEF": 35, "STM": 25, "waga": 28.6},
+  {
+  "id": "57", "typ": "blade", "nazwa": "DracielShield", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/7/79/BladeDracielShield.png/revision/latest?cb=20241202045350", "ATK": 30, "DEF": 50, "STM": 20, "waga": 28},
+  {
+  "id": "58", "typ": "blade", "nazwa": "Lightning L-Drago (Rapid-Hit Type)", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/5/5b/BladeLightningL-Drago%28Rapid-HitType%29.png/revision/latest?cb=20240809163229", "ATK": 50, "DEF": 30, "STM": 20, "waga": 33.5},
+  {
+  "id": "59", "typ": "blade", "nazwa": "Lightning L-Drago (Upper Type)", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/d/d0/BladeLightningL-Drago%28UpperType%29.png/revision/latest?cb=20240809163223", "ATK": 55, "DEF": 25, "STM": 20, "waga": 34},
+  {
+  "id": "60", "typ": "blade", "nazwa": "Rock Leone", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/a2/BladeRockLeone.png/revision/latest/scale-to-width-down/1000?cb=20250719051128", "ATK": 30, "DEF": 55, "STM": 15, "waga": 29.8},
+  {
+  "id": "61", "typ": "blade", "nazwa": "StormPegasis", "ilosc": 0, "img": "https://i.ibb.co/9HrvgxqN/Storm-Pegasis-3-70-RA-removebg-preview.png", "ATK": 55, "DEF": 15, "STM": 30, "waga": 31},
+  {
+  "id": "62", "typ": "blade", "nazwa": "Trypio", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/e/e7/Trypio_3-60N.png/revision/latest?cb=20240129174146", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0},
+  {
+  "id": "63", "typ": "blade", "nazwa": "VictoryValkyrie", "ilosc": 0, "img": "https://i.ibb.co/svvTNN9v/Victory-Valkyrie-2-60-RA-removebg-preview.png", "ATK": 55, "DEF": 20, "STM": 25, "waga": 33.2},
+  {
+  "id": "64", "typ": "blade", "nazwa": "XenoXcalibur", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/bb/BladeXenoXcalibur.png/revision/latest?cb=20250322231907", "ATK": 65, "DEF": 25, "STM": 10, "waga": 31},
+  
+  {
+  "id": "96", "typ": "rachet", "nazwa": "1-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/f/f1/Ratchet1-70.png/revision/latest?cb=20250715052629", "ATK": 17, "DEF": 6, "STM": 7, "waga": 7.3},
+  {
+  "id": "97", "typ": "rachet", "nazwa": "2-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/a6/Ratchet2-60.png/revision/latest?cb=20240614034142", "ATK": 16, "DEF": 8, "STM": 6, "waga": 6.2},
+  {
+  "id": "98", "typ": "rachet", "nazwa": "2-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/d/dc/Ratchet2-80.png/revision/latest?cb=20240527053613", "ATK": 10, "DEF": 11, "STM": 9, "waga": 6.9},
+  {
+  "id": "99", "typ": "rachet", "nazwa": "3-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/1/1b/Ratchet3-60.png/revision/latest?cb=20240913063429", "ATK": 15, "DEF": 9, "STM": 6, "waga": 6.4},
+  {
+  "id": "100", "typ": "rachet", "nazwa": "3-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/6/69/Ratchet3-80.png/revision/latest?cb=20250609060206", "ATK":15, "DEF": 7, "STM": 8, "waga": 7.1},
+  {
+  "id": "101", "typ": "rachet", "nazwa": "4-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/4/46/Ratchet4-60.png/revision/latest?cb=20250317055414", "ATK": 11, "DEF": 13, "STM": 6, "waga": 6.3},
+  {
+  "id": "102", "typ": "rachet", "nazwa": "4-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/1/16/Ratchet4-70.png/revision/latest?cb=20240524163324", "ATK": 11, "DEF": 12, "STM": 7, "waga": 6.4},
+  {
+  "id": "103", "typ": "rachet", "nazwa": "4-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/ae/Ratchet4-80.png/revision/latest?cb=20250608045210", "ATK": 11, "DEF": 11, "STM": 8, "waga": 7},
+  {
+  "id": "104", "typ": "rachet", "nazwa": "5-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/f/f7/Ratchet5-60.png/revision/latest?cb=20230918165846", "ATK": 12, "DEF": 9, "STM": 9, "waga": 6.6},
+  {
+  "id": "105", "typ": "rachet", "nazwa": "5-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/4/42/Ratchet5-80.png/revision/latest?cb=20230918165909", "ATK": 12, "DEF": 8, "STM": 10, "waga": 7.3},
+  {
+  "id": "106", "typ": "rachet", "nazwa": "6-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/1/14/Ratchet6-70.png/revision/latest?cb=20250715051344", "ATK": 0, "DEF": 0, "STM": 0, "waga": 7.3},
+  {
+  "id": "107", "typ": "rachet", "nazwa": "7-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/d/d7/Ratchet7-80.png/revision/latest?cb=20250115050921", "ATK": 7, "DEF": 14, "STM": 9, "waga": 7.8},
+  {
+  "id": "108", "typ": "rachet", "nazwa": "9-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/af/Ratchet9-60.png/revision/latest?cb=20250530201949", "ATK": 13, "DEF": 10, "STM": 7, "waga": 6.2},
+  {
+  "id": "109", "typ": "rachet", "nazwa": "9-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/6/61/Ratchet9-80.png/revision/latest?cb=20240115193705", "ATK": 13, "DEF": 10, "STM": 7, "waga": 6.9},
+  {
+  "id": "110", "typ": "rachet", "nazwa": "M-85", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/7/79/RatchetM-85.png/revision/latest?cb=20250515033258", "ATK": 8, "DEF": 19, "STM": 13, "waga": 10.6},
+  {
+  "id": "111", "typ": "rachet", "nazwa": "0-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/0/08/Ratchet0-70.png/revision/latest?cb=20250415034357", "ATK": 3, "DEF": 13, "STM": 14, "waga": 7.0},
+  {
+  "id": "112", "typ": "rachet", "nazwa": "0-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/ac/Ratchet0-80.png/revision/latest?cb=20241115025146", "ATK": 3, "DEF": 12, "STM": 15, "waga": 7.6},
+  {
+  "id": "113", "typ": "rachet", "nazwa": "1-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/3a/Ratchet1-60.png/revision/latest?cb=20240215060550", "ATK": 17, "DEF": 9, "STM": 4, "waga": 6.0},
+  {
+  "id": "114", "typ": "rachet", "nazwa": "1-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/4/46/Ratchet1-80.png/revision/latest?cb=20240513065345", "ATK": 17, "DEF": 4, "STM": 9, "waga":6.7},
+  {
+  "id": "115", "typ": "rachet", "nazwa": "2-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/cb/Ratchet2-70.png/revision/latest?cb=20241015033717", "ATK": 10, "DEF": 12, "STM": 8, "waga": 6.4},
+  {
+  "id": "116", "typ": "rachet", "nazwa": "3-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/d/da/Ratchet3-70.png/revision/latest?cb=20240215060619", "ATK": 15, "DEF": 8, "STM": 7, "waga": 6.4},
+  {
+  "id": "117", "typ": "rachet", "nazwa": "3-85", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/b8/Ratchet3-85.png/revision/latest?cb=20241015034624", "ATK": 5, "DEF": 15, "STM": 10, "waga": 4.7},
+  {
+  "id": "118", "typ": "rachet", "nazwa": "4-50", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/2a/Ratchet4-50.png/revision/latest?cb=20250715051521", "ATK": 0, "DEF": 0, "STM": 0, "waga": 5.9},
+  {
+  "id": "119", "typ": "rachet", "nazwa": "5-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/c/cc/Ratchet5-70.png/revision/latest?cb=20240215060642", "ATK": 12, "DEF": 8, "STM": 10, "waga": 6.7},
+  {
+  "id": "120", "typ": "rachet", "nazwa": "7-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/39/Ratchet7-60.png/revision/latest?cb=20240712055419", "ATK": 8, "DEF": 14, "STM": 8, "waga": 7.1},
+  {
+  "id": "121", "typ": "rachet", "nazwa": "7-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/38/Ratchet7-70.png/revision/latest?cb=20241015043216", "ATK": 8, "DEF": 12, "STM": 10, "waga": 7.3},
+  {
+  "id": "122", "typ": "rachet", "nazwa": "9-70", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/86/Ratchet9-70.png/revision/latest?cb=20240712055351", "ATK": 13, "DEF": 10, "STM": 7, "waga": 6.3},
+  {
+  "id": "123", "typ": "rachet", "nazwa": "4-55", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/7/7a/Ratchet4-55.png/revision/latest?cb=20250605000210", "ATK": 7, "DEF": 11, "STM": 12, "waga": 4.8 },
+  {
+  "id": "124", "typ": "rachet", "nazwa": "6-60", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/5/53/Ratchet6-60.png/revision/latest?cb=20250215050512", "ATK": 14, "DEF": 8, "STM": 8, "waga": 6.1 },
+  {
+  "id": "125", "typ": "rachet", "nazwa": "6-80", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/9/98/Ratchet6-80.png/revision/latest?cb=20250215050704", "ATK": 14, "DEF": 6, "STM": 10, "waga": 6.9 },
+  {
+  "id": "126", "typ": "bit", "nazwa": "Ball", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/8c/BitBall.png/revision/latest?cb=20250608045235", "ATK":15, "DEF": 25, "STM": 50, "waga": 2.1, "DASH": 10, "BURST_RES": 30},
+  {
+  "id": "127", "typ": "bit", "nazwa": "Cyclone", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/f/fb/BitCyclone.png/revision/latest?cb=20240614034151", "ATK": 40, "DEF": 5, "STM": 10, "waga":2.1, "DASH": 0, "BURST_RES": 0},
+  {
+  "id": "128", "typ": "bit", "nazwa": "Dot", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/b2/BitDot.png/revision/latest?cb=20240614034756", "ATK": 10, "DEF": 55, "STM": 25, "waga": 2.0, "DASH": 0, "BURST_RES": 0},
+  {
+  "id": "129", "typ": "bit", "nazwa": "Elevate", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/38/BitElevate.png/revision/latest?cb=20240812022551", "ATK": 30, "DEF": 15, "STM": 20, "waga": 3.2, "DASH": 35, "BURST_RES": 30},
+  {
+  "id": "130", "typ": "bit", "nazwa": "Flat", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/b0/BitFlat.png/revision/latest?cb=20240913063436", "ATK": 40, "DEF": 15, "STM": 10, "waga": 2.2, "DASH": 35, "BURST_RES": 80},
+  {
+  "id": "131", "typ": "bit", "nazwa": "Gear Ball", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/9/97/BitGearBall.png/revision/latest?cb=20231115091947", "ATK": 10, "DEF": 15, "STM": 45, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
+  {
+  "id": "132", "typ": "bit", "nazwa": "Gear Flat", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/bd/BitGearFlat.png/revision/latest?cb=20231115091943", "ATK": 50, "DEF": 5, "STM": 5, "waga": 2.3, "DASH": 40, "BURST_RES": 80},
+  {
+  "id": "133", "typ": "bit", "nazwa": "Gear Needle", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/9/9d/BitGearNeedle.png/revision/latest?cb=20240116063659", "ATK": 20, "DEF": 40, "STM": 10, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
+  {
+  "id": "134", "typ": "bit", "nazwa": "Gear Point", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/3/36/BitGearPoint.png/revision/latest?cb=20240115194709", "ATK": 30, "DEF": 25, "STM": 15, "waga": 2.3, "DASH": 30, "BURST_RES": 80},
+  {
+  "id": "135", "typ": "bit", "nazwa": "High Needle", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/2f/BitHighNeedle.png/revision/latest?cb=20230808063846", "ATK": 15, "DEF": 55, "STM": 20, "waga": 2.2, "DASH": 10, "BURST_RES": 30},
+  {
+  "id": "136", "typ": "bit", "nazwa": "High Taper", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/b5/BitHighTaper.png/revision/latest?cb=20231014024512", "ATK": 30, "DEF": 25, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  {
+  "id": "137", "typ": "bit", "nazwa": "Low Flat", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/0/0e/BitLowFlat.png/revision/latest?cb=20230812203610", "ATK": 45, "DEF": 5, "STM": 10, "waga": 2.1, "DASH": 40, "BURST_RES": 80},
+  {
+  "id": "138", "typ": "bit", "nazwa": "Merge", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/5/5e/BitMerge.png/revision/latest?cb=20250715051358", "ATK": 0, "DEF": 0, "STM": 0, "waga": 3.4, "DASH": 0, "BURST_RES": 0},
+  {
+  "id": "139", "typ": "bit", "nazwa": "Needle", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/2/26/BitNeedle.png/revision/latest?cb=20250609060238", "ATK": 10, "DEF": 50, "STM": 30, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  {
+  "id": "140", "typ": "bit", "nazwa": "Orb", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/1/17/BitOrb.png/revision/latest?cb=20230918165916", "ATK": 10, "DEF": 30, "STM": 50, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  {
+  "id": "141", "typ": "bit", "nazwa": "Point", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/b/bf/BitPoint.png/revision/latest?cb=20230918165854", "ATK": 25, "DEF": 25, "STM": 25, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  {
+  "id": "142", "typ": "bit", "nazwa": "Quake", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/e/ed/BitQuake.png/revision/latest?cb=20240503184404", "ATK": 55, "DEF": 15, "STM": 0, "waga": 2.2, "DASH": 5, "BURST_RES": 0},
+  {
+  "id": "143", "typ": "bit", "nazwa": "Rush", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/e/e1/BitRush.png/revision/latest?cb=20231014022216", "ATK": 40, "DEF": 10, "STM": 20, "waga": 2.1, "DASH": 30, "BURST_RES": 80},
+  {
+  "id": "144", "typ": "bit", "nazwa": "Spike", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/7/7d/BitSpike.png/revision/latest?cb=20231014012757", "ATK": 10, "DEF": 45, "STM": 35, "waga": 2, "DASH": 0, "BURST_RES": 0},
+  {
+  "id": "145", "typ": "bit", "nazwa": "Taper", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/ad/BitTaper.png/revision/latest?cb=20250317055452", "ATK": 35, "DEF": 20, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  {
+  "id": "146", "typ": "bit", "nazwa": "Trans Point", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/d/d0/BitTransPoint.png/revision/latest?cb=20241015052109", "ATK": 35, "DEF": 25, "STM": 25, "waga": 0, "DASH": 15, "BURST_RES": 80},
+  {
+  "id": "147", "typ": "bit", "nazwa": "Unite", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/a/a0/BitUnite.png/revision/latest?cb=20240515052315", "ATK": 25, "DEF": 25, "STM": 30, "waga": 2.1, "DASH": 0, "BURST_RES": 0},
+  {
+  "id": "148", "typ": "bit", "nazwa": "Accel", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/8e/BitAccel.png/revision/latest?cb=20240215060559", "ATK": 40, "DEF": 10, "STM": 10, "waga": 2.6, "DASH": 40, "BURST_RES": 80},
+  {
+  "id": "149", "typ": "bit", "nazwa": "Bound Spike", "ilosc": 0, "img": "https://static.wikia.nocookie.net/beyblade/images/8/88/BitBoundSpike.png/revision/latest?cb=20241015034935", "ATK": 5, "DEF": 60, "STM": 30, "waga": 2.0, "DASH": 5, "BURST_RES": 30},
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Dran",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/6/6c/LockChipDran.png/revision/latest?cb=20250215050437",
+    "id": "150"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Cerberus",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/b/bd/LockChipCerberus.png/revision/latest?cb=20250613042044",
+    "id": "151"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Fox",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/6/65/LockChipFox.png/revision/latest?cb=20250415032832",
+    "id": "152"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Hornet",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/8/88/LockChipHornet.png/revision/latest?cb=20250820214840",
+    "id": "153"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Kraken",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/d/d4/LockChipKraken.png/revision/latest?cb=20250820214847",
+    "id": "154"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Leon",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/1/1a/LockChipLeon.png/revision/latest?cb=20250515031153",
+    "id": "155"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Pegasus",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/8/86/LockChipPegasus.png/revision/latest?cb=20250613042010",
+    "id": "156"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Perseus",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/6/6a/LockChipPerseus.png/revision/latest?cb=20250215050629",
+    "id": "157"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Rhino",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/d/d7/LockChipRhino.png/revision/latest?cb=20250404235409",
+    "id": "158"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Sol",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/6/6e/LockChipSol.png/revision/latest?cb=20250812023449",
+    "id": "159"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Stag",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/d/d9/LockChipStag.png/revision/latest?cb=20250820214853",
+    "id": "160"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Valkyrie",
+    "ilosc": 0,
+    "waga": 5.6,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/b/b4/LockChipValkyrie.png/revision/latest/scale-to-width-down/1000?cb=20250715032014",
+    "id": "161"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Whale",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/7/75/LockChipWhale.png/revision/latest?cb=20250613042706",
+    "id": "162"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Wizard",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/4/43/LockChipWizard.png/revision/latest?cb=20250215050531",
+    "id": "163"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Flame",
+    "ilosc": 0,
+    "ATK": 5,
+    "DEF": 15,
+    "STM": 40,
+    "waga": 28.5,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/9/99/MainBladeFlame.png/revision/latest?cb=20250613042102",
+    "id": "164"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Antler",
+    "ilosc": 0,
+    "ATK": 8,
+    "DEF": 15,
+    "STM": 37,
+    "waga": 28.8,
+    "img": "",
+    "id": "165"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Arc",
+    "ilosc": 0,
+    "ATK": 10,
+    "DEF": 10,
+    "STM": 40,
+    "waga": 29.2,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/f/f5/MainBladeArc.png/revision/latest?cb=20250801190723",
+    "id": "166"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Blast",
+    "ilosc": 0,
+    "ATK": 50,
+    "DEF": 10,
+    "STM": 15,
+    "waga": 32.8,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/5/5f/MainBladeBlast.png/revision/latest?cb=20250613042021",
+    "id": "167"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Brave",
+    "ilosc": 0,
+    "ATK": 40,
+    "DEF": 10,
+    "STM": 10,
+    "waga": 31.2,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/d/df/MainBladeBrave.png/revision/latest?cb=20250727212836",
+    "id": "168"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Brush",
+    "ilosc": 0,
+    "ATK": 40,
+    "DEF": 15,
+    "STM": 5,
+    "waga": 30.3,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/e/e7/MainBladeBrush.png/revision/latest?cb=20250415032849",
+    "id": "169"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Dark",
+    "ilosc": 0,
+    "ATK": 10,
+    "DEF": 40,
+    "STM": 10,
+    "waga": 30.3,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/e/e0/MainBladeDark.png/revision/latest?cb=20250215050646",
+    "id": "170"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Eclipse",
+    "ilosc": 0,
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "img": "",
+    "id": "171"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Fang",
+    "ilosc": 0,
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/a/ae/MainBladeFang.png/revision/latest?cb=20250515031203",
+    "id": "172"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Fort",
+    "ilosc": 0,
+    "ATK": 24,
+    "DEF": 12,
+    "STM": 24,
+    "waga": 29.0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/3/3b/MainBladeFort.png/revision/latest?cb=20250814033238",
+    "id": "173"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Reaper",
+    "ilosc": 0,
+    "ATK": 25,
+    "DEF": 10,
+    "STM": 25,
+    "waga": 29.0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/a/a4/MainBladeReaper.png/revision/latest?cb=20250314041624",
+    "id": "174"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Volt",
+    "ilosc": 0,
+    "ATK": 45,
+    "DEF": 15,
+    "STM": 15,
+    "waga": 31.0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/0/04/MainBladeVolt.png/revision/latest/scale-to-width-down/1000?cb=20250715032031",
+    "id": "175"
+  },
+  {
+    "typ": "cx-main-blade",
+    "nazwa": "Wriggle",
+    "ilosc": 0,
+    "ATK": 18,
+    "DEF": 2,
+    "STM": 40,
+    "waga": 29.3,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/1/12/MainBladeWriggle.png/revision/latest?cb=20250814033242",
+    "id": "176"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Assault",
+    "ilosc": 0,
+    "ATK": 25,
+    "DEF": 10,
+    "STM": 5,
+    "waga": 5,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/2/24/AssistBladeAssault.png/revision/latest?cb=20250613042027",
+    "id": "177"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Bumper",
+    "ilosc": 0,
+    "ATK": 10,
+    "DEF": 20,
+    "STM": 10,
+    "waga": 5.3,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/a/aa/AssistBladeBumper.png/revision/latest?cb=20250215050654",
+    "id": "178"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Charge",
+    "ilosc": 0,
+    "ATK": 15,
+    "DEF": 20,
+    "STM": 5,
+    "waga": 5.0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/8/89/AssistBladeCharge.png/revision/latest?cb=20250314041928",
+    "id": "179"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Dual",
+    "ilosc": 0,
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/e/e1/AssistBladeDual.png/revision/latest?cb=20250812023514",
+    "id": "180"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Jaggy",
+    "ilosc": 0,
+    "ATK": 20,
+    "DEF": 15,
+    "STM": 5,
+    "waga": 4.9,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/1/14/AssistBladeJaggy.png/revision/latest?cb=20250415032856",
+    "id": "181"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Massive",
+    "ilosc": 0,
+    "ATK": 15,
+    "DEF": 15,
+    "STM": 10,
+    "waga": 5.3,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/2/23/AssistBladeMassive.png/revision/latest?cb=20250613042947",
+    "id": "182"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Round",
+    "ilosc": 0,
+    "ATK": 10,
+    "DEF": 10,
+    "STM": 20,
+    "waga": 4.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/3/3c/AssistBladeRound.png/revision/latest?cb=20250215050554",
+    "id": "183"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Slash",
+    "ilosc": 0,
+    "ATK": 10,
+    "DEF": 20,
+    "STM": 10,
+    "waga": 4.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/c/cb/AssistBladeSlash.png/revision/latest?cb=20250215050454",
+    "id": "184"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Turn",
+    "ilosc": 0,
+    "ATK": 10,
+    "DEF": 10,
+    "STM": 20,
+    "waga": 5.8,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/2/2c/AssistBladeTurn.png/revision/latest?cb=20250314041629",
+    "id": "185"
+  },
+  {
+    "typ": "cx-assist-blade",
+    "nazwa": "Wheel",
+    "ilosc": 0,
+    "ATK": 5,
+    "DEF": 15,
+    "STM": 20,
+    "waga": 7.2,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/3/3d/AssistBladeWheel.png/revision/latest?cb=20250613042109",
+    "id": "186"
+  },
+  {
+    "typ": "cx-lock-chip",
+    "nazwa": "Hell",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/7/7a/LockChipHells.png/revision/latest?cb=20250314041513",
+    "id": "187"
+  },
+  {
+    "id": "188",
+    "typ": "bit",
+    "nazwa": "Gear Rush",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/5/58/BitGearRush.png/revision/latest?cb=20250415032926",
+    "ATK": 45,
+    "DEF": 10,
+    "STM": 10,
+    "waga": 2.1,
+    "DASH": 35,
+    "BURST_RES": 80
+  },
+  {
+    "id": "189",
+    "typ": "bit",
+    "nazwa": "Kick",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/4/47/BitKick.png/revision/latest?cb=20250314041641",
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 2.2,
+    "DASH": 0,
+    "BURST_RES": 0
+  },
+  {
+    "id": "190",
+    "typ": "bit",
+    "nazwa": "Low Orb",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/f/f4/BitLowOrb.png/revision/latest?cb=20250215050618",
+    "ATK": 5,
+    "DEF": 25,
+    "STM": 55,
+    "waga": 0,
+    "DASH": 15,
+    "BURST_RES": 30
+  },
+  {
+    "id": "191",
+    "typ": "bit",
+    "nazwa": "Trans Kick",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/5/5d/BitTransKick.png/revision/latest?cb=20250812023538",
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "DASH": 0,
+    "BURST_RES": 0
+  },
+  {
+    "id": "192",
+    "typ": "bit",
+    "nazwa": "Vortex",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/f/f9/BitVortex.png/revision/latest?cb=20250215050522",
+    "ATK": 45,
+    "DEF": 10,
+    "STM": 5,
+    "waga": 2.2,
+    "DASH": 40,
+    "BURST_RES": 80
+  },
+  {
+    "id": "193_wallball", 
+    "typ": "bit",
+    "nazwa": "Wall Ball",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/3/38/BitWallBall.png/revision/latest?cb=20250613042119",
+    "ATK": 15,
+    "DEF": 30,
+    "STM": 45,
+    "waga": 0,
+    "DASH": 10,
+    "BURST_RES": 30
+  },
+  {
+    "id": "193_wedge", 
+    "typ": "bit",
+    "nazwa": "Wedge",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/2/29/BitWedge.png/revision/latest?cb=20250215050716",
+    "ATK": 5,
+    "DEF": 55,
+    "STM": 30,
+    "waga": 0,
+    "DASH": 10,
+    "BURST_RES": 30
+  },
+  {
+    "id": "194",
+    "typ": "bit",
+    "nazwa": "Disk Ball",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/1/10/BitDiskBall.png/revision/latest?cb=20240215060650",
+    "ATK": 15,
+    "DEF": 20,
+    "STM": 55,
+    "waga": 3.2,
+    "DASH": 10,
+    "BURST_RES": 30
+  },
+  {
+    "id": "195",
+    "typ": "bit",
+    "nazwa": "Free Ball",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/7/78/BitFreeBall.png/revision/latest?cb=20240913034835",
+    "ATK": 10,
+    "DEF": 25,
+    "STM": 60,
+    "waga": 1.9,
+    "DASH": 15,
+    "BURST_RES": 30
+  },
+  {
+    "id": "196",
+    "typ": "bit",
+    "nazwa": "Glide",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/d/d5/BitGlide.png/revision/latest?cb=20240712055345",
+    "ATK": 20,
+    "DEF": 10,
+    "STM": 55,
+    "waga": 2.5,
+    "DASH": 0,
+    "BURST_RES": 0
+  },
+  {
+    "id": "197",
+    "typ": "bit",
+    "nazwa": "Hexa",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/8/8c/BitHexa.png/revision/latest?cb=20240215060626",
+    "ATK": 30,
+    "DEF": 35,
+    "STM": 20,
+    "waga": 2.6,
+    "DASH": 15,
+    "BURST_RES": 80
+  },
+  {
+    "id": "198",
+    "typ": "bit",
+    "nazwa": "Level",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/5/56/BitLevel.png/revision/latest?cb=20241015033722",
+    "ATK": 40,
+    "DEF": 5,
+    "STM": 15,
+    "waga": 2.7,
+    "DASH": 40,
+    "BURST_RES": 80
+  },
+  {
+    "id": "199",
+    "typ": "bit",
+    "nazwa": "Low Rush",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/3/36/BitLowRush.png/revision/latest?cb=20241115024042",
+    "ATK": 45,
+    "DEF": 5,
+    "STM": 10,
+    "waga": 1.9,
+    "DASH": 35,
+    "BURST_RES": 80
+  },
+  {
+    "id": "200",
+    "typ": "bit",
+    "nazwa": "Metal Needle",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/4/47/BitMetalNeedle.png/revision/latest?cb=20240416003755",
+    "ATK": 8,
+    "DEF": 57,
+    "STM": 30,
+    "waga": 2.8,
+    "DASH": 5,
+    "BURST_RES": 30
+  },
+  {
+    "id": "201",
+    "typ": "bit",
+    "nazwa": "Rubber Accel",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/5/5a/BitRubberAccel.png/revision/latest?cb=20241015044738",
+    "ATK": 60,
+    "DEF": 17,
+    "STM": 3,
+    "waga": 3.1,
+    "DASH": 0,
+    "BURST_RES": 0
+  },
+  {
+    "id": "202",
+    "typ": "bit",
+    "nazwa": "Under Flat",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/5/55/BitUnderFlat.png/revision/latest?cb=20250715051536",
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 2.0,
+    "DASH": 0,
+    "BURST_RES": 0
+  },
+  {
+    "id": "203",
+    "typ": "bit",
+    "nazwa": "Under Needle",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/1/16/BitUnderNeedle.png/revision/latest?cb=20250115052342",
+    "ATK": 10,
+    "DEF": 60,
+    "STM": 20,
+    "waga": 1.9,
+    "DASH": 10,
+    "BURST_RES": 30
+  },
+  {
+    "id": "204",
+    "typ": "bit",
+    "nazwa": "Zap",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/6/61/BitZap.png/revision/latest?cb=20250415034411",
+    "ATK": 30,
+    "DEF": 20,
+    "STM": 15,
+    "waga": 2.5,
+    "DASH": 35,
+    "BURST_RES": 80
+  },
+  {
+    "id": "205",
+    "typ": "rachet",
+    "nazwa": "Turbo",
+    "ilosc": 0,
+    "img": "https://static.wikia.nocookie.net/beyblade/images/c/cf/RatchetBitTurbo.png/revision/latest?cb=20250613042038",
+    "ATK": 30,
+    "DEF": 30,
+    "STM": 60,
+    "waga": 9.0,
+    "DASH": 10,
+    "BURST_RES": 30,
+    "integrujeBit": true
+ }
+]
+
+
+</script>
+
+
+</body>
+</html>
+
