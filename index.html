@@ -389,6 +389,97 @@ font-size: 0.8em;
 margin-left: 6px;
 font-weight: bold; /* poprawiona literówka z font-weght */
 }
+/* === STYLE DLA LICZNIKA PUNKTÓW === */
+.score-counter-card {
+    display: flex;
+    flex-direction: column; /* Ułożenie sekcji graczy i kontrolek jedna pod drugą */
+    gap: 30px; /* Odstęp między sekcjami graczy a kontrolkami */
+    padding: 25px;
+    align-items: center; /* Wycentrowanie elementów wewnątrz karty */
+}
+
+.player-section {
+    background-color: rgba(25, 25, 35, 0.6);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 450px; /* Maksymalna szerokość dla sekcji gracza */
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.player-section h3 {
+    color: #c080ff;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.5em; /* Większa nazwa gracza */
+}
+
+.score-display {
+    font-size: 4.5em; /* Duży wyświetlacz wyniku */
+    font-weight: bold;
+    color: #fff;
+    background-color: rgba(10,10,10,0.4);
+    padding: 15px 25px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    min-width: 100px; /* Minimalna szerokość, aby nie skakało przy małych liczbach */
+    display: inline-block; /* Aby padding działał poprawnie */
+    line-height: 1; /* Zapobiega zbyt dużej wysokości przez line-height czcionki */
+    border: 2px solid rgba(138, 43, 226, 0.3); /* Subtelna ramka */
+}
+
+.score-buttons button {
+    font-size: 1.1em;
+    padding: 10px 18px;
+    margin: 5px;
+    min-width: 60px; /* Minimalna szerokość przycisków */
+}
+
+.score-buttons button.danger-btn {
+    background-color: rgba(200, 60, 60, 0.7); /* Lekko inny odcień dla -1 */
+}
+.score-buttons button.danger-btn:hover {
+    background-color: rgba(220, 70, 70, 0.8);
+}
+
+.player-section input[type="text"] {
+    margin-top: 15px;
+    margin-bottom: 0; /* Usunięty dolny margines, bo sekcja ma swój padding */
+    text-align: center;
+    font-size: 0.9em;
+    padding: 10px;
+}
+
+.game-controls {
+    margin-top: 20px; /* Odstęp od sekcji graczy */
+    width: 100%;
+    text-align: center;
+}
+.game-controls button {
+    font-size: 1.2em; /* Większy przycisk resetu */
+}
+
+/* Dostosowania dla mniejszych ekranów - opcjonalne */
+@media (max-width: 600px) {
+    .score-counter-card {
+        padding: 15px;
+    }
+    .player-section {
+        padding: 15px;
+    }
+    .score-display {
+        font-size: 3.5em;
+        padding: 10px 20px;
+    }
+    .score-buttons button {
+        font-size: 1em;
+        padding: 8px 15px;
+        min-width: 50px;
+    }
+}
+
 </style>
 
 </head>
@@ -409,6 +500,7 @@ font-weight: bold; /* poprawiona literówka z font-weght */
     <div class="sidebar-links">
         <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="ATK.png" alt="Generator"><span>Generator</span></a>
         <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="DEF.png" alt="Magazyn"><span>Magazyn</span></a>
+    <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="DEF.png" alt="Licznik"><span>Licznik</span></a> 
     
         <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="STM.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a> <!-- lub Twoja oryginalna ikona dla "Deck" -->
 		<a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="STM.png" alt="Galeria"><span>Moje Decki</span></a> <!-- lub Twoja oryginalna ikona dla "Galeria" -->
@@ -418,7 +510,38 @@ font-weight: bold; /* poprawiona literówka z font-weght */
 </div>
 
 <div id="app-container">
+<section id="licznikPunktow" class="page">
+        <h2>Licznik Punktów Rozgrywki</h2>
+        <div class="card score-counter-card">
+            <div class="player-section">
+                <h3 id="playerName1">Gracz 1</h3>
+                <div class="score-display" id="scorePlayer1">0</div>
+                <div class="score-buttons">
+                    <button onclick="updateScore('player1', 1)">+1</button>
+                    <button onclick="updateScore('player1', 2)">+2</button>
+                    <button onclick="updateScore('player1', 3)">+3</button>
+                    <button class="danger-btn" onclick="updateScore('player1', -1)" style="margin-left: 10px;">-1</button>
+                </div>
+                 <input type="text" id="inputPlayerName1" placeholder="Wpisz imię Gracza 1" onchange="updatePlayerName('player1')">
+            </div>
 
+            <div class="player-section">
+                <h3 id="playerName2">Gracz 2</h3>
+                <div class="score-display" id="scorePlayer2">0</div>
+                <div class="score-buttons">
+                    <button onclick="updateScore('player2', 1)">+1</button>
+                    <button onclick="updateScore('player2', 2)">+2</button>
+                    <button onclick="updateScore('player2', 3)">+3</button>
+                    <button class="danger-btn" onclick="updateScore('player2', -1)" style="margin-left: 10px;">-1</button>
+                </div>
+                <input type="text" id="inputPlayerName2" placeholder="Wpisz imię Gracza 2" onchange="updatePlayerName('player2')">
+            </div>
+
+            <div class="game-controls">
+                <button onclick="resetScores()" class="cancel-btn" style="width: auto; padding: 12px 25px;">Resetuj Wyniki</button>
+            </div>
+        </div>
+    </section>
 <!-- Strona Generatora Losowego -->
 <section id="generator" class="page">
   <h2>Generator Zestawów</h2>
@@ -570,6 +693,162 @@ let wynikiDivGenerator, placeholderActualImgGenerator, deckBuilderContainerDeckP
 // Globalna tablica dla ostatnio wylosowanych zestawów z LOSUJ()
 let ostatnioWylosowaneZestawyGlobalnie = [];
 
+// =================================
+// Logika Licznika Punktów
+// =================================
+let scores = {
+    player1: 0,
+    player2: 0
+};
+
+let playerNames = {
+    player1: "Gracz 1",
+    player2: "Gracz 2"
+}
+
+// Funkcja do aktualizacji wyniku na ekranie
+function displayScores() {
+    const scoreP1 = document.getElementById('scorePlayer1');
+    const scoreP2 = document.getElementById('scorePlayer2');
+    if (scoreP1) scoreP1.textContent = scores.player1;
+    if (scoreP2) scoreP2.textContent = scores.player2;
+}
+
+// Funkcja do aktualizacji nazw graczy na ekranie
+function displayPlayerNames() {
+    const nameP1Display = document.getElementById('playerName1');
+    const nameP2Display = document.getElementById('playerName2');
+    const nameP1Input = document.getElementById('inputPlayerName1');
+    const nameP2Input = document.getElementById('inputPlayerName2');
+
+    if (nameP1Display) nameP1Display.textContent = playerNames.player1;
+    if (nameP2Display) nameP2Display.textContent = playerNames.player2;
+    if (nameP1Input) nameP1Input.value = playerNames.player1 === "Gracz 1" ? "" : playerNames.player1; // Pokaż w inpucie, jeśli zmienione
+    if (nameP2Input) nameP2Input.value = playerNames.player2 === "Gracz 2" ? "" : playerNames.player2;
+}
+
+
+// Funkcja do zmiany wyniku
+function updateScore(player, points) {
+    if (scores.hasOwnProperty(player)) {
+        scores[player] += points;
+        // Opcjonalnie: zapobieganie ujemnym punktom, jeśli nie chcesz
+        // if (scores[player] < 0) {
+        //     scores[player] = 0;
+        // }
+        displayScores();
+        saveScoresToLocalStorage(); // Zapisz po każdej zmianie
+    }
+}
+
+// Funkcja do aktualizacji nazwy gracza
+function updatePlayerName(player) {
+    const inputElement = document.getElementById(`inputPlayerName${player === 'player1' ? '1' : '2'}`);
+    if (inputElement && playerNames.hasOwnProperty(player)) {
+        const newName = inputElement.value.trim();
+        playerNames[player] = newName !== '' ? newName : (player === 'player1' ? "Gracz 1" : "Gracz 2"); // Domyślna, jeśli puste
+        displayPlayerNames();
+        saveScoresToLocalStorage(); // Zapisz również nazwy
+    }
+}
+
+
+// Funkcja do resetowania wyników
+function resetScores() {
+    scores.player1 = 0;
+    scores.player2 = 0;
+    // Opcjonalnie: resetowanie nazw graczy
+    // playerNames.player1 = "Gracz 1";
+    // playerNames.player2 = "Gracz 2";
+    // displayPlayerNames(); // Jeśli resetujesz nazwy
+
+    displayScores();
+    saveScoresToLocalStorage(); // Zapisz zresetowane wyniki
+    showNotification("Wyniki zostały zresetowane.", 2000, 'info');
+}
+
+// Funkcje do zapisu i odczytu z localStorage
+const SCORES_KEY = 'beybladeScoreCounterAnanas';
+
+function saveScoresToLocalStorage() {
+    try {
+        const dataToSave = {
+            scores: scores,
+            playerNames: playerNames
+        };
+        localStorage.setItem(SCORES_KEY, JSON.stringify(dataToSave));
+    } catch (e) {
+        console.error("Błąd zapisu wyników do localStorage:", e);
+    }
+}
+
+function loadScoresFromLocalStorage() {
+    try {
+        const savedDataString = localStorage.getItem(SCORES_KEY);
+        if (savedDataString) {
+            const savedData = JSON.parse(savedDataString);
+            if (savedData.scores) scores = savedData.scores;
+            if (savedData.playerNames) playerNames = savedData.playerNames;
+
+            // Upewnij się, że mamy wartości domyślne, jeśli coś poszło nie tak
+            scores.player1 = parseInt(scores.player1, 10) || 0;
+            scores.player2 = parseInt(scores.player2, 10) || 0;
+            playerNames.player1 = playerNames.player1 || "Gracz 1";
+            playerNames.player2 = playerNames.player2 || "Gracz 2";
+
+        }
+    } catch (e) {
+        console.error("Błąd odczytu wyników z localStorage:", e);
+        // Ustaw domyślne, jeśli błąd
+        scores = { player1: 0, player2: 0 };
+        playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
+    }
+    displayScores();
+    displayPlayerNames(); // Wyświetl również nazwy
+}
+
+// Modyfikacja navigateTo, aby inicjalizować licznik
+// (Znajdź swoją istniejącą funkcję navigateTo i dodaj ten fragment)
+// ... wewnątrz funkcji navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) ...
+// przed końcowym if (sidebarExpanded && window.innerWidth < 768)
+// dodaj:
+
+/*
+    // PRZYKŁAD, GDZIE TO DODAĆ W `navigateTo`:
+    // ... poprzedni kod w navigateTo ...
+
+    } else if (pageId === 'galeriaDeckow') { 
+        displaySavedDecks();
+    } else if (pageId === 'licznikPunktow') { // <--- NOWY BLOK
+        loadScoresFromLocalStorage(); // Załaduj zapisane wyniki przy wejściu na stronę
+        displayScores();
+        displayPlayerNames();
+    }
+    
+    if (sidebarExpanded && window.innerWidth < 768) {
+        toggleSidebar();
+    }
+*/
+
+// Modyfikacja DOMContentLoaded, aby załadować wyniki przy starcie aplikacji,
+// jeśli strona licznika jest stroną startową (mało prawdopodobne, ale dla kompletności)
+// (Znajdź swoją istniejącą funkcję DOMContentLoaded i dodaj ten fragment)
+
+/*
+    // PRZYKŁAD, GDZIE TO DODAĆ W `DOMContentLoaded`:
+    // ... poprzedni kod w DOMContentLoaded ...
+
+    if (domyslnyLink) navigateTo('generator', domyslnyLink); 
+    else { console.error("Nie znaleziono domyślnego linku nawigacyjnego."); navigateTo('generator', null); }
+
+    // Jeśli strona licznika mogłaby być stroną startową (zamiast generatora)
+    if (document.getElementById('licznikPunktow')?.classList.contains('active')) {
+        loadScoresFromLocalStorage();
+    }
+
+    if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
+    else { console.error("Przycisk menu (#sidebarToggleBtn) nie znaleziony."); }
+*/
 
 // =================================
 // Funkcje Pomocnicze i Inicjalizacyjne
