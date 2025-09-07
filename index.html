@@ -2321,7 +2321,7 @@ function displaySavedDecks() {
         
         const actionsHTML = `
             <div class="item-actions" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
-                <button class="button-auto-width" onclick="wczytajDeckDoBuildera('${deck.id}')" title="Wczytaj '${deck.name || ''}' do Deck Generatora">Wczytaj</button>
+                
                 <button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}' w Deck Generatorze">Edytuj</button>
                 <button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button>
             </div>`;
