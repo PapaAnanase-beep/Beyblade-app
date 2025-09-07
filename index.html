@@ -616,7 +616,7 @@ font-weight: bold; /* poprawiona literówka z font-weght */
 <!-- Strona Deck Generatora -->
 <section id="deck" class="page">
   <h2>Deck Generator</h2>
-  <p style="text-align: center;">Stwórz własny zestaw 3 Beybladów, nazwij go i zapisz!</p>
+  <p style="text-align: center;">Stwórz własny zestaw 4 Beybladów, nazwij go i zapisz!</p>
   
   <div class="card" style="margin-bottom: 20px;">
     <h3>Zarządzanie Deckiem</h3>
@@ -1844,7 +1844,7 @@ function saveCurrentDeck() { // Dla Deck Generatora
     const currentDeckSetsConfig = []; 
     const magazynDanych = getMagazyn(); // Potrzebny do updateDeckStats
 
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 4; i++) {
         const seriaSelect = document.getElementById(`deck-seria-${i}`);
         if (!seriaSelect) {
             console.warn(`Brak selecta serii dla zestawu ${i} podczas zapisu.`);
@@ -2110,7 +2110,7 @@ function renderDeckBuilder(initialDeckData = null) {
         return;
     }
 
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 4; i++) {
         const deckSetCard = document.createElement("div");
         deckSetCard.className = "deck-set card";
         deckSetCard.style.marginBottom = "25px";
@@ -2369,7 +2369,7 @@ function wczytajDeckDoBuildera(deckId) {
         if (deckToLoad.sets && deckToLoad.sets.length > 0) {
             const magazyn = getMagazyn();
             for (let i = 0; i < deckToLoad.sets.length; i++) {
-                if (i < 3) { // Ogranicz do 3 zestawów w builderze
+                if (i < 4) { // Ogranicz do 3 zestawów w builderze
                     updateDeckStats(i + 1, magazyn);
                 }
             }
@@ -2411,7 +2411,7 @@ function edytujDeck(deckId) {
         if (deckToEdit.sets && deckToEdit.sets.length > 0) {
             const magazyn = getMagazyn();
             for (let i = 0; i < deckToEdit.sets.length; i++) {
-                 if (i < 3) updateDeckStats(i + 1, magazyn);
+                 if (i < 4) updateDeckStats(i + 1, magazyn);
             }
         }
 
@@ -3131,7 +3131,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "waga": 34.1
   },
 {
-  "id": "44", "typ": "blade", "nazwa": "SharkTorso", "ilosc": 0, "img": "https://i.ibb.co/9k3FVVRz/Gill-Shark-4-70-O-removebg-preview.png", "ATK": 20, "DEF": 25, "STM": 55, "waga": 29.6},
+  "id": "44", "typ": "blade", "nazwa": "GillShark", "ilosc": 0, "img": "https://i.ibb.co/9k3FVVRz/Gill-Shark-4-70-O-removebg-preview.png", "ATK": 20, "DEF": 25, "STM": 55, "waga": 29.6},
   {
   "id": "45", "typ": "blade", "nazwa": "ShinobiKnife", "ilosc": 0, "img": "img/BladeKnifeShinobi.webp", "ATK": 23, "DEF": 50, "STM": 27, "waga": 30.9},
   {
