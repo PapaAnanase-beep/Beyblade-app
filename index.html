@@ -1018,7 +1018,6 @@ function wyswietlMagazyn() {
     } else if (filtrPosiadania === 'nieposiadane') {
         czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && (parseInt(czesc.ilosc, 10) || 0) === 0);
     }
-    // Dla 'wszystkie_w_bazie' nie robimy nic dodatkowego z tą listą.
     console.log(`[MAGAZYN_VIEW_3] Po filtrze posiadania. Liczba części: ${czesciDoWyswietlenia.length}`);
 
     // 2. Filtracja na podstawie kategorii
@@ -1034,24 +1033,17 @@ function wyswietlMagazyn() {
     }
 
     // Sortowanie:
-    // 1. Alfabetycznie według TYPU części (kategorii)
-    // 2. W ramach tego samego typu, alfabetycznie według NAZWY części
     czesciDoWyswietlenia.sort((a, b) => {
-        // Upewnij się, że a i b oraz ich właściwości 'typ' i 'nazwa' istnieją
         const typA = (a && typeof a.typ === 'string') ? a.typ.toLowerCase() : "";
         const typB = (b && typeof b.typ === 'string') ? b.typ.toLowerCase() : "";
         const nazwaA = (a && typeof a.nazwa === 'string') ? a.nazwa.toLowerCase() : "";
         const nazwaB = (b && typeof b.nazwa === 'string') ? b.nazwa.toLowerCase() : "";
 
-        // Najpierw sortuj według typu
         if (typA < typB) return -1;
         if (typA > typB) return 1;
-
-        // Jeśli typy są takie same, sortuj według nazwy
         if (nazwaA < nazwaB) return -1;
         if (nazwaA > nazwaB) return 1;
-
-        return 0; // Jeśli typy i nazwy są takie same
+        return 0;
     });
 
     // Generowanie HTML dla każdej części
@@ -1063,50 +1055,69 @@ function wyswietlMagazyn() {
 
         const ilosc = parseInt(czesc.ilosc, 10) || 0;
 
-        // --- Logika BETA ---
+        // --- Logika BETA (POPRAWIONA - sprawdza czy CHOĆ JEDNA kluczowa statystyka jest 0 lub brak) ---
         let isBeta = false;
-        const maStat = (statName) => typeof czesc[statName] === 'number'; // Pomocnik
+        const maStat = (statName) => typeof czesc[statName] === 'number';
+        const jestZeroLubBrak = (statName) => !maStat(statName) || czesc[statName] === 0;
 
-        if (['blade', 'rachet', 'cx-main-blade', 'cx-assist-blade'].includes(czesc.typ)) {
-            if (maStat('ATK') && czesc.ATK === 0 &&
-                maStat('DEF') && czesc.DEF === 0 &&
-                maStat('STM') && czesc.STM === 0 &&
-                maStat('waga') && czesc.waga === 0) {
+        if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
+            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga')) {
                 isBeta = true;
             }
         } else if (czesc.typ === 'bit') {
-            if (maStat('ATK') && czesc.ATK === 0 &&
-                maStat('DEF') && czesc.DEF === 0 &&
-                maStat('STM') && czesc.STM === 0 &&
-                maStat('waga') && czesc.waga === 0) {
+            // Dla bita, jeśli podstawowe staty (ATK,DEF,STM,waga) są problematyczne LUB specjalne (DASH, B_RES) są problematyczne
+            // Możesz dostosować, czy brak DASH/BURST_RES zawsze oznacza BETA.
+            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga') || jestZeroLubBrak('DASH') || jestZeroLubBrak('BURST_RES')) {
                 isBeta = true;
             }
         } else if (czesc.typ === 'cx-lock-chip') {
-            if (maStat('waga') && czesc.waga === 0) {
+            if (jestZeroLubBrak('waga')) { // Dla Lock Chip nadal tylko waga może być kluczowa
                 isBeta = true;
             }
+            // Opcjonalnie: jeśli chcesz, aby brak bonusów też oznaczał BETA dla Lock Chipa
+            // if (jestZeroLubBrak('waga') || jestZeroLubBrak('cx_lc_wytrz') || jestZeroLubBrak('cx_lc_atk_bonus') || jestZeroLubBrak('cx_lc_def_bonus')) {
+            //     isBeta = true;
+            // }
         }
         // --- Koniec Logiki BETA ---
 
         // Generowanie stringu statystyk
         let statyString = '';
         if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
-            statyString = `ATK:${czesc.ATK||0}, DEF:${czesc.DEF||0}, STM:${czesc.STM||0}, Waga:${czesc.waga||0}g`;
+            statyString = `ATK:${maStat('ATK') ? czesc.ATK : 'N/A'}, DEF:${maStat('DEF') ? czesc.DEF : 'N/A'}, STM:${maStat('STM') ? czesc.STM : 'N/A'}, Waga:${maStat('waga') ? czesc.waga : 'N/A'}g`;
         } else if (czesc.typ === 'bit') {
-            statyString = `ATK:${czesc.ATK||0}, DEF:${czesc.DEF||0}, STM:${czesc.STM||0}, Waga:${czesc.waga||0}g`;
-            statyString += `, DASH:${czesc.DASH||0}`;
-            statyString += `, B-RES:${czesc.BURST_RES||0}`;
+            statyString = `ATK:${maStat('ATK') ? czesc.ATK : 'N/A'}, DEF:${maStat('DEF') ? czesc.DEF : 'N/A'}, STM:${maStat('STM') ? czesc.STM : 'N/A'}, Waga:${maStat('waga') ? czesc.waga : 'N/A'}g`;
+            statyString += `, DASH:${maStat('DASH') ? czesc.DASH : 'N/A'}`;
+            statyString += `, B-RES:${maStat('BURST_RES') ? czesc.BURST_RES : 'N/A'}`;
         } else if (czesc.typ === 'cx-lock-chip') {
-            statyString = `Waga:${czesc.waga||0}g`;
+            statyString = `Waga:${maStat('waga') ? czesc.waga : 'N/A'}g`;
             if (maStat('cx_lc_wytrz') && czesc.cx_lc_wytrz !== 0) statyString += `, Wytrz:${czesc.cx_lc_wytrz}`;
+            else if (maStat('cx_lc_wytrz') && czesc.cx_lc_wytrz === 0 && isBeta) statyString += `, Wytrz:N/A`; // Pokaż N/A jeśli beta i 0
+
             if (maStat('cx_lc_atk_bonus') && czesc.cx_lc_atk_bonus !== 0) statyString += `, ATK+:${czesc.cx_lc_atk_bonus}`;
+            else if (maStat('cx_lc_atk_bonus') && czesc.cx_lc_atk_bonus === 0 && isBeta) statyString += `, ATK+:N/A`;
+
             if (maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus !== 0) statyString += `, DEF+:${czesc.cx_lc_def_bonus}`;
+            else if (maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus === 0 && isBeta) statyString += `, DEF+:N/A`;
         }
-        if (!statyString.trim() && !isBeta) {
-            statyString = "Brak szczegółowych statystyk";
-        } else if (!statyString.trim() && isBeta) {
+        
+        // Usunięcie nadmiarowych "N/A" jeśli cała linia to tylko N/A
+        const czyWszystkieStatyToNA = statyString.split(',').every(s => s.includes(':N/A') || s.trim() === 'N/A');
+
+        if (isBeta && czyWszystkieStatyToNA) {
             statyString = "Statystyki: N/A (Wersja BETA)";
+        } else if (!isBeta && czyWszystkieStatyToNA && (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade' || czesc.typ === 'bit' || czesc.typ === 'cx-lock-chip')) {
+             // Jeśli nie jest BETA, ale i tak wszystkie kluczowe staty to N/A, to może być błąd danych
+             statyString = "Brak szczegółowych statystyk";
+        } else if (statyString.trim() === '' || statyString.toLowerCase().includes("waga:n/ag") && statyString.split(',').length === 1 && czesc.typ === 'cx-lock-chip') {
+            // Jeśli string pusty lub dla Lock Chipa tylko "Waga:N/Ag"
+            if (isBeta) {
+                statyString = "Statystyki: N/A (Wersja BETA)";
+            } else {
+                statyString = "Brak szczegółowych statystyk";
+            }
         }
+
 
         const imgHTML = czesc.img
             ? `<img class="part-img" src="${czesc.img}" alt="${czesc.nazwa}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -1117,6 +1128,9 @@ function wyswietlMagazyn() {
         cardDiv.className = 'card';
         if (ilosc === 0) {
             cardDiv.classList.add('part-not-owned');
+        }
+        if (isBeta) { // Opcjonalna klasa dla całej karty BETA
+            cardDiv.classList.add('part-beta-item');
         }
 
         const typNazwaFormatowana = czesc.typ.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -3698,7 +3712,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "typ": "cx-lock-chip",
-    "nazwa": "Hell",
+    "nazwa": "Hells",
     "ilosc": 0,
     "waga": 1.7,
     "img": "img/LockChipHells.webp",
