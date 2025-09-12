@@ -1849,61 +1849,100 @@ function saveCurrentDeck() { // Dla Deck Generatora
     const deckNameInput = document.getElementById('deckName');
     const deckName = deckNameInput ? deckNameInput.value.trim() : '';
 
-    if (!deckName && !currentEditingDeckId) { 
+    if (!deckName && !currentEditingDeckId) {
         showNotification("Wpisz nazwę dla nowego decku (Deck Generator).", 3000, 'warning');
-        deckNameInput?.focus(); 
+        deckNameInput?.focus();
         return;
     }
 
-    const currentDeckSetsConfig = []; 
+    const currentDeckSetsConfig = [];
     const magazynDanych = getMagazyn(); // Potrzebny do updateDeckStats
 
-    for (let i = 1; i <= 4; i++) {
+    // Słownik do śledzenia użytych części w całym decku { partId: { count: number, setName: string } }
+    const usedPartsInDeck = {}; 
+    let duplicateFound = false;
+    let duplicateMessage = "";
+
+    console.log("Rozpoczynam zapis decku. UsedPartsInDeck zainicjowany jako pusty.");
+
+    for (let i = 1; i <= 4; i++) { // Zakładając maksymalnie 4 zestawy
         const seriaSelect = document.getElementById(`deck-seria-${i}`);
         if (!seriaSelect) {
             console.warn(`Brak selecta serii dla zestawu ${i} podczas zapisu.`);
-            continue; // Pomiń ten zestaw, jeśli brakuje kluczowego elementu
+            continue;
         }
         const wybranaSeria = seriaSelect.value;
         const partsConfig = { seria: wybranaSeria };
+        let partsInThisSet = []; // Tablica ID części użytych w TYM zestawie
 
         if (wybranaSeria === 'bx_ux') {
             partsConfig.bladeId = document.getElementById(`deck-blade-${i}`)?.value || null;
             partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
             partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
+
+            if (partsConfig.bladeId) partsInThisSet.push({ id: partsConfig.bladeId, type: 'Blade' });
+            if (partsConfig.ratchetId) partsInThisSet.push({ id: partsConfig.ratchetId, type: 'Ratchet' });
+            if (partsConfig.bitId) partsInThisSet.push({ id: partsConfig.bitId, type: 'Bit' });
+
         } else if (wybranaSeria === 'cx') {
             partsConfig.cx_lock_chipId = document.getElementById(`deck-cx-lock-chip-${i}`)?.value || null;
             partsConfig.cx_main_bladeId = document.getElementById(`deck-cx-main-blade-${i}`)?.value || null;
             partsConfig.cx_assist_bladeId = document.getElementById(`deck-cx-assist-blade-${i}`)?.value || null;
             partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
             partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
+
+            if (partsConfig.cx_lock_chipId) partsInThisSet.push({ id: partsConfig.cx_lock_chipId, type: 'CX Lock Chip' });
+            if (partsConfig.cx_main_bladeId) partsInThisSet.push({ id: partsConfig.cx_main_bladeId, type: 'CX Main Blade' });
+            if (partsConfig.cx_assist_bladeId) partsInThisSet.push({ id: partsConfig.cx_assist_bladeId, type: 'CX Assist Blade' });
+            if (partsConfig.ratchetId) partsInThisSet.push({ id: partsConfig.ratchetId, type: 'Ratchet' });
+            if (partsConfig.bitId) partsInThisSet.push({ id: partsConfig.bitId, type: 'Bit' });
         } else {
             console.warn(`Nieznana seria ${wybranaSeria} dla zestawu ${i} podczas zapisu.`);
             continue;
         }
-        
-        // Zapisz obliczone statystyki dla tego zestawu
-        partsConfig.statystykiObliczone = updateDeckStats(i, magazynDanych, true); // true, aby zwróciło staty
 
-        // Dodaj zestaw do konfiguracji, tylko jeśli wybrano przynajmniej jedną część
-        // (lub jeśli chcemy zapisywać puste sloty - do decyzji)
-        const czyJakakolwiekCzescWybrana = Object.values(partsConfig).some(val => 
+        // --- Sprawdzanie duplikatów dla tego zestawu ---
+        for (const part of partsInThisSet) {
+            if (part.id) { // Tylko jeśli wybrano część (ID nie jest puste/null)
+                if (usedPartsInDeck[part.id]) {
+                    duplicateFound = true;
+                    const partObject = magazynDanych.find(p => p.id === part.id);
+                    const partName = partObject ? partObject.nazwa : `Część o ID ${part.id}`;
+                    duplicateMessage = `Część "${partName}" (${part.type}) została użyta więcej niż raz w tym decku (w Zestawie ${usedPartsInDeck[part.id].setName} i Zestawie ${i}).`;
+                    console.warn(`DUPLIKAT WYKRYTY: Część ID ${part.id} ("${partName}") użyta w Zestawie ${usedPartsInDeck[part.id].setName} i Zestawie ${i}`);
+                    break; // Wystarczy jeden duplikat, aby przerwać dla tego zestawu
+                }
+                usedPartsInDeck[part.id] = { count: 1, setName: i.toString() }; // Zapisz, że część została użyta i w którym zestawie po raz pierwszy
+                console.log(`Część ID ${part.id} dodana do usedPartsInDeck z Zestawu ${i}. Aktualny stan usedPartsInDeck:`, JSON.parse(JSON.stringify(usedPartsInDeck)));
+            }
+        }
+
+        if (duplicateFound) {
+            break; // Przerwij główną pętlę po zestawach, jeśli znaleziono duplikat
+        }
+        // --- Koniec sprawdzania duplikatów ---
+
+
+        partsConfig.statystykiObliczone = updateDeckStats(i, magazynDanych, true);
+
+        const czyJakakolwiekCzescWybrana = Object.values(partsConfig).some(val =>
             typeof val === 'string' && val !== '' && val !== wybranaSeria && val !== null && !val.startsWith('statystyki')
         );
 
         if (czyJakakolwiekCzescWybrana) {
-             currentDeckSetsConfig.push(partsConfig);
+            currentDeckSetsConfig.push(partsConfig);
         } else {
-            // Opcjonalnie: można dodać pusty obiekt, jeśli chcemy reprezentować pusty slot
-            // currentDeckSetsConfig.push({ seria: wybranaSeria, statystykiObliczone: {ATK:0,...} });
             console.log(`Zestaw ${i} był pusty i nie został dodany do zapisu.`);
         }
+    } // Koniec pętli for po zestawach
+
+    // Jeśli znaleziono duplikat, pokaż powiadomienie i zakończ
+    if (duplicateFound) {
+        showNotification(duplicateMessage, 5000, 'error');
+        return;
     }
-    
-    // Walidacja ilości części w magazynie (opcjonalne, ale dobre)
-    // Ta walidacja musiałaby być bardziej złożona, aby zliczać użycie tych samych ID części
-    // w różnych slotach tego samego decku i porównywać z `ilosc` w magazynie.
-    // Na razie pominiemy tę zaawansowaną walidację dla uproszczenia.
+    console.log("Walidacja duplikatów zakończona. Nie znaleziono duplikatów lub pętla została przerwana.");
+
 
     if (currentDeckSetsConfig.length === 0 && !currentEditingDeckId) {
         showNotification("Nie skonfigurowano żadnych części w Deck Generatorze.", 3000, 'warning');
@@ -1911,48 +1950,45 @@ function saveCurrentDeck() { // Dla Deck Generatora
     }
 
     let savedDecks = getSavedDecks();
-    let wiadomosc = ''; 
-    let nazwaDeckuOperacji = deckName || (currentEditingDeckId ? savedDecks.find(d=>d.id===currentEditingDeckId)?.name : `Deck ${new Date().toLocaleTimeString('pl-PL')}`);
+    let wiadomosc = '';
+    let nazwaDeckuOperacji = deckName || (currentEditingDeckId ? savedDecks.find(d => d.id === currentEditingDeckId)?.name : `Deck ${new Date().toLocaleTimeString('pl-PL')}`);
 
-    if (currentEditingDeckId) { 
+    if (currentEditingDeckId) {
         const deckIndex = savedDecks.findIndex(d => d.id === currentEditingDeckId);
         if (deckIndex > -1) {
             savedDecks[deckIndex].name = nazwaDeckuOperacji;
-            savedDecks[deckIndex].sets = currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : []; // Zapisz nowe zestawy lub pustą tablicę
+            savedDecks[deckIndex].sets = currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : [];
             savedDecks[deckIndex].lastModified = Date.now();
             wiadomosc = `Deck "${nazwaDeckuOperacji}" zaktualizowany!`;
         } else {
             showNotification("Błąd: Nie znaleziono decku do edycji.", 3000, 'error');
-            currentEditingDeckId = null; 
+            currentEditingDeckId = null;
             const saveBtn = document.getElementById('saveDeckButton');
-            if(saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck'; 
+            if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
             return;
         }
-    } else { 
+    } else {
         const newDeck = {
             id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-            name: nazwaDeckuOperacji, 
-            timestamp: Date.now(), 
+            name: nazwaDeckuOperacji,
+            timestamp: Date.now(),
             lastModified: Date.now(),
             sets: currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : []
         };
         savedDecks.push(newDeck);
         wiadomosc = `Deck "${nazwaDeckuOperacji}" zapisany!`;
     }
-    
+
     setSavedDecks(savedDecks);
     showNotification(wiadomosc, 3000, 'success');
-    
-    if (deckNameInput) deckNameInput.value = ''; 
-    currentEditingDeckId = null; 
+
+    if (deckNameInput) deckNameInput.value = '';
+    currentEditingDeckId = null;
     const saveBtn = document.getElementById('saveDeckButton');
-    if(saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
+    if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
 
     renderDeckBuilder(); // Zresetuj/odśwież Deck Builder
-    
-    // Opcjonalnie: nawiguj do galerii
-    // const linkDoGalerii = document.querySelector('.sidebar a[onclick*="navigateTo(\'galeriaDeckow"]');
-    // if (linkDoGalerii) navigateTo('galeriaDeckow', linkDoGalerii);
+    console.log("Zapis decku zakończony pomyślnie (lub aktualizacja).");
 }
 
 
@@ -2692,7 +2728,7 @@ function wykonajWyczyszczenieDanych() {
          if(poleJsonDecki) poleJsonDecki.value = '';
     }
 }
-// ZMODYFIKOWANA funkcja WERSJA 4 - Z ROZBUDOWANYMI LOGAMI
+
 function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false) {
     console.log(`[PRZETWORZ_V4_DEBUG_1] START. Źródło: ${zrodloDanychOpis}, UstawDomyslnaIloscNaZero: ${ustawDomyslnaIloscNaZero}`);
     console.log(`[PRZETWORZ_V4_DEBUG_2] Dane wejściowe (daneDoImportu) (pierwsze 3):`, Array.isArray(daneDoImportu) ? daneDoImportu.slice(0, 3) : daneDoImportu);
