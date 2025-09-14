@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Beyblade ANANAS</title> <!-- Zmieniono tytuł -->
+<title>Beyblade ANANAS</title>
 <link rel="icon" href="tlo.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
-
+ <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <style>
 html, body {
     height:100%;
@@ -108,7 +108,7 @@ html, body {
 }
 label { display: block; margin-bottom: 5px; color: #ccc; font-size: 0.9em;}
 select, input[type="text"], input[type="number"], input[type="url"], textarea {
-    width:100%; padding:12px 15px; margin:0 0 10px 0; /* Zmieniony margines dolny */
+    width:100%; padding:12px 15px; margin:0 0 10px 0;
     background:rgba(45,45,55,0.8); color:#f0f0f0;
     font-family:'Kode Mono', monospace; font-size:1em;
     box-sizing:border-box; border-radius:8px;
@@ -146,7 +146,6 @@ button.cancel-btn:active, button.danger-btn:active { background: rgba(170, 40, 4
 .card h4 { margin-top:0; margin-bottom: 8px; color: #c080ff; font-weight: bold;}
 .card p { font-size: 0.95em; line-height: 1.6; color: #d0d0d0; }
 
-/* Style dla obrazków części w magazynie (większe) */
 img.part-img { 
     max-width: 130px; height: 130px; object-fit:contain;
     display:block; margin:10px auto 15px auto; border-radius: 10px; 
@@ -157,63 +156,25 @@ img.part-img {
     color: #999; font-size: 0.9em; text-align: center;
 }
 
-/* === UJEDNOLICONE STYLE DLA OBRAZKÓW W WYNIKACH LOSOWANIA I PODGLĄDZIE DECKU === */
-.wynik-zestaw-obrazki { /* Główny kontener obrazków w karcie wyniku/podglądzie decku */
+.wynik-zestaw-obrazki {
     display: flex; justify-content: center; align-items: center;
-    gap: 8px; /* Możesz dostosować odstęp */
-    padding: 8px 5px; /* Możesz dostosować padding */
-    width: 100%;
-    min-height: auto; /* Pozwól zawartości określić wysokość */
-    overflow: hidden; box-sizing: border-box; 
+    gap: 8px; padding: 8px 5px; width: 100%;
+    min-height: auto; overflow: hidden; box-sizing: border-box; 
 }
-
-/* Obrazki/placeholdery części w kartach (zarówno wylosowane, jak i zapisane decki) */
-/* Używamy klas .deck-part-img i .deck-part-placeholder generowanych przez JS */
 .wynik-zestaw-obrazki img.deck-part-img,
 .wynik-zestaw-obrazki div.deck-part-placeholder {
-    height: 60px; /* <<< USTAWIENIE ROZMIARU NA 60px */
-    max-width: 60px; /* <<< USTAWIENIE ROZMIARU NA 60px */
-    object-fit: contain;
-    border-radius: 4px; /* Możesz dostosować promień */
+    height: 60px; max-width: 60px; object-fit: contain; border-radius: 4px;
 }
-
-/* Ogólny styl dla placeholderów (jeśli nie mają obrazka) */
-/* Ten styl jest używany przez .deck-part-placeholder */
 .deck-part-placeholder {
-    width:60px; /* Dopasuj do height/max-width powyżej */
-    height:60px; /* Dopasuj do height/max-width powyżej */
-    border:1px dashed #555; 
-    background-color: rgba(0,0,0,0.15); /* Dodano dla spójności z poprzednim placeholder-small */
+    width:60px; height:60px; border:1px dashed #555; 
+    background-color: rgba(0,0,0,0.15); 
     display:flex; align-items:center; justify-content:center; 
-    font-size:0.55em; /* Możesz dostosować */
-    color:#999; /* Możesz dostosować */
-    border-radius:4px; /* Dopasuj do border-radius obrazków */
+    font-size:0.55em; color:#999; border-radius:4px;
 }
-
-/* Specjalny placeholder dla zintegrowanego bita */
-/* Stosowane w .generated-set-card oraz .deck-card-set-preview */
 .wynik-zestaw-obrazki div.deck-part-placeholder[title*="Bit zintegrowany"] {
-    /* Rozmiar dziedziczy z .deck-part-placeholder (60x60) */
-    font-size: 0.5em; 
-    line-height: 1.2;
-    padding: 5px; /* Dla lepszego ułożenia tekstu wewnątrz */
-    box-sizing: border-box; 
+    font-size: 0.5em; line-height: 1.2; padding: 5px; box-sizing: border-box; 
 }
-
-/* STARE STYLE DLA .part-img-small i .part-img-placeholder-small - ZAKOMENTOWANE/NIEPOTRZEBNE */
-/*
-.wynik-zestaw-obrazki .part-img-small { 
-    height: 70px; max-width: 70px; 
-    object-fit: contain; border-radius: 6px;
-}
-.wynik-zestaw-obrazki .part-img-placeholder-small { 
-    width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;
-    background-color: rgba(0,0,0,0.15); border-radius: 8px; color: #999;
-    font-size: 0.7em; padding: 0 5px; text-align: center;
-}
-*/
-
-.wynik-nazwy { /* Style dla nazw pod wynikami losowania - jeśli nadal używane */
+.wynik-nazwy { 
     text-align: center; margin-top: 10px; margin-bottom: 5px; 
     font-size: 0.9em; font-weight: bold; word-break: break-word; color: #e0e0e0; line-height: 1.4;
 }
@@ -224,25 +185,15 @@ img.part-img {
 .item-actions button {
     flex-grow: 1; flex-basis: 0; padding: 10px; font-size: 0.85em;
 }
-
-/* Dodatkowe style dla wyników CX (głównie marginesy i obramowania) */
 .wylosowany-zestaw-cx .cx-blade-komponenty, .wylosowany-zestaw-cx .cx-drive-komponenty {
     border: 1px solid rgba(138,43,226,0.3); padding: 8px; margin-bottom: 10px; border-radius: 8px;
 }
 .wylosowany-zestaw-cx .cx-blade-komponenty h5, .wylosowany-zestaw-cx .cx-drive-komponenty h5 {
     margin:0 0 8px 0; text-align:center; color:#c080ff; font-size: 0.9em;
 }
-/* Style dla kontenerów obrazków CX w wylosowanych kartach i zapisanych deckach */
 .cx-images-container .cx-blade-row,
-.cx-images-container .cx-drive-row {
-    /* .wynik-zestaw-obrazki jest już w nich, więc dziedziczą flex i gap */
-    /* Można dodać specyficzne marginesy jeśli trzeba */
-}
-.cx-images-container .cx-drive-row {
-    margin-top: 5px; /* Tak jak było w JS, można to trzymać tutaj */
-}
-
-
+.cx-images-container .cx-drive-row {}
+.cx-images-container .cx-drive-row { margin-top: 5px; }
 .import-export-section { margin-bottom:25px; }
 .action-button-container {
     background:rgba(40,40,50,0.7); backdrop-filter:blur(10px); 
@@ -259,21 +210,17 @@ img.part-img {
     box-shadow: 0 4px 12px rgba(0,0,0,0.35);
     opacity:0; transition: opacity 0.3s ease-in-out;
 }
-#notification-bar.notification-show { 
-    opacity:1;
-}
-
+#notification-bar.notification-show { opacity:1; }
 #generator-obraz img {
     display: block; width: 70%; max-width: 220px; height: auto;   
     margin: 10px auto; animation: rotateImg 10s linear infinite; 
-    opacity: 0.99x; border-radius: 12px;
+    opacity: 0.99; /* Zmienione z 0.99x */ border-radius: 12px;
 }
 @keyframes rotateImg {
     from { transform: rotate(0deg); } to { transform: rotate(360deg); }
 }
 * { -webkit-tap-highlight-color: transparent; }
 button, a, select, input, textarea { outline: none; }
-
 #lista-magazyn {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 15px;
@@ -283,205 +230,255 @@ button, a, select, input, textarea { outline: none; }
   align-items: center; justify-content: space-between;
   padding: 15px; 
 }
-#lista-magazyn img.part-img { /* Obrazek części w magazynie - ten jest większy, zostawiamy */
+#lista-magazyn img.part-img {
   width: 100px; height: 100px; object-fit: contain; margin-bottom: 10px;
 }
 #lista-magazyn h3 { font-size: 1.05em; margin: 5px 0; color: #e0e0e0;}
 #lista-magazyn p { font-size: 0.8em; margin: 3px 0; line-height: 1.3; color: #bbb;}
-
 #savedDecksContainer {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
     gap: 15px;
 }
 .saved-deck-card { text-align: left; }
-
-.deck-card-set-preview { /* Podgląd pojedynczego zestawu w karcie decku */
+.deck-card-set-preview { 
     margin-bottom: 10px; padding-bottom: 10px; 
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .deck-card-set-preview:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
 .deck-card-set-preview strong { font-size:0.9em; display: block; margin-bottom: 6px; color: #c080ff;}
-
-/* Kontener obrazków w podglądzie zestawu decku - .wynik-zestaw-obrazki jest już ostylowany wyżej */
 .deck-card-set-preview .wynik-zestaw-obrazki { 
-    justify-content: center; 
-    gap: 6px; /* Można dostosować specyficzny gap dla podglądu decku */
-    margin-bottom: 6px; 
-    padding: 0; /* Może być potrzebny reset paddingu jeśli globalny jest inny */
+    justify-content: center; gap: 6px; margin-bottom: 6px; padding: 0;
 }
-/* Obrazki/placeholdery w podglądzie zestawu decku - już obsłużone przez ogólną regułę wyżej */
-/* .deck-card-set-preview .wynik-zestaw-obrazki img.deck-part-img, 
-.deck-card-set-preview .wynik-zestaw-obrazki div.deck-part-placeholder {
-    height: 60px; max-width: 60px; 
-    object-fit: contain; border-radius: 4px;
-} */
-
-
-.stat-grid { /* Dla statystyk w karcie decku i wylosowanego zestawu */
+.stat-grid { 
     display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 10px; 
     margin-top: 5px; font-size: 0.8em; line-height: 1.5;
 }
 .stat-grid span { padding: 3px 6px; border-radius: 3px; white-space:nowrap; }
-
-#formularz .card { padding: 20px; }
-#formularz label { display: block; margin-bottom: 4px; text-align: left; font-size:0.9em; color:#ccc;}
-#formularz input[type="text"], 
+/* #formularz .card { padding: 20px; } */ /* Jeśli formularz nie jest już używany, można usunąć */
+/* #formularz label { display: block; margin-bottom: 4px; text-align: left; font-size:0.9em; color:#ccc;} */
+/* #formularz input[type="text"], 
 #formularz input[type="number"], 
 #formularz input[type="url"] {
     margin-bottom: 12px; 
-}
-
+} */
 .item-quantity-controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 12px;
-    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin-top: 12px; margin-bottom: 8px;
 }
-
 .quantity-btn {
-    font-size: 1.2em; 
-    padding: 6px 12px; 
-    min-width: 40px; 
-    line-height: 1;
-    font-weight: bold;
+    font-size: 1.2em; padding: 6px 12px; min-width: 40px; 
+    line-height: 1; font-weight: bold;
 }
 .quantity-btn:disabled {
-    background: rgba(60,60,70,0.5);
-    color: #777;
-    cursor: not-allowed;
+    background: rgba(60,60,70,0.5); color: #777; cursor: not-allowed;
 }
-
 .quantity-display {
-    font-size: 1.1em;
-    font-weight: bold;
-    padding: 5px 10px;
-    background-color: rgba(0,0,0,0.15);
-    border-radius: 6px;
-    min-width: 30px; 
-    text-align: center;
+    font-size: 1.1em; font-weight: bold; padding: 5px 10px;
+    background-color: rgba(0,0,0,0.15); border-radius: 6px;
+    min-width: 30px; text-align: center;
 }
-
 .item-management-actions {
-    display: flex;
-    justify-content: space-around; 
-    gap: 8px;
-    margin-top: 10px;
+    display: flex; justify-content: space-around; gap: 8px; margin-top: 10px;
 }
-
 .small-action-btn {
-    padding: 8px 12px;
-    font-size: 0.8em; 
-    flex-grow: 1; 
-    flex-basis: 0;
+    padding: 8px 12px; font-size: 0.8em; flex-grow: 1; flex-basis: 0;
 }
-.small-action-btn.danger-btn { 
-    background: rgba(190, 50, 50, 0.7);
-}
-.small-action-btn.danger-btn:hover {
-    background: rgba(210, 60, 60, 0.8);
-}
+.small-action-btn.danger-btn { background: rgba(190, 50, 50, 0.7); }
+.small-action-btn.danger-btn:hover { background: rgba(210, 60, 60, 0.8); }
 .beta-label {
-color: red;
-font-size: 0.8em;
-margin-left: 6px;
-font-weight: bold; /* poprawiona literówka z font-weght */
+    color: red; font-size: 0.8em; margin-left: 6px; font-weight: bold;
 }
-/* === STYLE DLA LICZNIKA PUNKTÓW === */
 .score-counter-card {
-    display: flex;
-    flex-direction: column; /* Ułożenie sekcji graczy i kontrolek jedna pod drugą */
-    gap: 30px; /* Odstęp między sekcjami graczy a kontrolkami */
-    padding: 25px;
-    align-items: center; /* Wycentrowanie elementów wewnątrz karty */
+    display: flex; flex-direction: column; gap: 30px; 
+    padding: 25px; align-items: center;
 }
-
 .player-section {
-    background-color: rgba(25, 25, 35, 0.6);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    width: 100%;
-    max-width: 450px; /* Maksymalna szerokość dla sekcji gracza */
-    box-sizing: border-box;
-    text-align: center;
+    background-color: rgba(25, 25, 35, 0.6); padding: 20px; border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3); width: 100%; max-width: 450px;
+    box-sizing: border-box; text-align: center;
 }
-
 .player-section h3 {
-    color: #c080ff;
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.5em; /* Większa nazwa gracza */
+    color: #c080ff; margin-top: 0; margin-bottom: 15px; font-size: 1.5em;
 }
-
 .score-display {
-    font-size: 4.5em; /* Duży wyświetlacz wyniku */
-    font-weight: bold;
-    color: #fff;
-    background-color: rgba(10,10,10,0.4);
-    padding: 15px 25px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    min-width: 100px; /* Minimalna szerokość, aby nie skakało przy małych liczbach */
-    display: inline-block; /* Aby padding działał poprawnie */
-    line-height: 1; /* Zapobiega zbyt dużej wysokości przez line-height czcionki */
-    border: 2px solid rgba(138, 43, 226, 0.3); /* Subtelna ramka */
+    font-size: 4.5em; font-weight: bold; color: #fff;
+    background-color: rgba(10,10,10,0.4); padding: 15px 25px;
+    border-radius: 10px; margin-bottom: 20px; min-width: 100px;
+    display: inline-block; line-height: 1; border: 2px solid rgba(138, 43, 226, 0.3);
 }
-
 .score-buttons button {
-    font-size: 1.1em;
-    padding: 10px 18px;
-    margin: 5px;
-    min-width: 60px; /* Minimalna szerokość przycisków */
+    font-size: 1.1em; padding: 10px 18px; margin: 5px; min-width: 60px;
 }
-
-.score-buttons button.danger-btn {
-    background-color: rgba(200, 60, 60, 0.7); /* Lekko inny odcień dla -1 */
-}
-.score-buttons button.danger-btn:hover {
-    background-color: rgba(220, 70, 70, 0.8);
-}
-
+.score-buttons button.danger-btn { background-color: rgba(200, 60, 60, 0.7); }
+.score-buttons button.danger-btn:hover { background-color: rgba(220, 70, 70, 0.8); }
 .player-section input[type="text"] {
-    margin-top: 15px;
-    margin-bottom: 0; /* Usunięty dolny margines, bo sekcja ma swój padding */
-    text-align: center;
-    font-size: 0.9em;
-    padding: 10px;
+    margin-top: 15px; margin-bottom: 0; text-align: center;
+    font-size: 0.9em; padding: 10px;
 }
+.game-controls { margin-top: 20px; width: 100%; text-align: center; }
+.game-controls button { font-size: 1.2em; }
 
-.game-controls {
-    margin-top: 20px; /* Odstęp od sekcji graczy */
-    width: 100%;
-    text-align: center;
+/* Style dla Drag and Drop Deck Buildera */
+.deck-builder-container { display: flex; gap: 20px; }
+.available-parts-panel {
+    width: 300px; padding: 15px; background: rgba(40,40,50,0.7);
+    border-radius: 10px; height: fit-content; max-height: 70vh; overflow-y: auto;
 }
-.game-controls button {
-    font-size: 1.2em; /* Większy przycisk resetu */
+.available-parts-panel h4 { margin-top: 0; margin-bottom: 10px; color: #c080ff; text-align: center;}
+.available-part-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 8px;
+    background: rgba(55,55,65,0.8); border-radius: 6px; cursor: grab; transition: background-color 0.2s;
 }
+.available-part-item:hover { background: rgba(70,70,80,0.9); }
+.available-part-item img { width: 40px; height: 40px; object-fit: contain; border-radius: 4px; }
+.available-part-item span { font-size: 0.9em; color: #e0e0e0; }
+.dragging { opacity: 0.5; border: 2px dashed #8a2be2; } /* Styl dla elementu, który jest aktualnie przeciągany */
+.deck-set-slots-container { flex-grow: 1; }
+.deck-part-slot {
+    min-height: 70px; padding: 10px; margin-bottom: 10px; background: rgba(30,30,40,0.6);
+    border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; gap: 10px;
+    transition: background-color 0.2s, border-color 0.2s;
+    text-align: center; color: #888; font-size: 0.9em;
+}
+.deck-part-slot.drag-over-target { background-color: rgba(138,43,226,0.2); border-color: #8a2be2; }
+.deck-part-slot.filled {
+    border-style: solid; border-color: rgba(255,255,255,0.1); background: rgba(45,45,55,0.7);
+    justify-content: space-between; padding: 5px 10px;
+}
+.deck-part-slot .part-info-container { display: flex; align-items: center; gap: 8px;}
+.deck-part-slot img { width: 50px; height: 50px; object-fit: contain; border-radius: 4px; }
+.deck-part-slot span.part-name { font-size: 0.95em; color: #e0e0e0; }
+.deck-part-slot .remove-part-btn {
+    background: none; border: none; color: #ff6b6b; font-size: 1.3em;
+    font-weight: bold; cursor: pointer; padding: 5px; line-height: 1;
+}
+.deck-part-slot .remove-part-btn:hover { color: #ff4757; }
 
-/* Dostosowania dla mniejszych ekranów - opcjonalne */
+
+@media (max-width: 768px) { /* Poprawka dla responsywności D&D buildera */
+    .deck-builder-container {
+        flex-direction: column;
+    }
+    .available-parts-panel {
+        width: 100%; /* Pełna szerokość na mobilnych */
+        max-height: 40vh; /* Dostosuj wysokość panelu części */
+    }
+}
 @media (max-width: 600px) {
-    .score-counter-card {
-        padding: 15px;
+    .score-counter-card { padding: 15px; }
+    .player-section { padding: 15px; }
+    .score-display { font-size: 3.5em; padding: 10px 20px; }
+    .score-buttons button { font-size: 1em; padding: 8px 15px; min-width: 50px; }
+}
+/* === RESPONSYWNOŚĆ DECK BUILDERA DLA URZĄDZEŃ MOBILNYCH === */
+@media (max-width: 768px) {
+    .deck-builder-container {
+        flex-direction: column; /* Układa panel części i sloty jeden pod drugim */
+        align-items: center; /* Opcjonalnie: wycentruj elementy w kontenerze flex */
     }
-    .player-section {
-        padding: 15px;
+
+    .available-parts-panel {
+        width: 100%; /* Panel części zajmuje całą dostępną szerokość */
+        max-width: 500px; /* Opcjonalnie: można ustawić maksymalną szerokość, jeśli nie chcesz, by był zbyt szeroki na tabletach w trybie portretowym */
+        max-height: 45vh; /* Zmniejszona maksymalna wysokość, aby więcej miejsca było na sloty poniżej. Dostosuj według potrzeb. */
+        margin-bottom: 25px; /* Dodaje odstęp między panelem części a kontenerem slotów decku */
+        /* overflow-y: auto; -- już powinno być zdefiniowane, ale upewnijmy się */
     }
-    .score-display {
-        font-size: 3.5em;
-        padding: 10px 20px;
+
+    .deck-set-slots-container {
+        width: 100%; /* Kontener ze slotami na zestawy również zajmuje całą szerokość */
     }
-    .score-buttons button {
-        font-size: 1em;
-        padding: 8px 15px;
-        min-width: 50px;
+
+    /* Opcjonalnie: dostosowanie marginesów kart zestawów na mobilnych */
+    .deck-set-slots-container .deck-set.card {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Jeśli używasz inputa do filtrowania w panelu części, upewnij się, że jest responsywny */
+    .available-parts-panel .filter-parts-dnd {
+        display: flex;
+        flex-direction: column; /* Etykieta nad selectem */
+        gap: 5px; /* Mały odstęp */
+    }
+    .available-parts-panel .filter-parts-dnd label {
+        text-align: left; /* Wyrównaj etykietę do lewej */
+    }
+    .available-parts-panel .filter-parts-dnd select {
+        width: 100%; /* Select na całą szerokość */
     }
 }
+
+/* Dodatkowe drobne poprawki dla bardzo małych ekranów, jeśli potrzebne */
+@media (max-width: 480px) {
+    .available-parts-panel {
+        max-height: 40vh; /* Jeszcze mniejsza wysokość dla bardzo małych ekranów */
+    }
+
+    .deck-part-slot {
+        /* Możesz chcieć zmniejszyć minimalną wysokość slotu lub padding na bardzo małych ekranach */
+        min-height: 60px;
+        font-size: 0.8em; /* Mniejszy tekst w placeholderze slotu */
+    }
+
+    .deck-part-slot img { /* Obrazek części w slocie */
+        width: 40px;
+        height: 40px;
+    }
+
+    .available-part-item img { /* Obrazek części na liście D&D */
+        width: 35px;
+        height: 35px;
+    }
+    .available-part-item span {
+        font-size: 0.85em;
+    }
+}
+/* Style dla zakładek w Deck Builderze */
+.tabs-container {
+    display: flex;
+    margin-bottom: 15px; /* Odstęp od slotów poniżej */
+    border-bottom: 2px solid rgba(138, 43, 226, 0.3); /* Linia pod zakładkami */
+}
+
+.tab-button {
+    padding: 10px 18px;
+    cursor: pointer;
+    background-color: rgba(55, 55, 65, 0.7);
+    color: #ccc;
+    border: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-family: 'Kode Mono', monospace;
+    font-size: 0.95em;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
+    margin-right: 4px; /* Mały odstęp między guzikami */
+    border-bottom: 2px solid transparent; /* Miejsce na "aktywną" krawędź */
+}
+
+.tab-button:hover {
+    background-color: rgba(70, 70, 80, 0.8);
+    color: #fff;
+}
+
+.tab-button.active {
+    background-color: rgba(35,35,45,0.75); /* Ten sam kolor co .card */
+    color: #a25ff0; /* Kolor akcentu */
+    border-bottom: 2px solid #a25ff0; /* Podkreślenie aktywnej zakładki */
+    position: relative; /* Aby border-bottom był na wierzchu linii kontenera */
+    /* top: 2px;  Można dodać, aby "podnieść" zakładkę nad linię */
+}
+
+/* Kontener na sloty aktywnego zestawu */
+#deck-builder-active-set-slots .deck-set.card {
+    margin-top: 0; /* Usuń margines górny, jeśli zakładki są bezpośrednio nad */
+}
+
 
 </style>
-
 </head>
 <body>
 
@@ -496,21 +493,18 @@ font-weight: bold; /* poprawiona literówka z font-weght */
             <span class="menu-text" id="menu-btn-text">MENU</span>
         </div>
     </div>
-
     <div class="sidebar-links">
         <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="1.png" alt="Generator"><span>Generator</span></a>
         <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="2.png" alt="Magazyn"><span>Magazyn</span></a>
-    <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="3.png" alt="Licznik"><span>Licznik</span></a> 
-    
-        <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a> <!-- lub Twoja oryginalna ikona dla "Deck" -->
-		<a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a> <!-- lub Twoja oryginalna ikona dla "Galeria" -->
-		<a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a> <!-- lub Twoja oryginalna ikona dla "Import/Eksport" -->
+        <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="3.png" alt="Licznik"><span>Licznik</span></a> 
+        <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a>
+		<a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a>
+		<a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
     </div>
-
 </div>
 
 <div id="app-container">
-<section id="licznikPunktow" class="page">
+    <section id="licznikPunktow" class="page">
         <h2>Licznik Punktów Rozgrywki</h2>
         <div class="card score-counter-card">
             <div class="player-section">
@@ -524,7 +518,6 @@ font-weight: bold; /* poprawiona literówka z font-weght */
                 </div>
                  <input type="text" id="inputPlayerName1" placeholder="Wpisz imię Gracza 1" onchange="updatePlayerName('player1')">
             </div>
-
             <div class="player-section">
                 <h3 id="playerName2">Gracz 2</h3>
                 <div class="score-display" id="scorePlayer2">0</div>
@@ -536,168 +529,221 @@ font-weight: bold; /* poprawiona literówka z font-weght */
                 </div>
                 <input type="text" id="inputPlayerName2" placeholder="Wpisz imię Gracza 2" onchange="updatePlayerName('player2')">
             </div>
-
             <div class="game-controls">
                 <button onclick="resetScores()" class="cancel-btn" style="width: auto; padding: 12px 25px;">Resetuj Wyniki</button>
             </div>
         </div>
     </section>
-<!-- Strona Generatora Losowego -->
-<section id="generator" class="page">
-  <h2>Generator Zestawów</h2>
-  <div class="card">
-    <label for="seriaLosowania">Wybierz Serię do Losowania:</label>
-    <select id="seriaLosowania" aria-label="Seria Beybladów do losowania">
-        <option value="bx_ux">BX / UX (Blade, Ratchet, Bit)</option>
-        <option value="cx">CX (LockChip, Main, Assist, Ratchet, Bit)</option>
-    </select>
-    
-    <label for="ilosc" style="margin-top:15px;">Wybierz ilość Beybladów do wylosowania:</label>
-    <select id="ilosc" aria-label="Ilość Beybladów do wylosowania">
-        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-    </select>
-    <div style="display:flex; gap:10px; margin-top:20px;">
-        <button onclick="LOSUJ()">Losuj Zestawy</button>
-        <button onclick="wyczyscLosowanie()" class="cancel-btn">Wyczyść Wyniki</button>
-    </div>
-  </div>
 
-  <div id="generator-obraz" style="margin-top:20px; margin-bottom: 20px;">
-    <img id="placeholder-img" src="tlo.png" alt="Animowane tło generatora">
-  </div>
- 
-  <div id="wyniki" style="margin-top:20px;">
-      <!-- Wyniki losowania pojawią się tutaj -->
-  </div>
-</section>
-
-<!-- Strona Magazynu -->
+    <section id="generator" class="page">
+      <h2>Generator Zestawów</h2>
+      <div class="card">
+        <label for="seriaLosowania">Wybierz Serię do Losowania:</label>
+        <select id="seriaLosowania" aria-label="Seria Beybladów do losowania">
+            <option value="bx_ux">BX / UX (Blade, Ratchet, Bit)</option>
+            <option value="cx">CX (LockChip, Main, Assist, Ratchet, Bit)</option>
+        </select>
+        <label for="ilosc" style="margin-top:15px;">Wybierz ilość Beybladów do wylosowania:</label>
+        <select id="ilosc" aria-label="Ilość Beybladów do wylosowania">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        </select>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button onclick="LOSUJ()">Losuj Zestawy</button>
+            <button onclick="wyczyscLosowanie()" class="cancel-btn">Wyczyść Wyniki</button>
+        </div>
+        <div id="zapisz-glowny-zestaw-controls" style="display:none; margin-top:20px;">
+            <input type="text" id="nazwa-glownego-decku" placeholder="Nazwa dla tego zestawu (opcjonalnie)">
+            <button onclick="saveCurrentGeneratedDeck()">Zapisz Ten Wylosowany Zestaw</button>
+        </div>
+      </div>
+      <div id="generator-obraz" style="margin-top:20px; margin-bottom: 20px;">
+        <img id="placeholder-img" src="tlo.png" alt="Animowane tło generatora">
+      </div>
+      <div id="wyniki" style="margin-top:20px;"></div>
+    </section>
 <section id="magazyn" class="page">
-  <h2>Mój Magazyn Części</h2>
-  <div class="card" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;"> 
-    
-    <div style="flex-grow: 1; min-width: 200px;">
-      <label for="filterKategoria">Filtruj według kategorii:</label>
-      <select id="filterKategoria" onchange="wyswietlMagazyn()" aria-label="Filtr kategorii części">
-          <option value="all">Wszystkie Kategorie</option>
-          <optgroup label="Seria BX / UX">
-              <option value="blade">Blade (BX/UX)</option>
-          </optgroup>
-          <optgroup label="Seria CX">
-              <option value="cx-lock-chip">CX Lock Chip</option>
-              <option value="cx-main-blade">CX Main Blade</option>
-              <option value="cx-assist-blade">CX Assist Blade</option>
-          </optgroup>
-          <optgroup label="Komponenty Wspólne">
-              <option value="rachet">Ratchet</option>
-              <option value="bit">Bit</option>
-          </optgroup>
-      </select>
-    </div>
+      <h2>Mój Magazyn Części</h2>
+      <div class="card" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;"> 
+        <div style="flex-grow: 1; min-width: 200px;">
+          <label for="filterKategoria">Filtruj według kategorii:</label>
+          <select id="filterKategoria" onchange="wyswietlMagazyn()" aria-label="Filtr kategorii części">
+              <option value="all">Wszystkie Kategorie</option>
+              <optgroup label="Seria BX / UX">
+                  <option value="blade">Blade (BX/UX)</option>
+              </optgroup>
+              <optgroup label="Seria CX">
+                  <option value="cx-lock-chip">CX Lock Chip</option>
+                  <option value="cx-main-blade">CX Main Blade</option>
+                  <option value="cx-assist-blade">CX Assist Blade</option>
+              </optgroup>
+              <optgroup label="Komponenty Wspólne">
+                  <option value="rachet">Ratchet</option>
+                  <option value="bit">Bit</option>
+              </optgroup>
+          </select>
+        </div>
+        <div style="flex-grow: 1; min-width: 200px;">
+          <label for="filterPosiadane">Pokaż części:</label>
+          <select id="filterPosiadane" onchange="wyswietlMagazyn()" aria-label="Filtr posiadanych części">
+              <option value="posiadane">Posiadane</option>
+              <option value="nieposiadane">Nieposiadane</option>
+              <option value="wszystkie_w_bazie">Wszystkie</option> 
+          </select>
+        </div>
+      </div>
+      <div id="lista-magazyn" style="margin-top:15px;"></div>
+    </section>
 
-    <div style="flex-grow: 1; min-width: 200px;">
-      <label for="filterPosiadane">Pokaż części:</label>
-      <select id="filterPosiadane" onchange="wyswietlMagazyn()" aria-label="Filtr posiadanych części">
-          <option value="posiadane">Posiadane</option>
-          <option value="nieposiadane">Nieposiadane</option>
-          <option value="wszystkie_w_bazie">Wszystkie</option> 
-      </select>
-    </div>
+    <!-- Strona Deck Generatora - ZMODYFIKOWANA pod Drag and Drop -->
 
-  </div>
-  <div id="lista-magazyn" style="margin-top:15px;">
-      <!-- Karty części magazynu pojawią się tutaj -->
-  </div>
-</section>
-
-
-
-<!-- Strona Deck Generatora -->
 <section id="deck" class="page">
-  <h2>Deck Generator</h2>
-  <p style="text-align: center;">Stwórz własny zestaw 4 Beybladów, nazwij go i zapisz!</p>
-  
-  <div class="card" style="margin-bottom: 20px;">
-    <h3>Zarządzanie Deckiem</h3>
-    <div>
-      <label for="deckName" style="display: block; margin-bottom: 5px;">Nazwa Decku:</label>
-      <input type="text" id="deckName" placeholder="Np. Mój Deck Turniejowy" style="margin-bottom: 10px;">
-    </div>
-    <button id="saveDeckButton" onclick="saveCurrentDeck()">Zapisz Aktualny Deck</button>
-  </div>
+    <h2>Deck Generator</h2>
+    <p style="text-align: center;">Przeciągnij części z panelu do odpowiednich slotów aktywnego zestawu.</p>
+    
+    <div class="card" style="margin-bottom: 20px;">
+        <h3>Zarządzanie Deckiem</h3>
+        <div>
+            <label for="deckName" style="display: block; margin-bottom: 5px;">Nazwa Decku:</label>
+            <input type="text" id="deckName" placeholder="Np. Mój Deck Turniejowy" style="margin-bottom: 10px;">
+        </div>
+        <button id="saveDeckButton" onclick="saveCurrentDeck()">Zapisz Aktualny Deck</button>
 
-  <div id="deck-builder" style="margin-bottom: 30px;">
-    <!-- Tutaj renderDeckBuilder wstawia 3 karty .deck-set -->
-    <!-- UWAGA: Ta sekcja wymaga znacznych modyfikacji dla obsługi serii CX -->
-  </div>
-</section>
-
-<!-- Strona Galerii Zapisanych Decków -->
-<section id="galeriaDeckow" class="page">
-  <h2>Moje Zapisane Decki</h2>
-  <p style="text-align: center;">Tutaj znajdziesz wszystkie swoje zapisane konfiguracje decków.</p>
-  <div id="savedDecksContainer" style="margin-top: 20px;"> 
-    <!-- Karty zapisanych decków pojawią się tutaj dzięki displaySavedDecks() -->
-  </div>
-</section>
-
-<!-- Strona Importu/Eksportu -->
-<section id="importexport" class="page">
-  <h2>Zarządzanie Danymi Aplikacji</h2>
-  <div class="action-button-container import-export-section">
-    <h4>Importuj lub Eksportuj Dane Magazynu Części</h4>
-    <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
-    <button class="button-auto-width" onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn do Pola</button>
-    <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Dane magazynu w formacie JSON pojawią się tutaj po eksporcie, lub wklej tutaj dane do importu..." aria-label="Pole tekstowe dla danych JSON magazynu"></textarea>
-    <button class="button-auto-width" onclick="importujDaneZPolaTekstowego()">Importuj Magazyn z Pola</button>
-  </div>
-  <div class="action-button-container import-export-section">
-    <h4>Importuj lub Eksportuj Zapisane Decki</h4>
-    <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
-    <button class="button-auto-width" onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki do Pola</button>
-    <textarea id="poleDanychJsonDecki" rows="8" placeholder="Dane zapisanych decków w formacie JSON pojawią się tutaj po eksporcie, lub wklej tutaj dane do importu..." aria-label="Pole tekstowe dla danych JSON zapisanych decków"></textarea>
-    <button class="button-auto-width" onclick="importujDeckiZPolaTekstowego()">Importuj Decki z Pola</button>
-  </div>
-  <div class="action-button-container">
-    <h4>Usuń/przywróć domyślne </h4>
-    <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Uwaga: Poniższa operacja trwale usunie wszystkie części z Twojego magazynu ORAZ wszystkie zapisane Decki.</p>
-    <button class="button-auto-width danger-btn" onclick="wykonajWyczyszczenieDanych()">Wyczyść Wszystkie Dane (Nieodwracalne)</button>
-<!-- Wewnątrz <section id="importexport" class="page"> -->
-    <div class="section-container">
-        <h4>Import/Eksport Danych Magazynu</h4>
-        <!-- ... -->
-      <button onclick="importujMagazynZBazyDomyslnejHTML()" style="margin-top: 10px; background-color: #3a753c;">Załaduj Domyślną Bazę Części (z HTML)</button>
     </div>
 
-  </div>
-  
+    <div class="deck-builder-container">
+        <div class="available-parts-panel" id="available-parts-panel">
+            <h4>Dostępne Części</h4>
+            <div class="filter-parts-dnd" style="margin-bottom:15px;">
+                <label for="dndPartTypeFilter">Filtruj części:</label>
+                <select id="dndPartTypeFilter" onchange="renderAvailablePartsList()">
+                    <option value="blade">Blade (BX/UX)</option>
+                    <option value="cx-lock-chip">CX Lock Chip</option>
+                    <option value="cx-main-blade">CX Main Blade</option>
+                    <option value="cx-assist-blade">CX Assist Blade</option>
+                    <option value="rachet">Ratchet</option>
+                    <option value="bit">Bit</option>
+                </select>
+            </div>
+            <div id="parts-list-for-dnd">
+                <!-- Lista części do przeciągania -->
+            </div>
+        </div>
+
+        <div class="deck-set-slots-container">
+            <!-- NOWE GUZIKI ZAKŁADEK -->
+            <div id="deck-set-tabs-container" class="tabs-container">
+                <!-- Guziki będą generowane przez JS -->
+            </div>
+            <!-- Kontener na sloty TYLKO AKTYWNEGO ZESTAWU -->
+            <div id="deck-builder-active-set-slots">
+                <!-- Slotów na aktywny zestaw będą renderowane tutaj przez JS -->
+            </div>
+        </div>
+    </div>
 </section>
+
+    <section id="galeriaDeckow" class="page">
+      <h2>Moje Zapisane Decki</h2>
+      <p style="text-align: center;">Tutaj znajdziesz wszystkie swoje zapisane konfiguracje decków.</p>
+      <div id="savedDecksContainer" style="margin-top: 20px;"></div>
+    </section>
+
+    <section id="importexport" class="page">
+      <h2>Zarządzanie Danymi Aplikacji</h2>
+      <div class="action-button-container import-export-section">
+        <h4>Importuj lub Eksportuj Dane Magazynu Części</h4>
+        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
+        <button class="button-auto-width" onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn</button>
+        <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Dane magazynu JSON..." aria-label="Pole JSON magazynu"></textarea>
+        <button class="button-auto-width" onclick="importujDaneZPolaTekstowego()">Importuj Magazyn</button>
+      </div>
+      <div class="action-button-container import-export-section">
+        <h4>Importuj lub Eksportuj Zapisane Decki</h4>
+        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
+        <button class="button-auto-width" onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki</button>
+        <textarea id="poleDanychJsonDecki" rows="8" placeholder="Dane decków JSON..." aria-label="Pole JSON decków"></textarea>
+        <button class="button-auto-width" onclick="importujDeckiZPolaTekstowego()">Importuj Decki</button>
+      </div>
+      <div class="action-button-container">
+        <h4>Operacje na Danych</h4>
+        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Przywróć domyślną bazę części lub usuń wszystkie dane.</p>
+        <button onclick="importujMagazynZBazyDomyslnejHTML()" style="margin-top: 10px; background-color: #3a753c;">Załaduj Domyślną Bazę Części</button>
+        <button class="button-auto-width danger-btn" onclick="wykonajWyczyszczenieDanych()" style="margin-top:10px;">Wyczyść Wszystkie Dane (Nieodwracalne)</button>
+      </div>
+    </section>
 
 </div> <!-- Koniec #app-container -->
-<script>
 
+<script>
 // =================================
 // Konfiguracja i Zmienne Globalne
 // =================================
 let sidebarExpanded = false;
-let czyEdycjaWProgresie = false; // Flaga dla edycji CZĘŚCI (jeśli nadal używana)
 const sidebarWidthExpanded = 260;
 const sidebarWidthCollapsed = 50;
-let currentEditingDeckId = null; // Dla edycji DECKÓW ze strony "Deck Generator"
+let currentEditingDeckId = null; 
 
 let sidebar, appContainer, sidebarToggleBtn, menuIcon, menuBtnText;
-// Elementy specyficzne dla stron, inicjalizowane w DOMContentLoaded
-let wynikiDivGenerator, placeholderActualImgGenerator, deckBuilderContainerDeckPage;
+let wynikiDivGenerator, placeholderActualImgGenerator;
 
-// Globalna tablica dla ostatnio wylosowanych zestawów z LOSUJ()
 let ostatnioWylosowaneZestawyGlobalnie = [];
 
-// Klucze localStorage
 const MAGAZYN_KEY = 'beybladeMagazynAnanasCX_v3';
 const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3';
 const SCORES_KEY = 'beybladeScoreCounterAnanas';
 
+let currentDeckBeingBuilt = {}; // Zostanie zainicjalizowane w DOMContentLoaded lub przy nawigacji
+    let currentlyActiveSetIndexInBuilder = 0; // Domyślnie pierwszy zestaw (indeks 0)
+function initializeOrResetCurrentDeck(deckData = null) {
+    const defaultSetStructure = () => ({
+        seria: 'bx_ux', bladeId: null, ratchetId: null, bitId: null,
+        cx_lock_chipId: null, cx_main_bladeId: null, cx_assist_bladeId: null,
+        // ratchetId i bitId są używane dla obu serii w tej strukturze
+        statystykiObliczone: {}
+    });
+
+    if (deckData && deckData.id) {
+        currentDeckBeingBuilt = JSON.parse(JSON.stringify(deckData)); // Głęboka kopia
+        // Upewnij się, że każdy zestaw ma wszystkie potrzebne klucze, nawet jeśli są null
+        currentDeckBeingBuilt.sets = currentDeckBeingBuilt.sets.map(set => ({
+            ...defaultSetStructure(), // Zacznij od domyślnej struktury
+            ...set // Nadpisz wartościami z wczytanego zestawu
+        }));
+        // Uzupełnij do 4 zestawów, jeśli jest mniej
+        while (currentDeckBeingBuilt.sets.length < 4) {
+            currentDeckBeingBuilt.sets.push(defaultSetStructure());
+        }
+        if(document.getElementById('deckName')) {
+            document.getElementById('deckName').value = currentDeckBeingBuilt.name || "";
+        }
+        currentEditingDeckId = deckData.id; // Ustaw ID edytowanego decku
+    } else {
+        currentDeckBeingBuilt = {
+            name: "",
+            id: `temp_deck_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+            sets: Array(4).fill(null).map(() => defaultSetStructure())
+        };
+        if(document.getElementById('deckName')) {
+            document.getElementById('deckName').value = "";
+        }
+        currentEditingDeckId = null; // Resetuj ID edytowanego decku
+    }
+    console.log("Zainicjalizowano/Zresetowano currentDeckBeingBuilt:", JSON.parse(JSON.stringify(currentDeckBeingBuilt)));
+}
+
+    function clearCurrentDeckForBuilder() {
+        const deckNameInput = document.getElementById('deckName');
+        if(deckNameInput) deckNameInput.value = "";
+        initializeOrResetCurrentDeck(); 
+        currentEditingDeckId = null; 
+        const saveBtn = document.getElementById('saveDeckButton');
+        if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
+        
+        currentlyActiveSetIndexInBuilder = 0; // Zresetuj do pierwszej zakładki
+        renderDeckBuilderAndParts(); // Odśwież widok buildera (zakładki i sloty)
+        showNotification("Builder decku wyczyszczony.", 2000, 'info');
+    }
 // =================================
 // Zarządzanie Magazynem (localStorage)
 // =================================
@@ -707,7 +753,6 @@ function getMagazyn() {
         return magazynString ? JSON.parse(magazynString) : [];
     } catch (e) { showNotification("Błąd odczytu danych magazynu.", 3000, 'error'); console.error("Błąd odczytu magazynu:", e); return []; }
 }
-
 function setMagazyn(magazynArray) {
     try {
         if (Array.isArray(magazynArray)) {
@@ -732,7 +777,6 @@ function getSavedDecks() {
         return [];
     }
 }
-
 function setSavedDecks(decksArray) {
     try {
         if (Array.isArray(decksArray)) {
@@ -747,19 +791,11 @@ function setSavedDecks(decksArray) {
     }
 }
 
-
 // =================================
 // Logika Licznika Punktów
 // =================================
-let scores = {
-    player1: 0,
-    player2: 0
-};
-
-let playerNames = {
-    player1: "Gracz 1",
-    player2: "Gracz 2"
-}
+let scores = { player1: 0, player2: 0 };
+let playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
 
 function displayScores() {
     const scoreP1 = document.getElementById('scorePlayer1');
@@ -767,19 +803,16 @@ function displayScores() {
     if (scoreP1) scoreP1.textContent = scores.player1;
     if (scoreP2) scoreP2.textContent = scores.player2;
 }
-
 function displayPlayerNames() {
     const nameP1Display = document.getElementById('playerName1');
     const nameP2Display = document.getElementById('playerName2');
     const nameP1Input = document.getElementById('inputPlayerName1');
     const nameP2Input = document.getElementById('inputPlayerName2');
-
     if (nameP1Display) nameP1Display.textContent = playerNames.player1;
     if (nameP2Display) nameP2Display.textContent = playerNames.player2;
     if (nameP1Input) nameP1Input.value = playerNames.player1 === "Gracz 1" ? "" : playerNames.player1;
     if (nameP2Input) nameP2Input.value = playerNames.player2 === "Gracz 2" ? "" : playerNames.player2;
 }
-
 function updateScore(player, points) {
     if (scores.hasOwnProperty(player)) {
         scores[player] += points;
@@ -787,7 +820,6 @@ function updateScore(player, points) {
         saveScoresToLocalStorage();
     }
 }
-
 function updatePlayerName(player) {
     const inputElement = document.getElementById(`inputPlayerName${player === 'player1' ? '1' : '2'}`);
     if (inputElement && playerNames.hasOwnProperty(player)) {
@@ -797,27 +829,16 @@ function updatePlayerName(player) {
         saveScoresToLocalStorage();
     }
 }
-
 function resetScores() {
-    scores.player1 = 0;
-    scores.player2 = 0;
-    displayScores();
-    saveScoresToLocalStorage();
+    scores.player1 = 0; scores.player2 = 0;
+    displayScores(); saveScoresToLocalStorage();
     showNotification("Wyniki zostały zresetowane.", 2000, 'info');
 }
-
 function saveScoresToLocalStorage() {
     try {
-        const dataToSave = {
-            scores: scores,
-            playerNames: playerNames
-        };
-        localStorage.setItem(SCORES_KEY, JSON.stringify(dataToSave));
-    } catch (e) {
-        console.error("Błąd zapisu wyników do localStorage:", e);
-    }
+        localStorage.setItem(SCORES_KEY, JSON.stringify({ scores, playerNames }));
+    } catch (e) { console.error("Błąd zapisu wyników do localStorage:", e); }
 }
-
 function loadScoresFromLocalStorage() {
     try {
         const savedDataString = localStorage.getItem(SCORES_KEY);
@@ -825,7 +846,6 @@ function loadScoresFromLocalStorage() {
             const savedData = JSON.parse(savedDataString);
             if (savedData.scores) scores = savedData.scores;
             if (savedData.playerNames) playerNames = savedData.playerNames;
-
             scores.player1 = parseInt(scores.player1, 10) || 0;
             scores.player2 = parseInt(scores.player2, 10) || 0;
             playerNames.player1 = playerNames.player1 || "Gracz 1";
@@ -836,8 +856,7 @@ function loadScoresFromLocalStorage() {
         scores = { player1: 0, player2: 0 };
         playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
     }
-    displayScores();
-    displayPlayerNames();
+    displayScores(); displayPlayerNames();
 }
 // =================================
 // Funkcje Pomocnicze i Nawigacyjne
@@ -847,21 +866,13 @@ function showNotification(message, duration = 3000, type = 'info') {
     if (!bar) { console.error("Element #notification-bar nie znaleziony!"); return; }
     bar.textContent = message;
     bar.className = 'notification-show'; 
-
-    let bgColor = 'rgba(138, 43, 226, 0.9)'; 
-    let textColor = '#fff';
-    
+    let bgColor = 'rgba(138, 43, 226, 0.9)'; let textColor = '#fff';
     if (type === 'error') bgColor = 'rgba(220, 53, 69, 0.9)';
     else if (type === 'success') bgColor = 'rgba(40, 167, 69, 0.9)';
     else if (type === 'warning') { bgColor = 'rgba(255, 193, 7, 0.9)'; textColor = '#333'; } 
-    
-    bar.style.backgroundColor = bgColor;
-    bar.style.color = textColor;
-    bar.style.backdropFilter = 'blur(5px)';
-    bar.style.webkitBackdropFilter = 'blur(5px)';
-    bar.style.display = "block";
-    bar.style.opacity = "1";
-
+    bar.style.backgroundColor = bgColor; bar.style.color = textColor;
+    bar.style.backdropFilter = 'blur(5px)'; bar.style.webkitBackdropFilter = 'blur(5px)';
+    bar.style.display = "block"; bar.style.opacity = "1";
     if (bar._hideTimeout) clearTimeout(bar._hideTimeout);
     bar._hideTimeout = setTimeout(() => {
         bar.style.opacity = "0";
@@ -884,108 +895,72 @@ function toggleSidebar() {
     }
 }
 
-function navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) {
-    console.log(`Nawigacja do: ${pageId}, forceRenderDeckBuilder: ${forceRenderDeckBuilder}`);
-
+function navigateTo(pageId, clickedLinkElement) { // Usunięto forceRenderDeckBuilder, bo logika jest teraz wewnątrz
+    console.log(`Nawigacja do: ${pageId}`);
     document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active-link'));
-    if (clickedLinkElement) {
-        clickedLinkElement.classList.add('active-link');
-    }
-
+    if (clickedLinkElement) clickedLinkElement.classList.add('active-link');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const page = document.getElementById(pageId);
-    if (page) {
-        page.classList.add('active');
-    } else { 
+    if (page) page.classList.add('active');
+    else { 
         console.error(`Strona ID '${pageId}' nie znaleziona.`); 
-        const domyslnyLinkFallback = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]');
-        if (domyslnyLinkFallback && pageId !== 'generator') {
-            navigateTo('generator', domyslnyLinkFallback, true);
-        }
+        const fallbackLink = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]');
+        if (fallbackLink && pageId !== 'generator') navigateTo('generator', fallbackLink); // Wywołanie bez force
         return; 
     }
-    
-    // Resetuj flagę edycji CZĘŚCI, jeśli opuszczamy stronę 'dodaj' (zakładając, że ta strona już nie istnieje lub nie jest używana w ten sposób)
-    // if (pageId !== 'dodaj' && czyEdycjaWProgresie) {
-    //     pokazFormularz(); // Zakładając, że pokazFormularz() resetuje odpowiednie stany
-    //     czyEdycjaWProgresie = false;
-    // }
 
-    if (pageId !== 'deck' && currentEditingDeckId) {
+    if (pageId !== 'deck' && currentEditingDeckId) { 
         const deckNameInput = document.getElementById('deckName');
-        const saveDeckBtn = document.getElementById('saveDeckButton');
         if (deckNameInput) deckNameInput.value = '';
-        if (saveDeckBtn) saveDeckBtn.textContent = 'Zapisz Aktualny Deck';
-        currentEditingDeckId = null;
-        console.log("Zresetowano stan edycji DECKU z powodu opuszczenia strony 'deck'.");
-    }
-
-    if (pageId === 'magazyn') { 
-        wyswietlMagazyn(); 
-    } else if (pageId === 'deck') { 
-        if (forceRenderDeckBuilder) { 
-             renderDeckBuilder();
-        }
-    } else if (pageId === 'galeriaDeckow') { 
-        displaySavedDecks();
-    } else if (pageId === 'licznikPunktow') {
-        loadScoresFromLocalStorage(); // Załaduj wyniki przy wejściu na stronę licznika
+        currentEditingDeckId = null; 
+        // initializeOrResetCurrentDeck(); // Już niepotrzebne tutaj, bo deck jest czyszczony przed każdym renderowaniem
+        const saveBtn = document.getElementById('saveDeckButton');
+        if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
+        console.log("Zresetowano stan edycji decku po opuszczeniu strony 'deck'.");
     }
     
-    if (sidebarExpanded && window.innerWidth < 768) {
-        toggleSidebar();
-    }
+    if (pageId === 'magazyn') wyswietlMagazyn(); 
+    else if (pageId === 'deck') {
+        if (!currentEditingDeckId) { // Jeśli nie edytujemy, to inicjujemy pusty
+             initializeOrResetCurrentDeck();
+        }
+        // Jeśli currentEditingDeckId jest ustawione, to dane zostaną załadowane przez `edytujDeck` -> `initializeOrResetCurrentDeck(deckData)`
+        // a następnie `renderDeckBuilderAndParts`
+        renderDeckBuilderAndParts(); 
+    } else if (pageId === 'galeriaDeckow') displaySavedDecks();
+    else if (pageId === 'licznikPunktow') loadScoresFromLocalStorage();
+    
+    if (sidebarExpanded && window.innerWidth < 768) toggleSidebar();
 }
 
 // =================================
 // Wyświetlanie Magazynu
 // =================================
 function wyswietlMagazyn() {
-    console.log("[MAGAZYN_VIEW_1] Funkcja wyswietlMagazyn - START");
     const magazynPelny = getMagazyn();
     const lista = document.getElementById('lista-magazyn');
-
-    if (!lista) {
-        console.error("[MAGAZYN_VIEW_X1] Błąd krytyczny: Element #lista-magazyn nie istnieje.");
-        showNotification("Błąd wewnętrzny: Nie można wyświetlić magazynu.", 3000, 'error');
-        return;
-    }
+    if (!lista) { console.error("Element #lista-magazyn nie istnieje."); return; }
     lista.innerHTML = '';
-
     if (!Array.isArray(magazynPelny)) {
-        console.error("[MAGAZYN_VIEW_X2] Błąd: Dane z getMagazyn() nie są tablicą.");
-        lista.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>Błąd wczytywania danych magazynu.</p></div>';
+        lista.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>Błąd wczytywania.</p></div>';
         return;
     }
-
-    const filtrKategoriiSelect = document.getElementById('filterKategoria');
-    const filtrKategorii = filtrKategoriiSelect ? filtrKategoriiSelect.value : 'all';
-
-    const filtrPosiadaneSelect = document.getElementById('filterPosiadane');
-    const filtrPosiadania = filtrPosiadaneSelect ? filtrPosiadaneSelect.value : 'posiadane';
-
+    const filtrKategorii = document.getElementById('filterKategoria')?.value || 'all';
+    const filtrPosiadania = document.getElementById('filterPosiadane')?.value || 'posiadane';
     let czesciDoWyswietlenia = [...magazynPelny];
 
-    if (filtrPosiadania === 'posiadane') {
-        czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && (parseInt(czesc.ilosc, 10) || 0) > 0);
-    } else if (filtrPosiadania === 'nieposiadane') {
-        czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && (parseInt(czesc.ilosc, 10) || 0) === 0);
-    }
-
-    if (filtrKategorii !== 'all' && filtrKategorii) {
-        czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && czesc.typ === filtrKategorii);
-    }
+    if (filtrPosiadania === 'posiadane') czesciDoWyswietlenia = czesciDoWyswietlenia.filter(c => c && (parseInt(c.ilosc, 10) || 0) > 0);
+    else if (filtrPosiadania === 'nieposiadane') czesciDoWyswietlenia = czesciDoWyswietlenia.filter(c => c && (parseInt(c.ilosc, 10) || 0) === 0);
+    
+    if (filtrKategorii !== 'all' && filtrKategorii) czesciDoWyswietlenia = czesciDoWyswietlenia.filter(c => c && c.typ === filtrKategorii);
 
     if (czesciDoWyswietlenia.length === 0) {
-        lista.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>Brak części pasujących do wybranych filtrów.</p></div>';
+        lista.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>Brak części pasujących do filtrów.</p></div>';
         return;
     }
-
     czesciDoWyswietlenia.sort((a, b) => {
-        const typA = (a && typeof a.typ === 'string') ? a.typ.toLowerCase() : "";
-        const typB = (b && typeof b.typ === 'string') ? b.typ.toLowerCase() : "";
-        const nazwaA = (a && typeof a.nazwa === 'string') ? a.nazwa.toLowerCase() : "";
-        const nazwaB = (b && typeof b.nazwa === 'string') ? b.nazwa.toLowerCase() : "";
+        const typA = (a?.typ || "").toLowerCase(); const typB = (b?.typ || "").toLowerCase();
+        const nazwaA = (a?.nazwa || "").toLowerCase(); const nazwaB = (b?.nazwa || "").toLowerCase();
         if (typA < typB) return -1; if (typA > typB) return 1;
         if (nazwaA < nazwaB) return -1; if (nazwaA > nazwaB) return 1;
         return 0;
@@ -993,18 +968,17 @@ function wyswietlMagazyn() {
 
     czesciDoWyswietlenia.forEach((czesc) => {
         if (!czesc || !czesc.typ || typeof czesc.nazwa !== 'string') return;
-
         const ilosc = parseInt(czesc.ilosc, 10) || 0;
         let isBeta = false;
         const maStat = (statName) => typeof czesc[statName] === 'number';
         const jestZeroLubBrak = (statName) => !maStat(statName) || czesc[statName] === 0;
 
         if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
-            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga')) isBeta = true;
+            if (jestZeroLubBrak('ATK')||jestZeroLubBrak('DEF')||jestZeroLubBrak('STM')||jestZeroLubBrak('waga')) isBeta=true;
         } else if (czesc.typ === 'bit') {
-            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga') || jestZeroLubBrak('DASH') || jestZeroLubBrak('BURST_RES')) isBeta = true;
+            if (jestZeroLubBrak('ATK')||jestZeroLubBrak('DEF')||jestZeroLubBrak('STM')||jestZeroLubBrak('waga')||jestZeroLubBrak('DASH')||jestZeroLubBrak('BURST_RES')) isBeta=true;
         } else if (czesc.typ === 'cx-lock-chip') {
-            if (jestZeroLubBrak('waga')) isBeta = true;
+            if (jestZeroLubBrak('waga')) isBeta=true;
         }
         
         let statyString = '';
@@ -1023,10 +997,10 @@ function wyswietlMagazyn() {
             else if (maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus === 0 && isBeta) statyString += `, DEF+:N/A`;
         }
         const czyWszystkieStatyToNA = statyString.split(',').every(s => s.includes(':N/A') || s.trim() === 'N/A');
-        if (isBeta && czyWszystkieStatyToNA) statyString = "Statystyki: N/A (Wersja BETA)";
+        if (isBeta && czyWszystkieStatyToNA) statyString = "Statystyki: N/A (BETA)";
         else if (!isBeta && czyWszystkieStatyToNA && (czesc.typ !== 'cx-lock-chip' || (czesc.typ === 'cx-lock-chip' && statyString.toLowerCase() === "waga:n/ag"))) statyString = "Brak szczegółowych statystyk";
         else if (statyString.trim() === '' || (statyString.toLowerCase().includes("waga:n/ag") && statyString.split(',').length === 1 && czesc.typ === 'cx-lock-chip')) {
-            statyString = isBeta ? "Statystyki: N/A (Wersja BETA)" : "Brak szczegółowych statystyk";
+            statyString = isBeta ? "Statystyki: N/A (BETA)" : "Brak szczegółowych statystyk";
         }
 
         const imgHTML = czesc.img ? `<img class="part-img" src="${czesc.img}" alt="${czesc.nazwa}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="part-img-placeholder" style="display:none;">Brak<br>obr.</div>` : `<div class="part-img-placeholder">Brak<br>obr.</div>`;
@@ -1044,35 +1018,28 @@ function wyswietlMagazyn() {
         cardDiv.innerHTML = `${imgHTML}<h3>${czesc.nazwa}${isBeta ? '<span class="beta-label">BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p><p style="font-size:0.85em; line-height:1.4;">${statyString}</p>${quantityControlsHTML}`;
         lista.appendChild(cardDiv);
     });
-    console.log("[MAGAZYN_VIEW_7] Renderowanie części zakończone.");
 }
 
 function zmienIloscCzesci(idCzesci, zmiana) {
     const magazyn = getMagazyn();
     const indexCzesci = magazyn.findIndex(c => c && c.id === idCzesci);
-    if (indexCzesci === -1) {
-        showNotification("Błąd: Nie znaleziono części.", 3000, 'error'); return;
-    }
+    if (indexCzesci === -1) { showNotification("Błąd: Nie znaleziono części.", 3000, 'error'); return; }
     const czesc = magazyn[indexCzesci];
     let nowaIlosc = (parseInt(czesc.ilosc, 10) || 0) + zmiana;
     if (nowaIlosc < 0) nowaIlosc = 0;
-    
     if (czesc.ilosc === nowaIlosc && zmiana !== 0) return;
-    
     czesc.ilosc = nowaIlosc;
     magazyn[indexCzesci] = czesc;
     setMagazyn(magazyn);
-
     const aktywnaStronaId = document.querySelector('.page.active')?.id;
     if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-    if (document.getElementById('deck')?.classList.contains('active')) {
-        renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
-    }
+    if (aktywnaStronaId === 'deck') renderAvailablePartsList(); // Odśwież listę części dla D&D
 }
+
 // =================================
 // Obliczanie Statystyk Zestawu
 // =================================
-function obliczSumeStatystykZestawu(czesciZestawu, seria) {
+function obliczSumeStatystykZestawu(czesciZestawu, seria) { // czesciZestawu to obiekt z częściami, np. {blade: objBlade, rachet: objRatchet, ...}
     const suma = { ATK: 0, DEF: 0, STM: 0, WAGA: 0, DASH: 0, B_RES: 0, CX_LC_WYTRZ: 0 };
     const getStat = (czesc, statName, defaultValue = 0) => {
         if (!czesc || typeof czesc[statName] === 'undefined' || czesc[statName] === null) return defaultValue;
@@ -1085,7 +1052,7 @@ function obliczSumeStatystykZestawu(czesciZestawu, seria) {
         if (blade) { suma.ATK += getStat(blade, 'ATK'); suma.DEF += getStat(blade, 'DEF'); suma.STM += getStat(blade, 'STM'); suma.WAGA += getStat(blade, 'waga'); }
         if (rachet) {
             suma.ATK += getStat(rachet, 'ATK'); suma.DEF += getStat(rachet, 'DEF'); suma.STM += getStat(rachet, 'STM'); suma.WAGA += getStat(rachet, 'waga');
-            if (String(rachet.id) === "205" || rachet.integrujeBit === true) {
+            if (String(rachet.id) === "205" || rachet.integrujeBit === true) { // Specjalny Ratchet Turbo
                 suma.DASH = getStat(rachet, 'DASH'); suma.B_RES = getStat(rachet, 'BURST_RES');
             }
         }
@@ -1100,7 +1067,7 @@ function obliczSumeStatystykZestawu(czesciZestawu, seria) {
         if (cx_assist_blade) { suma.ATK += getStat(cx_assist_blade, 'ATK'); suma.DEF += getStat(cx_assist_blade, 'DEF'); suma.STM += getStat(cx_assist_blade, 'STM'); suma.WAGA += getStat(cx_assist_blade, 'waga'); }
         if (rachet) {
             suma.ATK += getStat(rachet, 'ATK'); suma.DEF += getStat(rachet, 'DEF'); suma.STM += getStat(rachet, 'STM'); suma.WAGA += getStat(rachet, 'waga');
-            if (String(rachet.id) === "205" || rachet.integrujeBit === true) {
+             if (String(rachet.id) === "205" || rachet.integrujeBit === true) { // Specjalny Ratchet Turbo
                 suma.DASH = getStat(rachet, 'DASH'); suma.B_RES = getStat(rachet, 'BURST_RES');
             }
         }
@@ -1111,9 +1078,7 @@ function obliczSumeStatystykZestawu(czesciZestawu, seria) {
     }
 
     for (const key in suma) {
-        if (typeof suma[key] === 'number') {
-            suma[key] = parseFloat(suma[key].toFixed(1));
-        }
+        if (typeof suma[key] === 'number') suma[key] = parseFloat(suma[key].toFixed(1));
     }
     return suma;
 }
@@ -1124,13 +1089,12 @@ function obliczSumeStatystykZestawu(czesciZestawu, seria) {
 function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
     const { seria, czesci, statystyki, idZestawu } = zestaw;
     const getPartAndHTML = (partObj, partTypeDefaultName) => {
-        const imgHTML = partObj && partObj.img ? `<img src="${partObj.img}" alt="${partObj.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
+        const imgHTML = partObj?.img ? `<img src="${partObj.img}" alt="${partObj.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
         const nameText = partObj ? (partObj.nazwa || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`;
         return { html: imgHTML, name: nameText };
     };
 
-    let setImagesHTML = ''; 
-    let setNameParts = [];
+    let setImagesHTML = ''; let setNameParts = [];
     const ratchetWylosowany = czesci.rachet;
     const czySpecjalnyRatchetZostalWylosowany = ratchetWylosowany && (String(ratchetWylosowany.id) === "205" || ratchetWylosowany.integrujeBit === true);
 
@@ -1156,36 +1120,13 @@ function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
     statySumaryczneHTML += `<span>DEF: ${(statystyki.DEF || 0).toFixed(1)}</span>`;
     statySumaryczneHTML += `<span>STM: ${(statystyki.STM || 0).toFixed(1)}</span>`;
     statySumaryczneHTML += `<span>Waga: ${(statystyki.WAGA || 0).toFixed(1)}g</span>`;
-    const dashValue = parseFloat((statystyki.DASH || 0).toFixed(1));
-    const bResValue = parseFloat((statystyki.B_RES || 0).toFixed(1));
-    if (dashValue !== 0) statySumaryczneHTML += `<span>DASH: ${dashValue.toFixed(1)}</span>`;
-    if (bResValue !== 0) statySumaryczneHTML += `<span>B-RES: ${bResValue.toFixed(1)}</span>`;
-    if (seria === 'cx') {
-        const lcWytrzValue = parseInt((statystyki.CX_LC_WYTRZ || 0).toFixed(0));
-        if (lcWytrzValue !== 0) statySumaryczneHTML += `<span>LC-W: ${lcWytrzValue}</span>`;
-    }
+    if ((statystyki.DASH || 0) !== 0) statySumaryczneHTML += `<span>DASH: ${(statystyki.DASH || 0).toFixed(1)}</span>`;
+    if ((statystyki.B_RES || 0) !== 0) statySumaryczneHTML += `<span>B-RES: ${(statystyki.B_RES || 0).toFixed(1)}</span>`;
+    if (seria === 'cx' && (statystyki.CX_LC_WYTRZ || 0) !== 0) statySumaryczneHTML += `<span>LC-W: ${parseInt((statystyki.CX_LC_WYTRZ || 0).toFixed(0))}</span>`;
     statySumaryczneHTML += `</div>`;
 
     let zmienneStatyRatchetHTML = '';
-    if (ratchetWylosowany && ratchetWylosowany.zmienneStaty && typeof ratchetWylosowany.zmienneStaty === 'object' && Object.keys(ratchetWylosowany.zmienneStaty).length > 0) {
-        zmienneStatyRatchetHTML = `<div class="zmienne-staty-info" style="font-size: 0.8em; margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: left;"><strong style="display:block; margin-bottom:4px; color:#e0e0e0;">${ratchetWylosowany.nazwa} - Tryby:</strong>`;
-        for (const trybKey in ratchetWylosowany.zmienneStaty) {
-            if (Object.hasOwnProperty.call(ratchetWylosowany.zmienneStaty, trybKey)) {
-                const tryb = ratchetWylosowany.zmienneStaty[trybKey];
-                zmienneStatyRatchetHTML += `<div style="margin-bottom:3px;"><em style="color:#c0a0ff;">${tryb.opis || trybKey}:</em> `;
-                let statyTrybuArray = [];
-                if (typeof tryb.ATK === 'number') statyTrybuArray.push(`ATK ${tryb.ATK.toFixed(1)}`);
-                if (typeof tryb.DEF === 'number') statyTrybuArray.push(`DEF ${tryb.DEF.toFixed(1)}`);
-                if (typeof tryb.STM === 'number') statyTrybuArray.push(`STM ${tryb.STM.toFixed(1)}`);
-                if (typeof tryb.wysokosc === 'number') statyTrybuArray.push(`H ${tryb.wysokosc.toFixed(1)}`);
-                if (typeof tryb.DASH === 'number') statyTrybuArray.push(`DASH ${tryb.DASH.toFixed(1)}`);
-                if (typeof tryb.BURST_RES === 'number') statyTrybuArray.push(`B-Res ${tryb.BURST_RES.toFixed(1)}`);
-                zmienneStatyRatchetHTML += statyTrybuArray.join(' / ') + '</div>';
-            }
-        }
-        if (ratchetWylosowany.opisSpecjalny) zmienneStatyRatchetHTML += `<small style="display:block; margin-top:5px; color:#aaa;"><em>${ratchetWylosowany.opisSpecjalny}</em></small>`;
-        zmienneStatyRatchetHTML += `</div>`;
-    }
+    // ... (reszta logiki zmiennych statystyk Ratcheta, jeśli jest) ...
 
     return `
         <div class="card saved-deck-card generated-set-card ${seria === 'cx' ? 'wylosowany-zestaw-cx' : ''}" data-zestaw-id="${idZestawu}">
@@ -1203,6 +1144,8 @@ function wyczyscLosowanie() {
     ostatnioWylosowaneZestawyGlobalnie = [];
     const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
     if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
+    const nazwaDeckuInput = document.getElementById('nazwa-glownego-decku');
+    if(nazwaDeckuInput) nazwaDeckuInput.value = ""; // Czyścimy też pole nazwy
     showNotification('Wyniki losowania wyczyszczone.', 2000, 'info');
 }
 
@@ -1215,44 +1158,76 @@ function LOSUJ() {
     const iloscZestawowDoWylosowania = parseInt(document.getElementById('ilosc')?.value) || 1;
     const wybranaSeria = document.getElementById('seriaLosowania')?.value;
 
-    if (!wybranaSeria) { showNotification("Błąd: Nie wybrano serii.", 3000, 'warning'); if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; return; }
+    if (!wybranaSeria) { 
+        showNotification("Błąd: Nie wybrano serii.", 3000, 'warning'); 
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; 
+        return; 
+    }
 
     const magazyn = getMagazyn();
     if (!magazyn || magazyn.length === 0) {
-        wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty!</p></div>';
-        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; return;
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty! Dodaj części w zakładce "Magazyn".</p></div>';
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; 
+        return;
     }
     
-    const dostepneCzesci = { blade: [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
+    // Tworzenie puli dostępnych części z uwzględnieniem ich ilości
+    const dostepneCzesciDoLosowania = { blade: [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
     magazyn.forEach(czesc => {
         const ilosc = parseInt(czesc.ilosc) || 0;
-        if (ilosc > 0 && dostepneCzesci.hasOwnProperty(czesc.typ)) {
-            for (let i = 0; i < ilosc; i++) dostepneCzesci[czesc.typ].push({ ...czesc, _instanceId: `${czesc.id}_${i}` });
+        if (ilosc > 0 && dostepneCzesciDoLosowania.hasOwnProperty(czesc.typ)) {
+            for (let i = 0; i < ilosc; i++) {
+                // Klonujemy obiekt części, aby każda instancja była unikalna na potrzeby losowania i usuwania z puli
+                dostepneCzesciDoLosowania[czesc.typ].push({ ...czesc, _uniqueDragId: `${czesc.id}_instance_${i}` });
+            }
         }
     });
 
-    let czyWystarczajacoCzesci = false; let komunikatBrakuCzesci = '';
+    let czyWystarczajacoCzesci = true;
+    let komunikatBrakuCzesci = "Niewystarczająca ilość części w magazynie do wylosowania ";
     if (wybranaSeria === 'bx_ux') {
-        const p = { b: iloscZestawowDoWylosowania, r: iloscZestawowDoWylosowania, i: iloscZestawowDoWylosowania }; // p zamiast potrzebne
-        if (dostepneCzesci.blade.length >= p.b && dostepneCzesci.rachet.length >= p.r && dostepneCzesci.bit.length >= p.i) czyWystarczajacoCzesci = true;
-        else { /* logika komunikatu braku */ }
+        komunikatBrakuCzesci += `${iloscZestawowDoWylosowania} zestawu/ów BX/UX:`;
+        if (dostepneCzesciDoLosowania.blade.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Blade,"; }
+        if (dostepneCzesciDoLosowania.rachet.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Ratchet,"; }
+        if (dostepneCzesciDoLosowania.bit.length < iloscZestawowDoWylosowania) { // Sprawdzamy bity, ale będziemy ostrożni z Ratchetami Turbo
+            // To sprawdzenie jest uproszczone; dokładniejsze wymagałoby analizy ile jest Ratchetów Turbo
+             let nonTurboRatchetsCount = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
+             let turboRatchetsCount = dostepneCzesciDoLosowania.rachet.length - nonTurboRatchetsCount;
+             // Jeśli potrzebujemy więcej bitów niż mamy zwykłych ratchetów + bitów, a turbo ratchety nie wystarczą
+             if (dostepneCzesciDoLosowania.bit.length < (iloscZestawowDoWylosowania - turboRatchetsCount) && nonTurboRatchetsCount < (iloscZestawowDoWylosowania - turboRatchetsCount)) {
+                //czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Bit (uwzględniając Ratchet Turbo),";
+             }
+        }
     } else if (wybranaSeria === 'cx') {
-        const p = { lc: iloscZestawowDoWylosowania, mb: iloscZestawowDoWylosowania, ab: iloscZestawowDoWylosowania, r: iloscZestawowDoWylosowania, i: iloscZestawowDoWylosowania };
-        if (dostepneCzesci['cx-lock-chip'].length >= p.lc && dostepneCzesci['cx-main-blade'].length >= p.mb && dostepneCzesci['cx-assist-blade'].length >= p.ab && dostepneCzesci.rachet.length >= p.r && dostepneCzesci.bit.length >= p.i) czyWystarczajacoCzesci = true;
-        else { /* logika komunikatu braku */ }
+        komunikatBrakuCzesci += `${iloscZestawowDoWylosowania} zestawu/ów CX:`;
+        if (dostepneCzesciDoLosowania['cx-lock-chip'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało LockChip,"; }
+        if (dostepneCzesciDoLosowania['cx-main-blade'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało MainBlade,"; }
+        if (dostepneCzesciDoLosowania['cx-assist-blade'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało AssistBlade,"; }
+        if (dostepneCzesciDoLosowania.rachet.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Ratchet,"; }
+        // Podobne uproszczone sprawdzenie dla Bitów w CX
+         let nonTurboRatchetsCountCX = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
+         let turboRatchetsCountCX = dostepneCzesciDoLosowania.rachet.length - nonTurboRatchetsCountCX;
+         if (dostepneCzesciDoLosowania.bit.length < (iloscZestawowDoWylosowania - turboRatchetsCountCX) && nonTurboRatchetsCountCX < (iloscZestawowDoWylosowania - turboRatchetsCountCX) ) {
+            //czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Bit (uwzględniając Ratchet Turbo),";
+         }
     }
-    if (!czyWystarczajacoCzesci && komunikatBrakuCzesci) { /* pokaż komunikat */ return; }
-    if (!czyWystarczajacoCzesci && !komunikatBrakuCzesci) { /* generyczny komunikat braku */ return; }
-
+    if (!czyWystarczajacoCzesci) {
+        showNotification(komunikatBrakuCzesci.slice(0, -1) + ".", 4000, 'warning');
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        return;
+    }
 
     const wylosowaneZestawyFragment = document.createDocumentFragment();
     for (let i = 0; i < iloscZestawowDoWylosowania; i++) {
         let wylosowanyZestawCzesci = {}; let czyZestawKompletny = true; let wylosowanoSpecjalnyRatchet = false;
-        const losujCzescZPulli = (typ) => {
-            if (dostepneCzesci[typ] && dostepneCzesci[typ].length > 0) {
-                const idx = Math.floor(Math.random() * dostepneCzesci[typ].length);
-                return dostepneCzesci[typ].splice(idx, 1)[0];
-            } return null;
+        
+        const losujCzescZPulli = (typCzesci) => {
+            if (dostepneCzesciDoLosowania[typCzesci] && dostepneCzesciDoLosowania[typCzesci].length > 0) {
+                const randomIndex = Math.floor(Math.random() * dostepneCzesciDoLosowania[typCzesci].length);
+                const wylosowanaCzesc = dostepneCzesciDoLosowania[typCzesci].splice(randomIndex, 1)[0]; // Usuwamy wylosowaną część z puli
+                return wylosowanaCzesc;
+            }
+            return null; 
         };
 
         if (wybranaSeria === 'bx_ux') {
@@ -1260,10 +1235,18 @@ function LOSUJ() {
             wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
             if (wylosowanyZestawCzesci.rachet) {
                 if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
-                    wylosowanoSpecjalnyRatchet = true; wylosowanyZestawCzesci.bit = null;
-                } else wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
-            } else { wylosowanyZestawCzesci.bit = null; czyZestawKompletny = false; }
-            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) czyZestawKompletny = false;
+                    wylosowanoSpecjalnyRatchet = true; 
+                    wylosowanyZestawCzesci.bit = null; // Bit jest zintegrowany
+                } else {
+                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+                }
+            } else { // Nie udało się wylosować Ratcheta
+                wylosowanyZestawCzesci.bit = null; 
+                czyZestawKompletny = false;
+            }
+            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet /* Jeśli nie turbo i nie ma bita, a jest ratchet*/ )) {
+                czyZestawKompletny = false;
+            }
         } else if (wybranaSeria === 'cx') {
             wylosowanyZestawCzesci.cx_lock_chip = losujCzescZPulli('cx-lock-chip');
             wylosowanyZestawCzesci.cx_main_blade = losujCzescZPulli('cx-main-blade');
@@ -1271,22 +1254,42 @@ function LOSUJ() {
             wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
             if (wylosowanyZestawCzesci.rachet) {
                 if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
-                    wylosowanoSpecjalnyRatchet = true; wylosowanyZestawCzesci.bit = null;
-                } else wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
-            } else { wylosowanyZestawCzesci.bit = null; czyZestawKompletny = false; }
-            if (!wylosowanyZestawCzesci.cx_lock_chip || !wylosowanyZestawCzesci.cx_main_blade || !wylosowanyZestawCzesci.cx_assist_blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) czyZestawKompletny = false;
+                    wylosowanoSpecjalnyRatchet = true;
+                    wylosowanyZestawCzesci.bit = null;
+                } else {
+                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+                }
+            } else {
+                wylosowanyZestawCzesci.bit = null;
+                czyZestawKompletny = false;
+            }
+            if (!wylosowanyZestawCzesci.cx_lock_chip || !wylosowanyZestawCzesci.cx_main_blade || !wylosowanyZestawCzesci.cx_assist_blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) {
+                czyZestawKompletny = false;
+            }
         }
 
         if (czyZestawKompletny) {
-            const statystykiZestawu = obliczSumeStatystykZestawu(wylosowanyZestawCzesci, wybranaSeria);
+            // Usuwamy _uniqueDragId przed przekazaniem do obliczeń i zapisu
+            const czesciDoStatystyk = {};
+            for(const key in wylosowanyZestawCzesci){
+                if(wylosowanyZestawCzesci[key]){
+                    const { _uniqueDragId, ...resztaCzesci } = wylosowanyZestawCzesci[key];
+                    czesciDoStatystyk[key] = resztaCzesci;
+                } else {
+                    czesciDoStatystyk[key] = null;
+                }
+            }
+
+            const statystykiZestawu = obliczSumeStatystykZestawu(czesciDoStatystyk, wybranaSeria);
             const idUnikalnyZestawu = `wylosowany-${Date.now()}-${i}-${Math.random().toString(16).slice(2)}`;
-            const pelnyZestaw = { idZestawu: idUnikalnyZestawu, seria: wybranaSeria, czesci: wylosowanyZestawCzesci, statystyki: statystykiZestawu };
+            const pelnyZestaw = { idZestawu: idUnikalnyZestawu, seria: wybranaSeria, czesci: czesciDoStatystyk, statystyki: statystykiZestawu };
             ostatnioWylosowaneZestawyGlobalnie.push(pelnyZestaw);
             const kartaHTML = generujHTMLDlaKartyZestawu(pelnyZestaw, i);
             const tempDiv = document.createElement('div'); tempDiv.innerHTML = kartaHTML.trim();
             wylosowaneZestawyFragment.appendChild(tempDiv.firstChild);
         } else {
-            showNotification(`Nie udało się wylosować wszystkich ${iloscZestawowDoWylosowania} zestawów.`, 3000, 'warning'); break; 
+            showNotification(`Nie udało się wylosować kompletu dla zestawu #${i + 1} z powodu braku części.`, 3000, 'warning');
+            // Nie przerywamy pętli, próbujemy wylosować pozostałe
         }
     }
 
@@ -1295,286 +1298,829 @@ function LOSUJ() {
         showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów)!`, 2500, 'success');
         const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
         if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'block';
-    } else if (iloscZestawowDoWylosowania > 0 && czyWystarczajacoCzesci) {
-        wynikiDivGenerator.innerHTML = '<div class="card"><p>Błąd losowania lub brak możliwości skompletowania.</p></div>';
+    } else if (iloscZestawowDoWylosowania > 0) { // Jeśli próbowaliśmy coś wylosować, ale nic się nie udało
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Nie udało się wylosować żadnego kompletnego zestawu. Sprawdź dostępność części w magazynie.</p></div>';
         if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
         const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
         if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
     }
 }
+
 // =================================
-// Zapisywanie Wylosowanych Zestawów i Decków
+// Zapisywanie Wylosowanych Zestawów
 // =================================
 function saveCurrentGeneratedDeck() {
     if (!ostatnioWylosowaneZestawyGlobalnie || ostatnioWylosowaneZestawyGlobalnie.length === 0) {
-        showNotification("Brak wylosowanych zestawów do zapisania.", 3000, 'warning'); return;
+        showNotification("Brak wylosowanych zestawów do zapisania jako deck.", 3000, 'warning'); return;
     }
-    const zestawDoZapisu = ostatnioWylosowaneZestawyGlobalnie[0];
+    // Domyślnie zapisujemy pierwszy wylosowany zestaw jako deck jednosetowy
+    const zestawDoZapisu = ostatnioWylosowaneZestawyGlobalnie[0]; 
     if (!zestawDoZapisu || !zestawDoZapisu.czesci || !zestawDoZapisu.seria) {
         showNotification("Błąd: Dane wylosowanego zestawu są niekompletne.", 3000, 'error'); return;
     }
 
     const nazwaInput = document.getElementById('nazwa-glownego-decku');
-    let nazwaDecku = `Wylosowany ${zestawDoZapisu.seria.toUpperCase()} ${new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}`;
+    let nazwaDecku = `Wylosowany ${zestawDoZapisu.seria.toUpperCase().replace('_','/')} ${new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}`;
     if (nazwaInput && nazwaInput.value.trim() !== '') nazwaDecku = nazwaInput.value.trim();
 
-    const pojedynczyZestawKonfiguracja = { statystykiObliczone: zestawDoZapisu.statystyki };
+    const pojedynczyZestawKonfiguracja = { 
+        seria: zestawDoZapisu.seria,
+        statystykiObliczone: zestawDoZapisu.statystyki 
+    };
+
     if (zestawDoZapisu.seria === 'bx_ux') {
-        pojedynczyZestawKonfiguracja.seria = 'bx_ux';
         pojedynczyZestawKonfiguracja.bladeId = zestawDoZapisu.czesci.blade?.id || null;
         pojedynczyZestawKonfiguracja.ratchetId = zestawDoZapisu.czesci.rachet?.id || null;
         pojedynczyZestawKonfiguracja.bitId = zestawDoZapisu.czesci.bit?.id || null;
     } else if (zestawDoZapisu.seria === 'cx') {
-        pojedynczyZestawKonfiguracja.seria = 'cx';
         pojedynczyZestawKonfiguracja.cx_lock_chipId = zestawDoZapisu.czesci.cx_lock_chip?.id || null;
         pojedynczyZestawKonfiguracja.cx_main_bladeId = zestawDoZapisu.czesci.cx_main_blade?.id || null;
         pojedynczyZestawKonfiguracja.cx_assist_bladeId = zestawDoZapisu.czesci.cx_assist_blade?.id || null;
-        pojedynczyZestawKonfiguracja.ratchetId = zestawDoZapisu.czesci.rachet?.id || null;
+        pojedynczyZestawKonfiguracja.ratchetId = zestawDoZapisu.czesci.rachet?.id || null; // Rachet i Bit są też w CX
         pojedynczyZestawKonfiguracja.bitId = zestawDoZapisu.czesci.bit?.id || null;
-    } else { showNotification("Błąd: Nieznana seria.", 3000, 'error'); return; }
+    } else { showNotification("Błąd: Nieznana seria wylosowanego zestawu.", 3000, 'error'); return; }
 
     const nowyDeck = {
         id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        name: nazwaDecku, timestamp: Date.now(), lastModified: Date.now(),
-        sets: [pojedynczyZestawKonfiguracja]
+        name: nazwaDecku, 
+        timestamp: Date.now(), 
+        lastModified: Date.now(),
+        sets: [pojedynczyZestawKonfiguracja] // Deck składa się z jednego, wylosowanego zestawu
     };
+
     const zapisaneDecki = getSavedDecks();
     zapisaneDecki.push(nowyDeck);
     setSavedDecks(zapisaneDecki);
-    showNotification(`Deck "${nowyDeck.name}" zapisany!`, 3000, 'success');
-    if (nazwaInput) nazwaInput.value = '';
+    showNotification(`Deck "${nowyDeck.name}" (z jednego zestawu) zapisany!`, 3000, 'success');
+    if (nazwaInput) nazwaInput.value = ''; // Czyścimy pole nazwy po zapisie
+    
+    // Opcjonalnie: Zaktualizuj przycisk zapisu, aby pokazać, że zapisano
     const zapiszGlownyButton = document.querySelector('#zapisz-glowny-zestaw-controls button');
     if(zapiszGlownyButton) {
-        zapiszGlownyButton.textContent = 'Zapisano!'; zapiszGlownyButton.disabled = true;
-        setTimeout(() => { zapiszGlownyButton.textContent = 'Zapisz Ten Wylosowany Zestaw'; zapiszGlownyButton.disabled = false; }, 2500);
+        zapiszGlownyButton.textContent = 'Zapisano!'; 
+        zapiszGlownyButton.disabled = true;
+        setTimeout(() => { 
+            zapiszGlownyButton.textContent = 'Zapisz Ten Wylosowany Zestaw'; 
+            zapiszGlownyButton.disabled = false; 
+        }, 2500);
     }
 }
 
-function saveCurrentDeck() { // Dla Deck Generatora
-    const deckNameInput = document.getElementById('deckName');
-    const deckName = deckNameInput ? deckNameInput.value.trim() : '';
-    if (!deckName && !currentEditingDeckId) {
-        showNotification("Wpisz nazwę dla nowego decku.", 3000, 'warning'); deckNameInput?.focus(); return;
+// =================================
+// Drag and Drop Deck Builder - Funkcje Renderujące
+// =================================
+
+    function renderDeckBuilderAndParts() {
+        console.log("renderDeckBuilderAndParts (tabs) wywołane. Aktywny zestaw index:", currentlyActiveSetIndexInBuilder, "Dane:", JSON.parse(JSON.stringify(currentDeckBeingBuilt)));
+        renderAvailablePartsList();
+        renderDeckSetTabs(); // Nowa funkcja do renderowania zakładek
+        renderActiveDeckSetSlots(); // Nowa funkcja do renderowania slotów tylko aktywnego zestawu
+        
+        // Statystyki są teraz aktualizowane w renderActiveDeckSetSlots dla aktywnego zestawu
+    }
+    
+	function renderDeckSetTabs() {
+        const tabsContainer = document.getElementById('deck-set-tabs-container');
+        if (!tabsContainer) {
+            console.error("Kontener zakładek #deck-set-tabs-container nie znaleziony");
+            return;
+        }
+        tabsContainer.innerHTML = ''; // Wyczyść stare zakładki
+
+        for (let i = 0; i < 4; i++) {
+            const tabButton = document.createElement('button');
+            tabButton.className = 'tab-button';
+            tabButton.textContent = `Zestaw ${i + 1}`;
+            tabButton.dataset.setIndex = i; // Przechowujemy indeks 0-3
+
+            if (i === currentlyActiveSetIndexInBuilder) {
+                tabButton.classList.add('active');
+            }
+
+            tabButton.addEventListener('click', (event) => {
+                const newActiveIndex = parseInt(event.currentTarget.dataset.setIndex);
+                if (newActiveIndex !== currentlyActiveSetIndexInBuilder) {
+                    currentlyActiveSetIndexInBuilder = newActiveIndex;
+                    renderDeckBuilderAndParts(); // Prerenderuj wszystko, aby odświeżyć zakładki i sloty
+                }
+            });
+            tabsContainer.appendChild(tabButton);
+        }
+    }
+    
+function renderActiveDeckSetSlots() {
+    const activeSlotsContainer = document.getElementById('deck-builder-active-set-slots');
+    if (!activeSlotsContainer) {
+        console.error("Kontener slotów aktywnego zestawu #deck-builder-active-set-slots nie znaleziony");
+        return;
+    }
+    activeSlotsContainer.innerHTML = ''; 
+
+    if (!currentDeckBeingBuilt || !currentDeckBeingBuilt.sets || !currentDeckBeingBuilt.sets[currentlyActiveSetIndexInBuilder]) {
+        console.warn("currentDeckBeingBuilt lub aktywny zestaw nie jest poprawnie zainicjalizowany.");
+        // Próba resetu, jeśli coś poszło nie tak głębiej
+        initializeOrResetCurrentDeck(); 
+        if (!currentDeckBeingBuilt.sets[currentlyActiveSetIndexInBuilder]) { // Jeśli nadal problem
+             currentDeckBeingBuilt.sets[currentlyActiveSetIndexInBuilder] = { seria: 'bx_ux', bladeId: null, ratchetId: null, bitId: null, cx_lock_chipId: null, cx_main_bladeId: null, cx_assist_bladeId: null, statystykiObliczone: {} };
+        }
+        // Wymuś rerender zakładek i slotów po potencjalnym resecie
+        renderDeckSetTabs(); 
     }
 
-    const currentDeckSetsConfig = [];
-    const magazynDanych = getMagazyn();
-    const usedPartsInDeck = {}; let duplicateFound = false; let duplicateMessage = "";
+    const setIndex = currentlyActiveSetIndexInBuilder;
+    const displaySetNumber = setIndex + 1;
+    const setConfig = currentDeckBeingBuilt.sets[setIndex];
 
-    for (let i = 1; i <= 4; i++) {
-        const seriaSelect = document.getElementById(`deck-seria-${i}`);
-        if (!seriaSelect) continue;
-        const wybranaSeria = seriaSelect.value;
-        const partsConfig = { seria: wybranaSeria };
-        let partsInThisSet = [];
+    const deckSetCard = document.createElement("div");
+    deckSetCard.className = "deck-set card";
+    deckSetCard.style.marginBottom = "20px";
+    deckSetCard.style.padding = "15px";
 
-        if (wybranaSeria === 'bx_ux') {
-            partsConfig.bladeId = document.getElementById(`deck-blade-${i}`)?.value || null;
-            partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
-            partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
-            if (partsConfig.bladeId) partsInThisSet.push({ id: partsConfig.bladeId, type: 'Blade' });
-            if (partsConfig.ratchetId) partsInThisSet.push({ id: partsConfig.ratchetId, type: 'Ratchet' });
-            if (partsConfig.bitId) partsInThisSet.push({ id: partsConfig.bitId, type: 'Bit' });
-        } else if (wybranaSeria === 'cx') {
-            partsConfig.cx_lock_chipId = document.getElementById(`deck-cx-lock-chip-${i}`)?.value || null;
-            partsConfig.cx_main_bladeId = document.getElementById(`deck-cx-main-blade-${i}`)?.value || null;
-            partsConfig.cx_assist_bladeId = document.getElementById(`deck-cx-assist-blade-${i}`)?.value || null;
-            partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
-            partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
-            if (partsConfig.cx_lock_chipId) partsInThisSet.push({ id: partsConfig.cx_lock_chipId, type: 'CX Lock Chip' });
-            if (partsConfig.cx_main_bladeId) partsInThisSet.push({ id: partsConfig.cx_main_bladeId, type: 'CX Main Blade' });
-            if (partsConfig.cx_assist_bladeId) partsInThisSet.push({ id: partsConfig.cx_assist_bladeId, type: 'CX Assist Blade' });
-            if (partsConfig.ratchetId) partsInThisSet.push({ id: partsConfig.ratchetId, type: 'Ratchet' });
-            if (partsConfig.bitId) partsInThisSet.push({ id: partsConfig.bitId, type: 'Bit' });
-        } else continue;
+    const seriaSelectDiv = document.createElement('div');
+    // ... (reszta kodu tworzenia seriaSelectDiv i seriaSelect - bez zmian, tak jak miałeś) ...
+    seriaSelectDiv.style.marginBottom = "10px";
+    const seriaLabel = document.createElement('label');
+    seriaLabel.htmlFor = `deck-seria-${displaySetNumber}`;
+    seriaLabel.textContent = `Seria dla Zestawu ${displaySetNumber}: `;
+    seriaLabel.style.marginRight = "5px";
+    const seriaSelect = document.createElement('select');
+    seriaSelect.id = `deck-seria-${displaySetNumber}`;
+    seriaSelect.innerHTML = `
+        <option value="bx_ux" ${setConfig.seria === 'bx_ux' ? 'selected' : ''}>BX / UX</option>
+        <option value="cx" ${setConfig.seria === 'cx' ? 'selected' : ''}>CX</option>
+    `;
+    seriaSelect.dataset.setIndex = setIndex;
+    seriaSelect.addEventListener('change', handleSeriaChangeForSet);
+    seriaSelectDiv.appendChild(seriaLabel);
+    seriaSelectDiv.appendChild(seriaSelect);
+    deckSetCard.appendChild(seriaSelectDiv);
 
-        for (const part of partsInThisSet) {
-            if (part.id) {
-                if (usedPartsInDeck[part.id]) {
-                    duplicateFound = true;
-                    const partObject = magazynDanych.find(p => p.id === part.id);
-                    const partName = partObject ? partObject.nazwa : `ID ${part.id}`;
-                    duplicateMessage = `Część "${partName}" (${part.type}) użyta więcej niż raz (w Zestawie ${usedPartsInDeck[part.id].setName} i ${i}).`;
-                    break;
+
+    const partTypes = getPartTypesForSeria(setConfig.seria);
+    const magazyn = getMagazyn(); // Pobierz magazyn raz na początku
+
+    // Sprawdź stan Ratcheta dla bieżącego zestawu PRZED pętlą po typach slotów
+    let jestTurboRatchetWAktywnymZestawie = false;
+    if (setConfig.ratchetId) {
+        const aktywnyRatchet = magazyn.find(p => p.id === setConfig.ratchetId && p.typ === 'rachet');
+        if (aktywnyRatchet && (String(aktywnyRatchet.id) === "205" || aktywnyRatchet.integrujeBit === true)) {
+            jestTurboRatchetWAktywnymZestawie = true;
+        }
+    }
+
+    // Jeśli jest Turbo Ratchet, upewnij się, że bitId w modelu jest null
+    if (jestTurboRatchetWAktywnymZestawie && setConfig.bitId !== null) {
+        console.log(`Wykryto Turbo Ratchet (ID: ${setConfig.ratchetId}) z istniejącym Bitem (ID: ${setConfig.bitId}). Czyszczę Bit.`);
+        setConfig.bitId = null; // Wyczyść Bit w modelu
+    }
+
+    partTypes.forEach(partTypeInfo => {
+        const slotDiv = document.createElement('div');
+        slotDiv.className = 'deck-part-slot';
+        slotDiv.dataset.setIndex = setIndex;
+        slotDiv.dataset.slotType = partTypeInfo.type;
+
+        let partId = null;
+        const partIdKey = getPartIdKeyForSlot(partTypeInfo.type, setConfig.seria);
+        if (partIdKey && setConfig.hasOwnProperty(partIdKey)) {
+            partId = setConfig[partIdKey];
+        }
+
+        if (partTypeInfo.type === 'bit' && jestTurboRatchetWAktywnymZestawie) {
+            slotDiv.classList.add('slot-disabled-integrated');
+            slotDiv.innerHTML = `<span style="font-style: italic; color: #888;">Bit zintegrowany</span>`;
+            // Nie dodajemy listenerów drag & drop
+        } else {
+            // Normalne renderowanie slotu (aktywnego lub wypełnionego)
+            if (partId) {
+                const partDetails = magazyn.find(p => p.id === partId);
+                if (partDetails) {
+                    let slotImageHTML;
+                    if (partDetails.img && partDetails.img.trim() !== "") {
+                        slotImageHTML = `<img src="${partDetails.img}" alt="${partDetails.nazwa}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px;">`;
+                    } else {
+                        slotImageHTML = `<div class="dnd-slot-placeholder">Brak<br>Obr.</div>`;
+                    }
+                    slotDiv.innerHTML = `
+                        <div class="part-info-container">
+                            ${slotImageHTML}
+                            <span class="part-name">${partDetails.nazwa}</span>
+                        </div>
+                        <button class="remove-part-btn" title="Usuń część">&times;</button>
+                    `;
+                    slotDiv.classList.add('filled');
+                    slotDiv.dataset.currentPartId = partId;
+                    slotDiv.querySelector('.remove-part-btn').addEventListener('click', () => removePartFromSlot(setIndex, partTypeInfo.type));
+                } else {
+                    slotDiv.innerHTML = `<span>Upuść ${partTypeInfo.label} tutaj (ID: ${partId} nie znalezione)</span>`;
+                    if (partIdKey) setConfig[partIdKey] = null; // Wyczyść nieprawidłowe ID z modelu
                 }
-                usedPartsInDeck[part.id] = { count: 1, setName: i.toString() };
+            } else {
+                slotDiv.innerHTML = `<span>Upuść ${partTypeInfo.label} tutaj</span>`;
             }
+            // Dodaj listenery D&D tylko do aktywnych slotów
+            slotDiv.addEventListener('dragover', handleDragOver);
+            slotDiv.addEventListener('dragenter', handleDragEnter);
+            slotDiv.addEventListener('dragleave', handleDragLeave);
+            slotDiv.addEventListener('drop', handleDrop);
+        }
+        deckSetCard.appendChild(slotDiv);
+    });
+        
+    const statsDiv = document.createElement('div');
+    statsDiv.id = `deck-stats-${displaySetNumber}`;
+    // ... (reszta kodu tworzenia statsDiv - bez zmian) ...
+    statsDiv.className = "deck-stats"; 
+    statsDiv.style.cssText = "margin-top: 15px; font-weight: normal; font-size: 0.9em; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 6px; text-align: left; line-height: 1.5;";
+    deckSetCard.appendChild(statsDiv);
+        
+    activeSlotsContainer.appendChild(deckSetCard);
+        
+    updateDeckStatsForSetInBuilder(displaySetNumber); 
+}
+    
+	
+function renderAvailablePartsList() {
+    const partsListContainer = document.getElementById('parts-list-for-dnd');
+    if (!partsListContainer) { console.error("Kontener #parts-list-for-dnd nie znaleziony"); return; }
+    partsListContainer.innerHTML = '';
+    const magazyn = getMagazyn();
+    const filterValue = document.getElementById('dndPartTypeFilter')?.value;
+
+    if (!filterValue) {
+        console.warn("Brak wartości filtra dla listy części D&D.");
+        partsListContainer.innerHTML = '<p style="font-size:0.9em; color:#999; text-align:center;">Wybierz typ części do wyświetlenia.</p>';
+        return;
+    }
+
+    const czesciDoWyswietlenia = magazyn.filter(czesc => {
+        const ilosc = parseInt(czesc.ilosc) || 0;
+        if (ilosc <= 0) return false;
+        return czesc.typ === filterValue;
+    }).sort((a,b) => (a.nazwa || "").localeCompare(b.nazwa || ""));
+
+    if (czesciDoWyswietlenia.length === 0) {
+        let typNazwa = filterValue.replace('-', ' ');
+        // Prosta kapitalizacja pierwszej litery każdego słowa dla nazwy typu
+        typNazwa = typNazwa.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        partsListContainer.innerHTML = `<p style="font-size:0.9em; color:#999; text-align:center;">Brak części typu "${typNazwa}" w magazynie.</p>`;
+        return;
+    }
+
+    czesciDoWyswietlenia.forEach(czesc => {
+        const partItem = document.createElement('div');
+        partItem.className = 'available-part-item';
+        partItem.draggable = true;
+        partItem.dataset.partId = czesc.id;
+        partItem.dataset.partType = czesc.typ;
+        partItem.dataset.partData = JSON.stringify({id: czesc.id, typ: czesc.typ, nazwa: czesc.nazwa, img: czesc.img });
+
+        let imageElementHTML;
+        if (czesc.img && czesc.img.trim() !== "") {
+            // Upewnij się, że styl jest spójny z CSS, jeśli używasz img tag bezpośrednio
+            imageElementHTML = `<img src="${czesc.img}" alt="${czesc.nazwa}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 4px;">`;
+        } else {
+            imageElementHTML = `<div class="dnd-list-placeholder">Brak<br>Obr.</div>`;
+        }
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = `${czesc.nazwa} (x${czesc.ilosc})`;
+        
+        partItem.innerHTML = imageElementHTML; // Ustawia obrazek/placeholder
+        partItem.appendChild(nameSpan);      // Dodaje nazwę obok
+        
+        partItem.addEventListener('dragstart', handleDragStart);
+        partItem.addEventListener('dragend', handleDragEnd);
+        partsListContainer.appendChild(partItem);
+    });
+}
+
+function renderDeckSlots() {
+    const slotsContainer = document.getElementById('deck-builder-slots');
+    if (!slotsContainer) { console.error("Kontener #deck-builder-slots nie znaleziony"); return; }
+    slotsContainer.innerHTML = ''; // Czyścimy przed renderowaniem
+
+    if (!currentDeckBeingBuilt || !currentDeckBeingBuilt.sets || currentDeckBeingBuilt.sets.length === 0) {
+        console.warn("currentDeckBeingBuilt nie jest poprawnie zainicjalizowany do renderowania slotów.");
+        initializeOrResetCurrentDeck(); // Spróbuj zainicjalizować
+    }
+
+
+    for (let i = 0; i < 4; i++) {
+        const setIndex = i; // Index w tablicy (0-3)
+        const displaySetNumber = i + 1; // Numer wyświetlany użytkownikowi (1-4)
+        const setConfig = currentDeckBeingBuilt.sets[setIndex]; // Pobieramy konfigurację zestawu
+
+        if (!setConfig) {
+            console.error(`Brak konfiguracji dla zestawu o indeksie ${setIndex} w currentDeckBeingBuilt.`);
+            continue; 
+        }
+
+        const deckSetCard = document.createElement("div");
+        deckSetCard.className = "deck-set card"; // Używamy klasy .card dla spójności
+        deckSetCard.style.marginBottom = "20px";
+        deckSetCard.style.padding = "15px";
+
+        const heading = document.createElement('h3');
+        heading.textContent = `Zestaw ${displaySetNumber}`;
+        deckSetCard.appendChild(heading);
+
+        const seriaSelectDiv = document.createElement('div');
+        seriaSelectDiv.style.marginBottom = "10px";
+        const seriaLabel = document.createElement('label');
+        seriaLabel.htmlFor = `deck-seria-${displaySetNumber}`;
+        seriaLabel.textContent = `Seria: `;
+        seriaLabel.style.marginRight = "5px";
+        const seriaSelect = document.createElement('select');
+        seriaSelect.id = `deck-seria-${displaySetNumber}`;
+        seriaSelect.innerHTML = `
+            <option value="bx_ux" ${setConfig.seria === 'bx_ux' ? 'selected' : ''}>BX / UX</option>
+            <option value="cx" ${setConfig.seria === 'cx' ? 'selected' : ''}>CX</option>
+        `;
+        seriaSelect.dataset.setIndex = setIndex; // Przechowujemy index tablicy
+        seriaSelect.addEventListener('change', handleSeriaChangeForSet);
+        
+        seriaSelectDiv.appendChild(seriaLabel);
+        seriaSelectDiv.appendChild(seriaSelect);
+        deckSetCard.appendChild(seriaSelectDiv);
+
+        const partTypes = getPartTypesForSeria(setConfig.seria);
+        partTypes.forEach(partType => {
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'deck-part-slot';
+            slotDiv.dataset.setIndex = setIndex; // Index tablicy 0-3
+            slotDiv.dataset.slotType = partType.type; // np. 'blade', 'cx-main-blade'
+            // Placeholder tekstowy
+            slotDiv.innerHTML = `<span>Upuść ${partType.label} tutaj</span>`;
+            
+            slotDiv.addEventListener('dragover', handleDragOver);
+            slotDiv.addEventListener('dragenter', handleDragEnter);
+            slotDiv.addEventListener('dragleave', handleDragLeave);
+            slotDiv.addEventListener('drop', handleDrop);
+            deckSetCard.appendChild(slotDiv);
+        });
+        
+        const statsDiv = document.createElement('div');
+        statsDiv.id = `deck-stats-${displaySetNumber}`; // ID dla aktualizacji statystyk
+        statsDiv.className = "deck-stats"; // Możesz dodać style dla .deck-stats
+        statsDiv.style.cssText = "margin-top: 15px; font-weight: normal; font-size: 0.9em; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 6px; text-align: left; line-height: 1.5;";
+        deckSetCard.appendChild(statsDiv);
+        
+        slotsContainer.appendChild(deckSetCard);
+    }
+}
+
+function getPartTypesForSeria(seria) {
+    if (seria === 'cx') {
+        return [
+            { type: 'cx_lock_chip', label: 'Lock Chip' },
+            { type: 'cx_main_blade', label: 'Main Blade' },
+            { type: 'cx_assist_blade', label: 'Assist Blade' },
+            { type: 'rachet', label: 'Ratchet (CX)' },
+            { type: 'bit', label: 'Bit (CX)' }
+        ];
+    }
+    // Domyślnie BX/UX
+    return [
+        { type: 'blade', label: 'Blade' },
+        { type: 'rachet', label: 'Ratchet (BX/UX)' },
+        { type: 'bit', label: 'Bit (BX/UX)' }
+    ];
+}
+
+function handleSeriaChangeForSet(event) {
+        const setIndex = parseInt(event.target.dataset.setIndex); // To jest indeks 0-3
+        const nowaSeria = event.target.value;
+        
+        if (isNaN(setIndex) || !currentDeckBeingBuilt.sets[setIndex]) return;
+
+        currentDeckBeingBuilt.sets[setIndex].seria = nowaSeria;
+
+        // Wyczyść ID części poprzedniej serii (lub wszystkie dla bezpieczeństwa)
+        if (nowaSeria === 'bx_ux') {
+            currentDeckBeingBuilt.sets[setIndex].cx_lock_chipId = null;
+            currentDeckBeingBuilt.sets[setIndex].cx_main_bladeId = null;
+            currentDeckBeingBuilt.sets[setIndex].cx_assist_bladeId = null;
+        } else if (nowaSeria === 'cx') {
+            currentDeckBeingBuilt.sets[setIndex].bladeId = null;
+        }
+        // Można rozważyć czyszczenie ratchetId i bitId, jeśli chcesz wymusić ponowny wybór
+        // currentDeckBeingBuilt.sets[setIndex].ratchetId = null;
+        // currentDeckBeingBuilt.sets[setIndex].bitId = null;
+
+        // Prerenderuj tylko sloty aktywnego zestawu i zaktualizuj jego statystyki
+        renderActiveDeckSetSlots(); 
+        // updateDeckStatsForSetInBuilder jest już wywoływane w renderActiveDeckSetSlots
+        console.log(`Zmieniono serię dla zestawu ${setIndex + 1} na ${nowaSeria}.`);
+    }
+    
+
+function fillDeckSlotsFromCurrentBuild() {
+    const magazyn = getMagazyn();
+    if (!currentDeckBeingBuilt || !currentDeckBeingBuilt.sets) {
+        console.warn("Próba wypełnienia slotów, ale currentDeckBeingBuilt nie jest gotowy.");
+        return;
+    }
+
+    currentDeckBeingBuilt.sets.forEach((set, setIndex) => {
+        if (!set) { // Jeśli zestaw jest null (co nie powinno się zdarzyć przy dobrej inicjalizacji)
+            console.warn(`Zestaw o indeksie ${setIndex} jest null w fillDeckSlotsFromCurrentBuild.`);
+            // Można by tu spróbować zainicjalizować ten konkretny zestaw, jeśli to konieczne
+            // currentDeckBeingBuilt.sets[setIndex] = initializeOrResetCurrentDeck().sets[0]; // Przykładowo
+            return;
+        }
+
+        const partTypes = getPartTypesForSeria(set.seria);
+        partTypes.forEach(partTypeInfo => {
+            const slotSelector = `.deck-part-slot[data-set-index="${setIndex}"][data-slot-type="${partTypeInfo.type}"]`;
+            const slotDiv = document.querySelector(slotSelector);
+            if (!slotDiv) {
+                console.warn(`Nie znaleziono slotu w DOM: ${slotSelector}`);
+                return;
+            }
+
+            let partId = null;
+            const partIdKey = getPartIdKeyForSlot(partTypeInfo.type, set.seria);
+            if (partIdKey && set.hasOwnProperty(partIdKey)) {
+                partId = set[partIdKey];
+            }
+            
+            if (partId) {
+                const partDetails = magazyn.find(p => p.id === partId);
+                if (partDetails) {
+                    let slotImageHTML;
+                    if (partDetails.img && partDetails.img.trim() !== "") {
+                        slotImageHTML = `<img src="${partDetails.img}" alt="${partDetails.nazwa}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px;">`;
+                    } else {
+                        slotImageHTML = `<div class="dnd-slot-placeholder">Brak<br>Obr.</div>`;
+                    }
+
+                    slotDiv.innerHTML = `
+                        <div class="part-info-container">
+                            ${slotImageHTML}
+                            <span class="part-name">${partDetails.nazwa}</span>
+                        </div>
+                        <button class="remove-part-btn" title="Usuń część">&times;</button>
+                    `;
+                    slotDiv.classList.add('filled');
+                    slotDiv.dataset.currentPartId = partId;
+                    slotDiv.querySelector('.remove-part-btn').addEventListener('click', () => removePartFromSlot(setIndex, partTypeInfo.type));
+                } else {
+                    slotDiv.innerHTML = `<span>Upuść ${partTypeInfo.label} tutaj (ID: ${partId} nie znalezione)</span>`;
+                    slotDiv.classList.remove('filled');
+                    delete slotDiv.dataset.currentPartId;
+                    // Opcjonalnie: wyczyść ID w modelu, jeśli część nie istnieje w magazynie
+                    // if (partIdKey) currentDeckBeingBuilt.sets[setIndex][partIdKey] = null;
+                }
+            } else {
+                slotDiv.innerHTML = `<span>Upuść ${partTypeInfo.label} tutaj</span>`;
+                slotDiv.classList.remove('filled');
+                delete slotDiv.dataset.currentPartId;
+            }
+        });
+    });
+}
+
+
+// =================================
+// Drag and Drop - Event Handlers
+// =================================
+let draggedItemData = null; // Przechowuje dane przeciąganego elementu
+
+function handleDragStart(event) {
+    try {
+        draggedItemData = JSON.parse(event.target.dataset.partData);
+        event.dataTransfer.setData("text/plain", draggedItemData.id); // Potrzebne dla Firefoxa
+        event.dataTransfer.effectAllowed = "move";
+        event.target.classList.add('dragging');
+        console.log("DragStart:", draggedItemData);
+    } catch (e) {
+        console.error("Błąd w handleDragStart podczas parsowania JSON:", e, "Dane:", event.target.dataset.partData);
+        draggedItemData = null;
+        event.preventDefault(); // Anuluj przeciąganie, jeśli dane są złe
+    }
+}
+
+function handleDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    event.currentTarget.classList.add('drag-over-target');
+}
+
+function handleDragEnter(event) {
+    event.preventDefault();
+    event.currentTarget.classList.add('drag-over-target');
+}
+
+function handleDragLeave(event) {
+    event.currentTarget.classList.remove('drag-over-target');
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('drag-over-target');
+
+    if (!draggedItemData) {
+        showNotification("Błąd: Brak danych przeciąganej części.", 3000, 'error');
+        return;
+    }
+
+    const dropZone = event.currentTarget;
+    const setArrayIndex = parseInt(dropZone.dataset.setIndex);
+    const slotType = dropZone.dataset.slotType;
+    
+    // Sprawdzenie, czy slot nie jest wyłączony (np. slot Bit przy Turbo Ratchet)
+    if (dropZone.classList.contains('slot-disabled-integrated')) {
+        showNotification("Ten slot jest nieaktywny z powodu zintegrowanej części.", 3000, 'warning');
+        draggedItemData = null;
+        return;
+    }
+
+    // ... (reszta walidacji: isNaN(setArrayIndex), currentDeckBeingBuilt.sets, isValidPlacement, isAlreadyInDeck - bez zmian) ...
+    if (isNaN(setArrayIndex) || !currentDeckBeingBuilt.sets[setArrayIndex]) {
+        showNotification("Błąd: Nieprawidłowy cel upuszczenia.", 3000, 'error');
+        draggedItemData = null;
+        return;
+    }
+    const targetSet = currentDeckBeingBuilt.sets[setArrayIndex];
+    const expectedSeria = targetSet.seria;
+    const partActualType = draggedItemData.typ;
+
+    let isValidPlacement = false;
+    if (expectedSeria === 'bx_ux') {
+        if ( (slotType === 'blade' && partActualType === 'blade') ||
+             (slotType === 'rachet' && partActualType === 'rachet') ||
+             (slotType === 'bit' && partActualType === 'bit') ) {
+            isValidPlacement = true;
+        }
+    } else if (expectedSeria === 'cx') {
+         if ( (slotType === 'cx_lock_chip' && partActualType === 'cx-lock-chip') ||
+             (slotType === 'cx_main_blade' && partActualType === 'cx-main-blade') ||
+             (slotType === 'cx_assist_blade' && partActualType === 'cx-assist-blade') ||
+             (slotType === 'rachet' && partActualType === 'rachet') ||
+             (slotType === 'bit' && partActualType === 'bit') ) {
+            isValidPlacement = true;
+        }
+    }
+
+    if (!isValidPlacement) {
+        const readableSlotType = slotType.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const readablePartType = partActualType.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        showNotification(`Nie można umieścić części typu "${readablePartType}" w slocie na "${readableSlotType}" dla serii ${expectedSeria.toUpperCase()}.`, 4000, 'warning');
+        draggedItemData = null;
+        return;
+    }
+
+    let isAlreadyInDeck = false;
+    const magazynForName = getMagazyn(); 
+    currentDeckBeingBuilt.sets.forEach((s, currentSetIdx) => {
+        if (!s) return;
+        Object.keys(s).forEach(key => {
+            if (key.endsWith('Id') && s[key] === draggedItemData.id) {
+                if (!(currentSetIdx === setArrayIndex && key === getPartIdKeyForSlot(slotType, expectedSeria)) ) {
+                     isAlreadyInDeck = true;
+                }
+            }
+        });
+    });
+
+    if (isAlreadyInDeck) {
+        const partDetails = magazynForName.find(p => p.id === draggedItemData.id);
+        showNotification(`Część "${partDetails ? partDetails.nazwa : draggedItemData.id}" jest już użyta w tym decku. Wybierz inną.`, 3500, 'warning');
+        draggedItemData = null;
+        return;
+    }
+    // Koniec walidacji
+
+    const partIdKey = getPartIdKeyForSlot(slotType, expectedSeria);
+    if (partIdKey) {
+        targetSet[partIdKey] = draggedItemData.id;
+    } else {
+        console.error("Nie udało się ustalić klucza ID dla slotu:", slotType, "i serii:", expectedSeria);
+        draggedItemData = null;
+        return;
+    }
+
+    // Jeśli upuszczono Ratchet, odświeżamy cały aktywny zestaw,
+    // aby poprawnie obsłużyć logikę włączania/wyłączania slotu Bit i czyszczenia bitId.
+    // renderActiveDeckSetSlots samo zaktualizuje UI i wywoła updateDeckStatsForSetInBuilder.
+    if (slotType === 'rachet') {
+        console.log("Upuszczono Ratchet. Odświeżam sloty aktywnego zestawu.");
+        renderActiveDeckSetSlots(); 
+    } else {
+        // Dla innych typów slotów (Blade, Bit, CX części) tylko aktualizujemy UI tego konkretnego slotu
+        // i przeliczamy statystyki.
+        let droppedPartImageHTML;
+        if (draggedItemData.img && draggedItemData.img.trim() !== "") {
+            droppedPartImageHTML = `<img src="${draggedItemData.img}" alt="${draggedItemData.nazwa}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px;">`;
+        } else {
+            droppedPartImageHTML = `<div class="dnd-slot-placeholder">Brak<br>Obr.</div>`;
+        }
+        dropZone.innerHTML = `
+            <div class="part-info-container">
+                ${droppedPartImageHTML}
+                <span class="part-name">${draggedItemData.nazwa}</span>
+            </div>
+            <button class="remove-part-btn" title="Usuń część">&times;</button>
+        `;
+        dropZone.classList.add('filled');
+        dropZone.dataset.currentPartId = draggedItemData.id;
+        dropZone.querySelector('.remove-part-btn').addEventListener('click', () => removePartFromSlot(setArrayIndex, slotType));
+        
+        updateDeckStatsForSetInBuilder(setArrayIndex + 1); // displaySetNumber
+    }
+    
+    console.log(`Zaktualizowano zestaw ${setArrayIndex + 1} po dropie:`, JSON.parse(JSON.stringify(targetSet)));
+    draggedItemData = null;
+}
+
+
+function handleDragEnd(event) {
+    event.target.classList.remove('dragging');
+    draggedItemData = null; // Zawsze resetuj na końcu przeciągania
+}
+
+function getPartIdKeyForSlot(slotType, seria) {
+    // Ta funkcja mapuje typ slotu na odpowiedni klucz ID w obiekcie zestawu
+    if (seria === 'bx_ux') {
+        if (slotType === 'blade') return 'bladeId';
+        if (slotType === 'rachet') return 'ratchetId';
+        if (slotType === 'bit') return 'bitId';
+    } else if (seria === 'cx') {
+        if (slotType === 'cx_lock_chip') return 'cx_lock_chipId';
+        if (slotType === 'cx_main_blade') return 'cx_main_bladeId';
+        if (slotType === 'cx_assist_blade') return 'cx_assist_bladeId';
+        if (slotType === 'rachet') return 'ratchetId'; // Używamy tego samego klucza dla Ratchet w obu seriach
+        if (slotType === 'bit') return 'bitId';     // Używamy tego samego klucza dla Bit w obu seriach
+    }
+    return null;
+}
+
+function removePartFromSlot(setArrayIndex, slotType) {
+    if (isNaN(setArrayIndex) || !currentDeckBeingBuilt || !currentDeckBeingBuilt.sets[setArrayIndex]) {
+        console.error("Błąd w removePartFromSlot: Nieprawidłowy indeks zestawu lub brak danych.");
+        return;
+    }
+    
+    const targetSet = currentDeckBeingBuilt.sets[setArrayIndex];
+    const partIdKey = getPartIdKeyForSlot(slotType, targetSet.seria);
+
+    if (partIdKey && targetSet.hasOwnProperty(partIdKey) && targetSet[partIdKey] !== null) {
+        console.log(`Usuwanie części (ID: ${targetSet[partIdKey]}) ze slotu ${slotType} w zestawie ${setArrayIndex + 1}`);
+        targetSet[partIdKey] = null; // Usuń ID części z modelu
+
+        // Po usunięciu części (zwłaszcza jeśli to był Ratchet, który mógł wpływać na stan slotu Bit),
+        // odśwież całe sloty aktywnego zestawu.
+        // renderActiveDeckSetSlots zajmie się aktualizacją UI i statystyk.
+        renderActiveDeckSetSlots(); 
+        
+        // Nie ma potrzeby wywoływać tu updateDeckStatsForSetInBuilder,
+        // ponieważ renderActiveDeckSetSlots już to robi.
+    } else {
+        console.warn(`Próba usunięcia części ze slotu ${slotType} w zestawie ${setArrayIndex + 1}, ale slot był już pusty lub klucz nieprawidłowy.`);
+    }
+}
+
+// =================================
+// Deck Builder - Statystyki i Zapis
+// =================================
+function updateDeckStatsForSetInBuilder(displaySetNumber) { // displaySetNumber to 1-4
+    const setArrayIndex = displaySetNumber - 1;
+    if (!currentDeckBeingBuilt.sets[setArrayIndex]) return;
+
+    const setConfig = currentDeckBeingBuilt.sets[setArrayIndex];
+    const magazyn = getMagazyn();
+    let czesciDoObliczen = {};
+    let nazwyCzesciDoWyswietlenia = [];
+
+    if (setConfig.seria === 'bx_ux') {
+        czesciDoObliczen.blade = setConfig.bladeId ? magazyn.find(p => p.id === setConfig.bladeId) : null;
+        czesciDoObliczen.rachet = setConfig.ratchetId ? magazyn.find(p => p.id === setConfig.ratchetId) : null;
+        czesciDoObliczen.bit = setConfig.bitId ? magazyn.find(p => p.id === setConfig.bitId) : null;
+        nazwyCzesciDoWyswietlenia.push(`Blade: ${czesciDoObliczen.blade?.nazwa || '<i>Brak</i>'}`);
+        nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || '<i>Brak</i>'}`);
+        nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || '<i>Brak</i>'}`);
+    } else if (setConfig.seria === 'cx') {
+        czesciDoObliczen.cx_lock_chip = setConfig.cx_lock_chipId ? magazyn.find(p => p.id === setConfig.cx_lock_chipId) : null;
+        czesciDoObliczen.cx_main_blade = setConfig.cx_main_bladeId ? magazyn.find(p => p.id === setConfig.cx_main_bladeId) : null;
+        czesciDoObliczen.cx_assist_blade = setConfig.cx_assist_bladeId ? magazyn.find(p => p.id === setConfig.cx_assist_bladeId) : null;
+        czesciDoObliczen.rachet = setConfig.ratchetId ? magazyn.find(p => p.id === setConfig.ratchetId) : null; // Wspólny Ratchet
+        czesciDoObliczen.bit = setConfig.bitId ? magazyn.find(p => p.id === setConfig.bitId) : null;         // Wspólny Bit
+        nazwyCzesciDoWyswietlenia.push(`LockChip: ${czesciDoObliczen.cx_lock_chip?.nazwa || '<i>Brak</i>'}`);
+        nazwyCzesciDoWyswietlenia.push(`MainBlade: ${czesciDoObliczen.cx_main_blade?.nazwa || '<i>Brak</i>'}`);
+        nazwyCzesciDoWyswietlenia.push(`AssistBlade: ${czesciDoObliczen.cx_assist_blade?.nazwa || '<i>Brak</i>'}`);
+        nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || '<i>Brak</i>'}`);
+        nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || '<i>Brak</i>'}`);
+    }
+
+    const obliczoneStatystyki = obliczSumeStatystykZestawu(czesciDoObliczen, setConfig.seria);
+    currentDeckBeingBuilt.sets[setArrayIndex].statystykiObliczone = obliczoneStatystyki; // Zapisz obliczone staty
+
+    const statsDiv = document.getElementById(`deck-stats-${displaySetNumber}`);
+    if (statsDiv) {
+        let statsTextHTML = ``;
+        statsTextHTML += `<b>SUMA (${setConfig.seria.toUpperCase().replace('_','/')}):</b> `;
+        statsTextHTML += `ATK: ${obliczoneStatystyki.ATK}, DEF: ${obliczoneStatystyki.DEF}, STM: ${obliczoneStatystyki.STM}, Waga: ${obliczoneStatystyki.WAGA}g`;
+        const jestSpecjalnyRatchet = czesciDoObliczen.rachet && (String(czesciDoObliczen.rachet.id) === "205" || czesciDoObliczen.rachet.integrujeBit === true);
+        if ( (setConfig.seria === 'bx_ux' && !jestSpecjalnyRatchet && czesciDoObliczen.bit) || (setConfig.seria === 'cx' && !jestSpecjalnyRatchet && czesciDoObliczen.bit) || jestSpecjalnyRatchet ) {
+            if (obliczoneStatystyki.DASH !== 0) statsTextHTML += `, DASH: ${obliczoneStatystyki.DASH}`;
+            if (obliczoneStatystyki.B_RES !== 0) statsTextHTML += `, B-RES: ${obliczoneStatystyki.B_RES}`;
+        }
+        if (setConfig.seria === 'cx' && obliczoneStatystyki.CX_LC_WYTRZ !== 0) {
+            statsTextHTML += `, LC-W: ${obliczoneStatystyki.CX_LC_WYTRZ}`;
+        }
+        statsDiv.innerHTML = statsTextHTML;
+    }
+    return obliczoneStatystyki; // Zwracamy, jeśli potrzebne gdzieś indziej
+}
+
+
+function saveCurrentDeck() {
+    const deckNameInput = document.getElementById('deckName');
+    const deckName = deckNameInput ? deckNameInput.value.trim() : (currentDeckBeingBuilt.name || '');
+
+    if (!deckName && !currentEditingDeckId) { // Tylko jeśli to nowy deck, wymagaj nazwy
+        showNotification("Wpisz nazwę dla nowego decku.", 3000, 'warning');
+        deckNameInput?.focus();
+        return;
+    }
+    
+    // Filtrujemy tylko te zestawy, które mają przynajmniej jedną część wybraną
+    const nonEmptySets = currentDeckBeingBuilt.sets.filter(set => {
+        if (!set) return false;
+        return set.bladeId || set.ratchetId || set.bitId || set.cx_lock_chipId || set.cx_main_bladeId || set.cx_assist_bladeId;
+    });
+
+    if (nonEmptySets.length === 0 && !currentEditingDeckId) {
+        showNotification("Nie skonfigurowano żadnych części w żadnym zestawie.", 3000, 'warning');
+        return;
+    }
+    // Walidacja unikalności części w obrębie decku (już częściowo obsłużona w handleDrop, ale dla pewności)
+    const allPartIdsInDeck = new Set();
+    let duplicateFound = false;
+    let duplicatePartName = "";
+    const magazyn = getMagazyn();
+
+    for (const set of nonEmptySets) {
+        const partIdsInSet = [set.bladeId, set.ratchetId, set.bitId, set.cx_lock_chipId, set.cx_main_bladeId, set.cx_assist_bladeId].filter(id => id !== null);
+        for (const partId of partIdsInSet) {
+            if (allPartIdsInDeck.has(partId)) {
+                duplicateFound = true;
+                const partDetails = magazyn.find(p => p.id === partId);
+                duplicatePartName = partDetails ? partDetails.nazwa : `ID: ${partId}`;
+                break;
+            }
+            allPartIdsInDeck.add(partId);
         }
         if (duplicateFound) break;
-
-        partsConfig.statystykiObliczone = updateDeckStats(i, magazynDanych, true);
-        const czyJakakolwiekCzescWybrana = Object.values(partsConfig).some(val => typeof val === 'string' && val !== '' && val !== wybranaSeria && val !== null && !val.startsWith('statystyki'));
-        if (czyJakakolwiekCzescWybrana) currentDeckSetsConfig.push(partsConfig);
     }
 
-    if (duplicateFound) { showNotification(duplicateMessage, 5000, 'error'); return; }
-    if (currentDeckSetsConfig.length === 0 && !currentEditingDeckId) { showNotification("Nie skonfigurowano żadnych części.", 3000, 'warning'); return; }
+    if (duplicateFound) {
+        showNotification(`Część "${duplicatePartName}" jest użyta więcej niż raz w tym decku. Popraw konfigurację.`, 4000, 'error');
+        return;
+    }
+
 
     let savedDecks = getSavedDecks();
     let wiadomosc = '';
-    let nazwaDeckuOperacji = deckName || (currentEditingDeckId ? savedDecks.find(d => d.id === currentEditingDeckId)?.name : `Deck ${new Date().toLocaleTimeString('pl-PL')}`);
+    const finalDeckName = deckName || (currentEditingDeckId ? savedDecks.find(d => d.id === currentEditingDeckId)?.name : `Deck ${new Date().toLocaleTimeString('pl-PL')}`);
+
+    const deckToSave = {
+        id: currentEditingDeckId || currentDeckBeingBuilt.id || `deck_${Date.now()}_${Math.random().toString(36).substring(2,7)}`, // Użyj ID z currentDeck, jeśli istnieje
+        name: finalDeckName,
+        sets: nonEmptySets, // Zapisujemy tylko niepuste zestawy
+        timestamp: currentEditingDeckId ? (savedDecks.find(d => d.id === currentEditingDeckId)?.timestamp || Date.now()) : Date.now(),
+        lastModified: Date.now()
+    };
+
 
     if (currentEditingDeckId) {
         const deckIndex = savedDecks.findIndex(d => d.id === currentEditingDeckId);
         if (deckIndex > -1) {
-            savedDecks[deckIndex].name = nazwaDeckuOperacji;
-            savedDecks[deckIndex].sets = currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : [];
-            savedDecks[deckIndex].lastModified = Date.now();
-            wiadomosc = `Deck "${nazwaDeckuOperacji}" zaktualizowany!`;
+            savedDecks[deckIndex] = deckToSave;
+            wiadomosc = `Deck "${finalDeckName}" zaktualizowany!`;
         } else {
-            showNotification("Błąd: Nie znaleziono decku do edycji.", 3000, 'error');
-            currentEditingDeckId = null; const saveBtn = document.getElementById('saveDeckButton'); if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck'; return;
+            // To nie powinno się zdarzyć, jeśli currentEditingDeckId jest poprawnie zarządzane
+            savedDecks.push(deckToSave); // Dodaj jako nowy, jeśli jakimś cudem nie znaleziono
+            wiadomosc = `Deck "${finalDeckName}" zapisany (jako nowy, błąd edycji)!`;
+            currentEditingDeckId = null; // Zresetuj, bo zapisano jako nowy
         }
     } else {
-        const newDeck = { id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, name: nazwaDeckuOperacji, timestamp: Date.now(), lastModified: Date.now(), sets: currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : [] };
-        savedDecks.push(newDeck);
-        wiadomosc = `Deck "${nazwaDeckuOperacji}" zapisany!`;
+        savedDecks.push(deckToSave);
+        wiadomosc = `Deck "${finalDeckName}" zapisany!`;
     }
+    
     setSavedDecks(savedDecks);
     showNotification(wiadomosc, 3000, 'success');
 
-    if (deckNameInput) deckNameInput.value = '';
-    currentEditingDeckId = null;
-    const saveBtn = document.getElementById('saveDeckButton');
-    if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
-
-    renderDeckBuilder(); 
-    console.log("Zapis decku zakończony pomyślnie (lub aktualizacja).");
+    // Reset buildera do stanu początkowego po zapisie
+    clearCurrentDeckForBuilder(); // To także zresetuje currentEditingDeckId
 }
+
 
 // =================================
-// Deck Generator Functions (Builder, Stats, Display)
+// Wyświetlanie, Edycja, Usuwanie Zapisanych Decków
 // =================================
-function fillDropdown(selectId, type, magazynData, currentVal = null) {
-  const selectElement = document.getElementById(selectId);
-  if (!selectElement) { console.error(`FillDropdown: Select ID '${selectId}' nie istnieje.`); return; }
-  selectElement.innerHTML = "<option value=''>-- wybierz --</option>";
-  if (!Array.isArray(magazynData)) { console.error(`FillDropdown: Magazyn dla typu '${type}' nie jest listą.`); return; }
-
-  const parts = magazynData.filter(p => p && p.typ === type && (p.ilosc === undefined || parseInt(p.ilosc) > 0));
-  parts.sort((a, b) => (a.nazwa || "").localeCompare(b.nazwa || ""));
-  parts.forEach(p => { 
-    const option = document.createElement('option');
-    option.value = p.id || `brak_id_${Math.random().toString(36).substring(2,7)}`;
-    option.textContent = `${p.nazwa || 'Część Bez Nazwy'} (Ilość: ${p.ilosc === undefined ? 'N/A' : p.ilosc})`;
-    if (currentVal && option.value === currentVal) option.selected = true;
-    selectElement.appendChild(option);
-  });
-}
-
-function updateDeckStats(setIndex, magazynData, returnStatsOnly = false) {
-    const seriaSelect = document.getElementById(`deck-seria-${setIndex}`);
-    if (!seriaSelect) {
-        if (!returnStatsOnly) {
-            const statsDivFallback = document.getElementById(`deck-stats-${setIndex}`);
-            if (statsDivFallback) statsDivFallback.innerHTML = '<p style="color:red;">Błąd konfiguracji.</p>';
-        }
-        return returnStatsOnly ? { ATK: 0, DEF: 0, STM: 0, WAGA: 0, DASH: 0, B_RES: 0, CX_LC_WYTRZ: 0 } : undefined;
-    }
-    const wybranaSeria = seriaSelect.value;
-    let czesciDoObliczen = {}; let nazwyCzesciDoWyswietlenia = [];
-
-    if (wybranaSeria === 'bx_ux') {
-        const bladeId = document.getElementById(`deck-blade-${setIndex}`)?.value;
-        const ratchetId = document.getElementById(`deck-ratchet-${setIndex}`)?.value;
-        const bitId = document.getElementById(`deck-bit-${setIndex}`)?.value;
-        czesciDoObliczen.blade = bladeId ? magazynData.find(p => p.id === bladeId) : null;
-        czesciDoObliczen.rachet = ratchetId ? magazynData.find(p => p.id === ratchetId) : null;
-        czesciDoObliczen.bit = bitId ? magazynData.find(p => p.id === bitId) : null;
-        nazwyCzesciDoWyswietlenia.push(`Blade: ${czesciDoObliczen.blade?.nazwa || 'N/A'}`);
-        nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || 'N/A'}`);
-        nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || 'N/A'}`);
-    } else if (wybranaSeria === 'cx') {
-        const lockChipId = document.getElementById(`deck-cx-lock-chip-${setIndex}`)?.value;
-        const mainBladeId = document.getElementById(`deck-cx-main-blade-${setIndex}`)?.value;
-        const assistBladeId = document.getElementById(`deck-cx-assist-blade-${setIndex}`)?.value;
-        const ratchetId = document.getElementById(`deck-ratchet-${setIndex}`)?.value;
-        const bitId = document.getElementById(`deck-bit-${setIndex}`)?.value;
-        czesciDoObliczen.cx_lock_chip = lockChipId ? magazynData.find(p => p.id === lockChipId) : null;
-        czesciDoObliczen.cx_main_blade = mainBladeId ? magazynData.find(p => p.id === mainBladeId) : null;
-        czesciDoObliczen.cx_assist_blade = assistBladeId ? magazynData.find(p => p.id === assistBladeId) : null;
-        czesciDoObliczen.rachet = ratchetId ? magazynData.find(p => p.id === ratchetId) : null;
-        czesciDoObliczen.bit = bitId ? magazynData.find(p => p.id === bitId) : null;
-        nazwyCzesciDoWyswietlenia.push(`LockChip: ${czesciDoObliczen.cx_lock_chip?.nazwa || 'N/A'}`);
-        nazwyCzesciDoWyswietlenia.push(`MainBlade: ${czesciDoObliczen.cx_main_blade?.nazwa || 'N/A'}`);
-        nazwyCzesciDoWyswietlenia.push(`AssistBlade: ${czesciDoObliczen.cx_assist_blade?.nazwa || 'N/A'}`);
-        nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || 'N/A'}`);
-        nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || 'N/A'}`);
-    }
-    const obliczoneStatystyki = obliczSumeStatystykZestawu(czesciDoObliczen, wybranaSeria);
-    if (returnStatsOnly) return obliczoneStatystyki;
-
-    const statsDiv = document.getElementById(`deck-stats-${setIndex}`);
-    if (statsDiv) {
-        let statsTextHTML = `<b>Wybrane:</b><br><small>${nazwyCzesciDoWyswietlenia.join('<br>')}</small><br><br>`;
-        statsTextHTML += `<b>SUMA STATYSTYK (${wybranaSeria.toUpperCase().replace('_','/')}):</b><br>`;
-        statsTextHTML += `ATK: ${obliczoneStatystyki.ATK}, DEF: ${obliczoneStatystyki.DEF}, STM: ${obliczoneStatystyki.STM}, Waga: ${obliczoneStatystyki.WAGA}g`;
-        if (obliczoneStatystyki.DASH && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) {
-             statsTextHTML += `, DASH: ${obliczoneStatystyki.DASH}`;
-        }
-        if (obliczoneStatystyki.B_RES && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) {
-             statsTextHTML += `, B-RES: ${obliczoneStatystyki.B_RES}`;
-        }
-        if (wybranaSeria === 'cx' && obliczoneStatystyki.CX_LC_WYTRZ) {
-            statsTextHTML += `, LC-Wytrz: ${obliczoneStatystyki.CX_LC_WYTRZ}`;
-        }
-        statsDiv.innerHTML = statsTextHTML;
-    }
-}
-function renderDeckBuilder(initialDeckData = null) {
-    if (!deckBuilderContainerDeckPage) {
-        deckBuilderContainerDeckPage = document.getElementById("deck-builder");
-        if (!deckBuilderContainerDeckPage) {
-            showNotification("Błąd: Element #deck-builder nie istnieje.", 3000, 'error'); return;
-        }
-    }
-    deckBuilderContainerDeckPage.innerHTML = "";
-    const aktualnyMagazyn = getMagazyn();
-
-    if (!aktualnyMagazyn || aktualnyMagazyn.length === 0) {
-        deckBuilderContainerDeckPage.innerHTML = '<div class="card" style="text-align:center;"><p>Magazyn jest pusty.</p></div>';
-        return;
-    }
-
-    for (let i = 1; i <= 4; i++) {
-        const deckSetCard = document.createElement("div");
-        deckSetCard.className = "deck-set card";
-        deckSetCard.style.marginBottom = "25px"; deckSetCard.style.padding = "20px";
-
-        const initialSetData = initialDeckData?.sets?.[i - 1];
-        const currentSeria = initialSetData?.seria || 'bx_ux';
-
-        const seriaSelectDiv = document.createElement('div');
-        seriaSelectDiv.style.marginBottom = "15px";
-        const seriaLabel = document.createElement('label');
-        seriaLabel.htmlFor = `deck-seria-${i}`; seriaLabel.textContent = `Seria dla Zestawu ${i}:`;
-        const seriaSelect = document.createElement('select');
-        seriaSelect.id = `deck-seria-${i}`;
-        seriaSelect.innerHTML = `<option value="bx_ux" ${currentSeria === 'bx_ux' ? 'selected' : ''}>BX / UX</option><option value="cx" ${currentSeria === 'cx' ? 'selected' : ''}>CX</option>`;
-        
-        const partSelectorsContainer = document.createElement('div');
-        partSelectorsContainer.id = `part-selectors-container-${i}`;
-        
-        seriaSelect.addEventListener('change', (event) => {
-            renderPartSelectorsForSet(i, event.target.value, aktualnyMagazyn, partSelectorsContainer, null); 
-            updateDeckStats(i, aktualnyMagazyn);
-        });
-        seriaSelectDiv.appendChild(seriaLabel); seriaSelectDiv.appendChild(seriaSelect);
-
-        const statsDiv = document.createElement('div');
-        statsDiv.id = `deck-stats-${i}`; statsDiv.className = "deck-stats";
-        statsDiv.style.cssText = "margin-top: 15px; font-weight: normal; font-size: 0.9em; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 6px; text-align: left; line-height: 1.6;";
-        
-        const heading = document.createElement('h3'); heading.textContent = `Zestaw ${i}`;
-        deckSetCard.appendChild(heading); deckSetCard.appendChild(seriaSelectDiv);
-        deckSetCard.appendChild(partSelectorsContainer); deckSetCard.appendChild(statsDiv);
-        deckBuilderContainerDeckPage.appendChild(deckSetCard);
-
-        renderPartSelectorsForSet(i, currentSeria, aktualnyMagazyn, partSelectorsContainer, initialSetData);
-        updateDeckStats(i, aktualnyMagazyn);
-    }
-}
-
 function displaySavedDecks() {
     const container = document.getElementById('savedDecksContainer');
     if (!container) { console.error("Błąd: #savedDecksContainer nie istnieje."); return; }
@@ -1595,46 +2141,64 @@ function displaySavedDecks() {
 
         deck.sets.forEach((set, index) => {
             if (!set) { setsHTML += `<div class="deck-card-set-preview"><p style="color:red;">Błąd danych zestawu ${index + 1}</p></div>`; return; }
-            const seriaZestawu = set.seria || deck.seria || 'bx_ux'; 
-            let setImagesHTML = ''; let setNameParts = []; let currentSetStats = set.statystykiObliczone; 
-            const getPartAndHTML = (partId, partTypeDefaultName) => {
+            const seriaZestawu = set.seria || 'bx_ux'; // Domyślnie BX/UX jeśli brak
+            let setImagesHTML = ''; let setNameParts = []; 
+            let currentSetStats = set.statystykiObliczone; 
+            
+            const getPartDetailsAndHTML = (partId, partTypeDefaultName) => {
                 const part = partId ? magazynCzesci.find(p => p.id === partId) : null;
-                const imgHTML = part && part.img ? `<img src="${part.img}" alt="${part.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
+                const imgHTML = part?.img ? `<img src="${part.img}" alt="${part.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
                 const nameText = part ? (part.nazwa || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`;
                 return { html: imgHTML, name: nameText, partObj: part };
             };
 
+            const ratchetWDecku = set.ratchetId ? magazynCzesci.find(p => p.id === set.ratchetId) : null;
+            const czySpecjalnyRatchetWDecku = ratchetWDecku && (String(ratchetWDecku.id) === "205" || ratchetWDecku.integrujeBit === true);
+
             if (seriaZestawu === 'bx_ux') {
-                const bladeInfo = getPartAndHTML(set.bladeId, 'Blade');
-                const ratchetInfo = getPartAndHTML(set.ratchetId, 'Ratchet');
-                const bitInfo = getPartAndHTML(set.bitId, 'Bit');
+                const bladeInfo = getPartDetailsAndHTML(set.bladeId, 'Blade');
+                const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'Ratchet');
+                let bitInfo;
+                if(czySpecjalnyRatchetWDecku && ratchetInfo.partObj){
+                     bitInfo = { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` };
+                } else {
+                     bitInfo = getPartDetailsAndHTML(set.bitId, 'Bit');
+                }
+
                 setImagesHTML = `<div class="wynik-zestaw-obrazki">${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}</div>`;
                 setNameParts = [bladeInfo.name, ratchetInfo.name, bitInfo.name];
-                if (!currentSetStats && (bladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) currentSetStats = obliczSumeStatystykZestawu({ blade: bladeInfo.partObj, rachet: ratchetInfo.partObj, bit: bitInfo.partObj }, 'bx_ux');
+                if (!currentSetStats && (bladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) {
+                    currentSetStats = obliczSumeStatystykZestawu({ blade: bladeInfo.partObj, rachet: ratchetInfo.partObj, bit: bitInfo.partObj }, 'bx_ux');
+                }
             } else if (seriaZestawu === 'cx') {
-                const lockChipInfo = getPartAndHTML(set.cx_lock_chipId, 'LockChip');
-                const mainBladeInfo = getPartAndHTML(set.cx_main_bladeId, 'MainBlade');
-                const assistBladeInfo = getPartAndHTML(set.cx_assist_bladeId, 'AssistBlade');
-                const ratchetInfo = getPartAndHTML(set.ratchetId, 'Ratchet');
-                const bitInfo = getPartAndHTML(set.bitId, 'Bit');
+                const lockChipInfo = getPartDetailsAndHTML(set.cx_lock_chipId, 'LockChip');
+                const mainBladeInfo = getPartDetailsAndHTML(set.cx_main_bladeId, 'MainBlade');
+                const assistBladeInfo = getPartDetailsAndHTML(set.cx_assist_bladeId, 'AssistBlade');
+                const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'Ratchet'); // Wspólny Ratchet
+                let bitInfo;
+                 if(czySpecjalnyRatchetWDecku && ratchetInfo.partObj){
+                     bitInfo = { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` };
+                } else {
+                     bitInfo = getPartDetailsAndHTML(set.bitId, 'Bit'); // Wspólny Bit
+                }
+
                 setImagesHTML = `<div class="cx-images-container"><div class="cx-blade-row wynik-zestaw-obrazki">${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}</div><div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetInfo.html} ${bitInfo.html}</div></div>`;
                 setNameParts = [lockChipInfo.name, mainBladeInfo.name, assistBladeInfo.name, ratchetInfo.name, bitInfo.name];
-                if (!currentSetStats && (lockChipInfo.partObj || mainBladeInfo.partObj || assistBladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) currentSetStats = obliczSumeStatystykZestawu({ cx_lock_chip: lockChipInfo.partObj, cx_main_blade: mainBladeInfo.partObj, cx_assist_blade: assistBladeInfo.partObj, rachet: ratchetInfo.partObj, bit: bitInfo.partObj }, 'cx');
+                if (!currentSetStats && (lockChipInfo.partObj || mainBladeInfo.partObj || assistBladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) {
+                    currentSetStats = obliczSumeStatystykZestawu({ cx_lock_chip: lockChipInfo.partObj, cx_main_blade: mainBladeInfo.partObj, cx_assist_blade: assistBladeInfo.partObj, rachet: ratchetInfo.partObj, bit: bitInfo.partObj }, 'cx');
+                }
             }
-            let setNameHTML = setNameParts.join(' | ');
+            let setNameHTML = setNameParts.map(name => name.replace(/<\/?i>/g, '')).filter(name => name && !name.startsWith('(Bit zint.)')).join(' | '); // Usuwamy tagi <i> dla czystości
             let setStatsSummaryHTML = '<div class="stat-grid">'; 
             if (currentSetStats) {
                 setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span>`;
                 setStatsSummaryHTML += `<span>DEF: ${currentSetStats.DEF || 0}</span>`;
                 setStatsSummaryHTML += `<span>STM: ${currentSetStats.STM || 0}</span>`;
-                setStatsSummaryHTML += `<span>Waga: ${(currentSetStats.WAGA || currentSetStats.waga || 0)}g</span>`;
-                const dashValue = parseFloat(currentSetStats.DASH || 0);
-                const bResValue = parseFloat(currentSetStats.B_RES || 0);
-                if (dashValue !== 0) setStatsSummaryHTML += `<span>DASH: ${currentSetStats.DASH || 0}</span>`;
-                if (bResValue !== 0) setStatsSummaryHTML += `<span>B-RES: ${currentSetStats.B_RES || 0}</span>`;
-                if (seriaZestawu === 'cx') {
-                    const lcWytrzValue = parseInt(currentSetStats.CX_LC_WYTRZ || 0);
-                    if (lcWytrzValue !== 0) setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`;
+                setStatsSummaryHTML += `<span>Waga: ${(currentSetStats.WAGA || 0)}g</span>`;
+                if ((currentSetStats.DASH || 0) !== 0) setStatsSummaryHTML += `<span>DASH: ${currentSetStats.DASH || 0}</span>`;
+                if ((currentSetStats.B_RES || 0) !== 0) setStatsSummaryHTML += `<span>B-RES: ${currentSetStats.B_RES || 0}</span>`;
+                if (seriaZestawu === 'cx' && (currentSetStats.CX_LC_WYTRZ || 0) !== 0) {
+                    setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`;
                 }
             } else setStatsSummaryHTML += '<span>Brak danych statystyk</span>';
             setStatsSummaryHTML += `</div>`;
@@ -1647,37 +2211,90 @@ function displaySavedDecks() {
 }
 
 function edytujDeck(deckId) {
-    const deckToEdit = getSavedDecks().find(d => d.id === deckId);
-    if (!deckToEdit) { showNotification("Nie znaleziono decku do edycji.", 3000, 'error'); return; }
-    const deckNameInput = document.getElementById('deckName');
-    if (deckNameInput) deckNameInput.value = deckToEdit.name || '';
-    const linkDoDeckBuildera = document.querySelector('.sidebar a[onclick*="navigateTo(\'deck"]');
-    if(linkDoDeckBuildera) navigateTo('deck', linkDoDeckBuildera, false);
-    else { showNotification("Błąd: Brak linku do Deck Generatora.", 3000, 'error'); return; }
+    const savedDecks = getSavedDecks(); // Pobierz najświeższą listę decków
+    const deckToEdit = savedDecks.find(d => d.id === deckId);
+
+    if (!deckToEdit) { 
+        showNotification("Nie znaleziono decku do edycji.", 3000, 'error'); 
+        return; 
+    }
+    
+    // Ustaw currentEditingDeckId PRZED nawigacją, aby navigateTo wiedziało, że edytujemy
     currentEditingDeckId = deckId;
-    setTimeout(() => {
-        renderDeckBuilder(deckToEdit);
-        if (deckToEdit.sets && deckToEdit.sets.length > 0) {
-            const magazyn = getMagazyn();
-            for (let i = 0; i < deckToEdit.sets.length; i++) if (i < 4) updateDeckStats(i + 1, magazyn);
-        }
+    
+    // Inicjalizuj currentDeckBeingBuilt z danymi decku do edycji
+    // Ta funkcja powinna głęboko skopiować deckToEdit i upewnić się, że struktura jest kompletna (np. 4 sety)
+    initializeOrResetCurrentDeck(deckToEdit); 
+
+    // Zawsze zaczynaj edycję od wyświetlenia pierwszej zakładki/zestawu
+    currentlyActiveSetIndexInBuilder = 0; 
+
+    // Ustaw nazwę decku w polu input
+    const deckNameInput = document.getElementById('deckName');
+    if (deckNameInput) {
+        deckNameInput.value = deckToEdit.name || '';
+    }
+    
+    // Nawiguj do strony Deck Buildera
+    const linkDoDeckBuildera = document.querySelector('.sidebar a[onclick*="navigateTo(\'deck"]');
+    if(linkDoDeckBuildera) {
+        // navigateTo('deck', linkDoDeckBuildera) samo wywoła renderDeckBuilderAndParts,
+        // które z kolei użyje currentlyActiveSetIndexInBuilder do wyrenderowania odpowiedniej zakładki i slotów.
+        navigateTo('deck', linkDoDeckBuildera); 
+    } else { 
+        showNotification("Błąd krytyczny: Brak linku nawigacyjnego do Deck Generatora.", 3000, 'error'); 
+        currentEditingDeckId = null; // Zresetuj tryb edycji, bo nawigacja nieudana
+        initializeOrResetCurrentDeck(); // Wyczyść builder
+        return; 
+    }
+    
+    // Po nawigacji i renderowaniu (które dzieje się asynchronicznie w navigateTo),
+    // zaktualizuj tekst przycisku zapisu i pokaż powiadomienie.
+    // Używamy setTimeout, aby dać DOM czas na aktualizację po wywołaniu navigateTo.
+    setTimeout(() => { 
         const saveButton = document.getElementById('saveDeckButton');
-        if (saveButton) saveButton.textContent = 'Zapisz Zmiany w Decku';
-        showNotification(`Edytujesz deck: "${deckToEdit.name || 'Bez nazwy'}".`, 3000, 'info');
-        document.getElementById('deckName')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 250);
+        if (saveButton) {
+            saveButton.textContent = 'Zapisz Zmiany w Decku';
+        }
+        showNotification(`Edytujesz deck: "${deckToEdit.name || 'Bez nazwy'}". Wyświetlono Zestaw 1.`, 3500, 'info');
+        
+        // Opcjonalnie: przewiń do góry strony deck buildera lub do nazwy decku
+        const deckBuilderSection = document.getElementById('deck');
+        if (deckBuilderSection) {
+            deckBuilderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (deckNameInput) {
+            deckNameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 150); // Małe opóźnienie, można dostosować w razie potrzeby
 }
 
-function usunZapisanyDeck(deckId) {
-    if (!deckId) { showNotification("Błąd: Brak ID decku.", 3000, 'info'); return; }
-    const savedDecks = getSavedDecks();
-    const deckToDelete = savedDecks.find(deck => deck.id === deckId);
-    if (!deckToDelete) { showNotification("Nie znaleziono decku.", 3000, 'info'); displaySavedDecks(); return; }
-    const updatedDecks = savedDecks.filter(deck => deck.id !== deckId);
-    setSavedDecks(updatedDecks);
-    showNotification(`Deck "${deckToDelete.name || 'Bez nazwy'}" usunięty.`, 3000, 'info');
-    displaySavedDecks();
-}
+    function usunZapisanyDeck(deckId) {
+        if (!deckId) { showNotification("Błąd: Brak ID decku.", 3000, 'info'); return; }
+        const savedDecks = getSavedDecks();
+        const deckToDelete = savedDecks.find(deck => deck.id === deckId);
+        
+        if (!deckToDelete) { 
+            showNotification("Nie znaleziono decku do usunięcia.", 3000, 'info'); 
+            // displaySavedDecks(); // Można odświeżyć, jeśli podejrzewamy niespójność stanu
+            return; 
+        }
+        
+        // Logika usuwania wykonywana jest teraz bezpośrednio:
+        const updatedDecks = savedDecks.filter(deck => deck.id !== deckId);
+        setSavedDecks(updatedDecks);
+        showNotification(`Deck "${deckToDelete.name || 'Bez nazwy'}" usunięty.`, 3000, 'info');
+        
+        // Odśwież listę, jeśli jesteśmy na stronie galerii
+        if (document.getElementById('galeriaDeckow')?.classList.contains('active')) {
+            displaySavedDecks();
+        }
+        
+        // Jeśli edytowany deck został usunięty, wyczyść builder
+        if (currentEditingDeckId === deckId) { 
+            clearCurrentDeckForBuilder();
+        }
+    }
+    
 
 // =================================
 // Import/Eksport Magazynu
@@ -1687,9 +2304,12 @@ function eksportujDaneDoPolaTekstowego() {
     const poleTekstowe = document.getElementById('poleDanychJsonMagazyn');
     if (poleTekstowe) {
         if (magazyn && magazyn.length > 0) {
-            poleTekstowe.value = JSON.stringify(magazyn, null, 2); 
-            showNotification('Dane magazynu skopiowane.', 3000, 'success'); poleTekstowe.select(); 
-        } else { poleTekstowe.value = ''; showNotification('Magazyn pusty.', 3000, 'info'); }
+            try {
+                poleTekstowe.value = JSON.stringify(magazyn, null, 2); 
+                showNotification('Dane magazynu skopiowane do pola.', 3000, 'success'); 
+                poleTekstowe.focus(); poleTekstowe.select();
+            } catch (e) { showNotification('Błąd konwersji magazynu do JSON.', 3000, 'error'); poleTekstowe.value = 'Błąd JSON.';}
+        } else { poleTekstowe.value = ''; showNotification('Magazyn jest pusty.', 3000, 'info'); }
     } else showNotification('Błąd: Pole tekstowe magazynu nie znalezione.', 3000, 'error');
 }
 
@@ -1700,13 +2320,13 @@ function importujDaneZPolaTekstowego() {
     }
     let daneDoImportu;
     try { daneDoImportu = JSON.parse(poleTekstowe.value); } 
-    catch (e) { showNotification('Błąd importu: Nieprawidłowy JSON.', 3000, 'error'); console.error("Błąd parsowania JSON (magazyn):", e); return; }
-    przetworzIDopiszDaneMagazynu(daneDoImportu, 'Pole Tekstowe JSON', false);
+    catch (e) { showNotification('Błąd importu: Nieprawidłowy JSON w danych magazynu.', 3000, 'error'); console.error("Błąd parsowania JSON (magazyn):", e); return; }
+    przetworzIDopiszDaneMagazynu(daneDoImportu, 'Pole Tekstowe JSON', false); // false = nie zeruj ilości
 }
 
 function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false) {
     if (!Array.isArray(daneDoImportu)) {
-        showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format.`, 3000, 'error'); return;
+        showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format (oczekiwano tablicy).`, 3000, 'error'); return;
     }
     const czesciImportowaneLista = daneDoImportu.map((item, index) => {
         if (!item || typeof item !== 'object' || typeof item.typ !== 'string') return null;
@@ -1714,16 +2334,28 @@ function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomy
         if (!id) return null;
         let typ = String(item.typ).trim().toLowerCase();
         const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
-        if (!dozwoloneTypy.includes(typ)) typ = 'blade';
+        if (!dozwoloneTypy.includes(typ)) typ = 'blade'; // Domyślny typ w razie błędu
+        
         const parsedIlosc = parseInt(item.ilosc, 10);
         const iloscOdczytanaZPliku = (isNaN(parsedIlosc) || parsedIlosc < 0) ? 0 : parsedIlosc;
+        // Jeśli ustawDomyslnaIloscNaZero jest true (np. przy imporcie z domyślnej bazy), ilość nowej części to 0.
+        // W przeciwnym razie (import z JSON użytkownika), bierzemy ilość z pliku.
         const poczatkowaIloscDlaNowejCzesci = ustawDomyslnaIloscNaZero ? 0 : iloscOdczytanaZPliku;
-        const czesc = { id, typ, nazwa: String(item.nazwa || `Część ${index + 1}`).trim(), ilosc: poczatkowaIloscDlaNowejCzesci, _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku, img: String(item.img || '').trim(), ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0, cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0 };
+
+        const czesc = { 
+            id, typ, 
+            nazwa: String(item.nazwa || `Część ${index + 1}`).trim(), 
+            ilosc: poczatkowaIloscDlaNowejCzesci, // Używamy poczatkowaIloscDlaNowejCzesci
+            _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku, // To jest tylko do aktualizacji istniejących
+            img: String(item.img || '').trim(), 
+            ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0, 
+            cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0 
+        };
         const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
         const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
-        if (typ === 'blade' || typ === 'rachet' || typ === 'cx-main-blade' || typ === 'cx-assist-blade') { czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF); czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga); }
-        else if (typ === 'bit') { czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF); czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga); czesc.DASH = parseFloatOrZero(item.DASH); czesc.BURST_RES = parseFloatOrZero(item.BURST_RES); }
-        else if (typ === 'cx-lock-chip') { czesc.waga = parseFloatOrZero(item.waga); czesc.cx_lc_wytrz = parseIntOrZero(item.cx_lc_wytrz); czesc.cx_lc_atk_bonus = parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus = parseFloatOrZero(item.cx_lc_def_bonus); }
+        if (typ==='blade'||typ==='rachet'||typ==='cx-main-blade'||typ==='cx-assist-blade') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); }
+        else if (typ==='bit') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); czesc.DASH=parseFloatOrZero(item.DASH); czesc.BURST_RES=parseFloatOrZero(item.BURST_RES); }
+        else if (typ==='cx-lock-chip') { czesc.waga=parseFloatOrZero(item.waga); czesc.cx_lc_wytrz=parseIntOrZero(item.cx_lc_wytrz); czesc.cx_lc_atk_bonus=parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus=parseFloatOrZero(item.cx_lc_def_bonus); }
         if (!czesc.nazwa) czesc.nazwa = `Autonazwa ${index + 1}`;
         return czesc;
     }).filter(item => item !== null && typeof item.nazwa === 'string' && item.nazwa.trim() !== '' && item.id.trim() !== '');
@@ -1732,32 +2364,58 @@ function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomy
     if (czesciImportowaneLista.length === 0 && daneDoImportu.length === 0) { showNotification(`'${zrodloDanychOpis}' nie zawierał części.`, 3000, 'info'); return; }
 
     let aktualnyMagazyn = getMagazyn();
-    const nowyMagazynFinalny = []; let dodanoNowychCzesci = 0; let zaktualizowanoDaneCzesci = 0; let zaktualizowanoIloscIstniejacych = 0;
+    const nowyMagazynFinalny = []; 
+    let dodanoNowychCzesci = 0; let zaktualizowanoDaneCzesci = 0; let zaktualizowanoIloscIstniejacych = 0;
     const idCzesciJuzDodanychDoNowego = new Set();
 
+    // Przetwarzanie istniejących części i aktualizacja
     aktualnyMagazyn.forEach((istniejacaCzesc) => {
         if (!istniejacaCzesc || !istniejacaCzesc.id) return;
         const idIstniejacej = String(istniejacaCzesc.id).trim();
-        if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) return;
+        if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) return; 
         const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
+        
         if (pasujacaCzescZImportu) {
-            const iloscZPlikuDoAktualizacji = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
             let finalnaIlosc = istniejacaCzesc.ilosc;
-            if (!ustawDomyslnaIloscNaZero) { if (finalnaIlosc !== iloscZPlikuDoAktualizacji) zaktualizowanoIloscIstniejacych++; finalnaIlosc = iloscZPlikuDoAktualizacji; }
+            // Jeśli NIE ustawiamy domyślnej ilości na zero (czyli importujemy z pliku użytkownika),
+            // to aktualizujemy ilość na tę z pliku.
+            if (!ustawDomyslnaIloscNaZero) {
+                const iloscZPliku = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
+                if (finalnaIlosc !== iloscZPliku) zaktualizowanoIloscIstniejacych++;
+                finalnaIlosc = iloscZPliku;
+            }
+            // Dla importu z domyślnej bazy (ustawDomyslnaIloscNaZero = true), ilość pozostaje bez zmian (czyli 0, jeśli nowa)
+            // lub taka jaka była (jeśli część już istniała - ale wtedy jej ilość nie jest modyfikowana przez ten import).
+
             const zaktualizowanaCzesc = { ...pasujacaCzescZImportu, ilosc: finalnaIlosc };
-            delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji;
-            nowyMagazynFinalny.push(zaktualizowanaCzesc); idCzesciJuzDodanychDoNowego.add(idIstniejacej);
-            let daneZmienione = false;
-            for (const key in zaktualizowanaCzesc) if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) { daneZmienione = true; break; }
+            delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji; 
+            nowyMagazynFinalny.push(zaktualizowanaCzesc); 
+            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+            
+            let daneZmienione = false; // Sprawdzamy czy same dane (poza ilością) się zmieniły
+            for (const key in zaktualizowanaCzesc) {
+                if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) {
+                    daneZmienione = true; break;
+                }
+            }
             if (daneZmienione) zaktualizowanoDaneCzesci++;
-        } else { nowyMagazynFinalny.push(istniejacaCzesc); idCzesciJuzDodanychDoNowego.add(idIstniejacej); }
+        } else {
+            nowyMagazynFinalny.push(istniejacaCzesc); 
+            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+        }
     });
+
+    // Dodawanie nowych części, które nie istniały w magazynie
     czesciImportowaneLista.forEach(czescImportowana => {
         if (!czescImportowana || !czescImportowana.id) return;
         const idImportowany = String(czescImportowana.id).trim();
         if (!idCzesciJuzDodanychDoNowego.has(idImportowany)) {
-            const czescDoDodania = { ...czescImportowana }; delete czescDoDodania._iloscZPlikuDoAktualizacji;
-            nowyMagazynFinalny.push(czescDoDodania); idCzesciJuzDodanychDoNowego.add(idImportowany); dodanoNowychCzesci++;
+            const czescDoDodania = { ...czescImportowana }; 
+            // Ilość dla nowej części jest już ustawiona poprawnie (poczatkowaIloscDlaNowejCzesci)
+            delete czescDoDodania._iloscZPlikuDoAktualizacji;
+            nowyMagazynFinalny.push(czescDoDodania); 
+            idCzesciJuzDodanychDoNowego.add(idImportowany); 
+            dodanoNowychCzesci++;
         }
     });
 
@@ -1766,26 +2424,28 @@ function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomy
     if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
     if (zaktualizowanoDaneCzesci > 0) msg += `Zakt. dane dla ${zaktualizowanoDaneCzesci} istn. części. `;
     if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscNaZero) msg += `Zakt. ilość dla ${zaktualizowanoIloscIstniejacych} istn. części. `;
+    
     if (msg) showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
     else showNotification(`Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
     
     const aktywnaStronaId = document.querySelector('.page.active')?.id;
     if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-    if (document.getElementById('deck')?.classList.contains('active')) renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
+    if (aktywnaStronaId === 'deck') renderDeckBuilderAndParts(); // Odśwież listę dostępnych części
 }
 
 function importujMagazynZBazyDomyslnejHTML() {
     const nazwaZrodla = 'Domyślna Baza (z HTML)';
     try {
         const scriptTag = document.getElementById('domyslnaBazaDanychJson');
-        if (!scriptTag) { showNotification("Błąd: Brak źródła danych domyślnych.", 4000, 'error'); return; }
+        if (!scriptTag) { showNotification("Błąd: Brak źródła danych domyślnych (#domyslnaBazaDanychJson).", 4000, 'error'); return; }
         const jsonString = scriptTag.textContent;
-        if (!jsonString || jsonString.trim() === '') { showNotification("Błąd: Domyślna baza jest pusta.", 4000, 'error'); return; }
+        if (!jsonString || jsonString.trim() === '') { showNotification("Błąd: Domyślna baza danych w HTML jest pusta.", 4000, 'error'); return; }
         let daneDoImportu;
         try { daneDoImportu = JSON.parse(jsonString); } 
-        catch (parseError) { showNotification("Błąd: Nieprawidłowy format bazy domyślnej.", 5000, 'error'); return; }
-        przetworzIDopiszDaneMagazynu(daneDoImportu, nazwaZrodla, true);
-    } catch (error) { showNotification(`Błąd importu (${nazwaZrodla}): ${error.message}`, 4000, 'error'); }
+        catch (parseError) { showNotification("Błąd: Nieprawidłowy JSON w domyślnej bazie danych.", 5000, 'error'); console.error("Błąd parsowania JSON (baza domyślna):", parseError); return; }
+        // true = ustaw ilość na 0 dla nowych części, nie nadpisuj ilości istniejących na te z bazy (bo tam jest 0)
+        przetworzIDopiszDaneMagazynu(daneDoImportu, nazwaZrodla, true); 
+    } catch (error) { showNotification(`Krytyczny błąd importu z domyślnej bazy: ${error.message}`, 4000, 'error'); console.error(error); }
 }
 
 // =================================
@@ -1806,77 +2466,90 @@ function eksportujDeckiDoPolaTekstowego() {
     } else showNotification('Błąd: Pole tekstowe decków nie znalezione.', 3000, 'error');
 }
 
-/**
- * Waliduje i przygotowuje pojedynczy obiekt decku do dodania do systemu.
- * @param {object} deckObj - Surowy obiekt decku.
- * @param {string} defaultNamePrefix - Prefiks dla domyślnej nazwy, jeśli deck nie ma nazwy.
- * @returns {object|null} Zwalidowany i przygotowany obiekt decku, lub null jeśli nieprawidłowy.
- */
 function walidujIPrzygotujPojedynczyDeckDoDodania(deckObj, defaultNamePrefix = "Importowany Deck") {
     if (!deckObj || typeof deckObj !== 'object') {
         console.warn("[VALIDATE_DECK_WARN] Dane wejściowe nie są obiektem.", deckObj); return null;
     }
-    if (typeof deckObj.id !== 'string' || !deckObj.id.trim() || !(typeof deckObj.name === 'string' || deckObj.name === null || deckObj.name === undefined) || !Array.isArray(deckObj.sets)) {
-        console.warn("[VALIDATE_DECK_WARN] Nieprawidłowa struktura decku.", deckObj); return null;
+    if (typeof deckObj.id !== 'string' || !deckObj.id.trim() || 
+        !(typeof deckObj.name === 'string' || deckObj.name === null || deckObj.name === undefined) || 
+        !Array.isArray(deckObj.sets)) {
+        console.warn("[VALIDATE_DECK_WARN] Nieprawidłowa struktura decku (ID, nazwa lub zestawy).", deckObj); return null;
     }
+
     const gotowyDeck = {
-        id: deckObj.id.trim(), name: String(deckObj.name || `${defaultNamePrefix}_${Date.now() % 10000}`).trim(),
+        id: deckObj.id.trim(),
+        name: String(deckObj.name || `${defaultNamePrefix}_${Date.now() % 10000}`).trim(),
         timestamp: parseInt(deckObj.timestamp, 10) || Date.now(),
         lastModified: parseInt(deckObj.lastModified, 10) || (parseInt(deckObj.timestamp, 10) || Date.now()),
         sets: []
     };
+
     const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
     const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
 
     deckObj.sets.forEach((set) => {
-        if (!set || typeof set.seria !== 'string') { console.warn(`[VALIDATE_DECK_WARN_SET] Nieprawidłowy zestaw w decku ID: ${gotowyDeck.id}. Pomijam.`); return; }
-        const isValidPartId = (id) => (id === null || typeof id === 'string' || typeof id === 'undefined');
-        let czyTenZestawPoprawny = false; const przygotowanyZestaw = { seria: set.seria };
-
+        if (!set || typeof set.seria !== 'string' || !['bx_ux', 'cx'].includes(set.seria)) { 
+            console.warn(`[VALIDATE_DECK_WARN_SET] Nieprawidłowy lub brak serii w zestawie decku ID: ${gotowyDeck.id}. Pomijam zestaw.`); 
+            return; 
+        }
+        
+        const przygotowanyZestaw = { 
+            seria: set.seria,
+            bladeId: set.bladeId === undefined ? null : String(set.bladeId || '').trim() || null,
+            ratchetId: set.ratchetId === undefined ? null : String(set.ratchetId || '').trim() || null,
+            bitId: set.bitId === undefined ? null : String(set.bitId || '').trim() || null,
+            cx_lock_chipId: set.cx_lock_chipId === undefined ? null : String(set.cx_lock_chipId || '').trim() || null,
+            cx_main_bladeId: set.cx_main_bladeId === undefined ? null : String(set.cx_main_bladeId || '').trim() || null,
+            cx_assist_bladeId: set.cx_assist_bladeId === undefined ? null : String(set.cx_assist_bladeId || '').trim() || null,
+            statystykiObliczone: {}
+        };
+        
         if (set.seria === 'bx_ux') {
-            if (isValidPartId(set.bladeId) && isValidPartId(set.ratchetId) && isValidPartId(set.bitId)) {
-                przygotowanyZestaw.bladeId = set.bladeId === undefined ? null : set.bladeId;
-                przygotowanyZestaw.ratchetId = set.ratchetId === undefined ? null : set.ratchetId;
-                przygotowanyZestaw.bitId = set.bitId === undefined ? null : set.bitId;
-                czyTenZestawPoprawny = true;
-            }
+            przygotowanyZestaw.cx_lock_chipId = null;
+            przygotowanyZestaw.cx_main_bladeId = null;
+            przygotowanyZestaw.cx_assist_bladeId = null;
         } else if (set.seria === 'cx') {
-            if (isValidPartId(set.cx_lock_chipId) && isValidPartId(set.cx_main_bladeId) && isValidPartId(set.cx_assist_bladeId) && isValidPartId(set.ratchetId) && isValidPartId(set.bitId)) {
-                przygotowanyZestaw.cx_lock_chipId = set.cx_lock_chipId === undefined ? null : set.cx_lock_chipId;
-                przygotowanyZestaw.cx_main_bladeId = set.cx_main_bladeId === undefined ? null : set.cx_main_bladeId;
-                przygotowanyZestaw.cx_assist_bladeId = set.cx_assist_bladeId === undefined ? null : set.cx_assist_bladeId;
-                przygotowanyZestaw.ratchetId = set.ratchetId === undefined ? null : set.ratchetId;
-                przygotowanyZestaw.bitId = set.bitId === undefined ? null : set.bitId;
-                czyTenZestawPoprawny = true;
-            }
-        } else { console.warn(`[VALIDATE_DECK_WARN_SET_SERIA] Nieznana seria '${set.seria}'. Pomijam.`); return; }
-        if (!czyTenZestawPoprawny) { console.warn(`[VALIDATE_DECK_WARN_SET_PARTS] Zestaw w decku ID: ${gotowyDeck.id} ma złe ID części. Pomijam.`); return; }
+            przygotowanyZestaw.bladeId = null; 
+        }
 
         if (set.statystykiObliczone && typeof set.statystykiObliczone === 'object') {
             const stats = set.statystykiObliczone;
-            przygotowanyZestaw.statystykiObliczone = { ATK: parseFloatOrZero(stats.ATK), DEF: parseFloatOrZero(stats.DEF), STM: parseFloatOrZero(stats.STM), WAGA: parseFloatOrZero(stats.WAGA || stats.waga), DASH: parseFloatOrZero(stats.DASH), B_RES: parseFloatOrZero(stats.B_RES || stats.BURST_RES), CX_LC_WYTRZ: parseIntOrZero(stats.CX_LC_WYTRZ) };
-        } else delete przygotowanyZestaw.statystykiObliczone;
+            przygotowanyZestaw.statystykiObliczone = { 
+                ATK: parseFloatOrZero(stats.ATK), DEF: parseFloatOrZero(stats.DEF), STM: parseFloatOrZero(stats.STM), 
+                WAGA: parseFloatOrZero(stats.WAGA || stats.waga), DASH: parseFloatOrZero(stats.DASH), 
+                B_RES: parseFloatOrZero(stats.B_RES || stats.BURST_RES), CX_LC_WYTRZ: parseIntOrZero(stats.CX_LC_WYTRZ) 
+            };
+        }
         gotowyDeck.sets.push(przygotowanyZestaw);
     });
-    if (deckObj.sets.length > 0 && gotowyDeck.sets.length === 0) { console.warn(`[VALIDATE_DECK_WARN_NO_VALID_SETS] Deck ID: ${gotowyDeck.id} nie zawierał poprawnych zestawów. Odrzucam.`); return null; }
+
+    if (deckObj.sets.length > 0 && gotowyDeck.sets.length === 0) { 
+        console.warn(`[VALIDATE_DECK_WARN_NO_VALID_SETS] Deck ID: ${gotowyDeck.id} nie zawierał poprawnych zestawów. Odrzucam.`); 
+        return null; 
+    }
+    
     console.log(`[VALIDATE_DECK_SUCCESS] Deck ID: ${gotowyDeck.id} zwalidowany z ${gotowyDeck.sets.length} zestawami.`);
     return gotowyDeck;
 }
 
 function importujDeckiZPolaTekstowego() {
-    console.log("[IMPORT_DECK_FIELD_1] Import decków z pola tekstowego.");
+    console.log("[IMPORT_DECK_FIELD_1] Rozpoczęto import decków z pola tekstowego.");
     const poleTekstoweDecki = document.getElementById('poleDanychJsonDecki');
     if (!poleTekstoweDecki || !poleTekstoweDecki.value.trim()) {
         showNotification('Pole danych decków jest puste.', 3000, 'warning'); return;
     }
     let daneSuroweZInputu;
     try { daneSuroweZInputu = JSON.parse(poleTekstoweDecki.value); } 
-    catch (e) { showNotification('Błąd importu: Nieprawidłowy JSON.', 3000, 'error'); console.error("Błąd parsowania JSON (decki z pola):", e); return; }
+    catch (e) { showNotification('Błąd importu: Nieprawidłowy JSON w danych decków.', 3000, 'error'); console.error("Błąd parsowania JSON (decki z pola):", e); return; }
 
     let deckiDoSprawdzenia;
-    if (daneSuroweZInputu && typeof daneSuroweZInputu === 'object' && !Array.isArray(daneSuroweZInputu)) deckiDoSprawdzenia = [daneSuroweZInputu];
-    else if (Array.isArray(daneSuroweZInputu)) deckiDoSprawdzenia = daneSuroweZInputu;
-    else { showNotification('Błąd importu: Dane muszą być listą lub obiektem decku.', 3000, 'error'); return; }
+    if (daneSuroweZInputu && typeof daneSuroweZInputu === 'object' && !Array.isArray(daneSuroweZInputu)) {
+        deckiDoSprawdzenia = [daneSuroweZInputu];
+    } else if (Array.isArray(daneSuroweZInputu)) {
+        deckiDoSprawdzenia = daneSuroweZInputu;
+    } else {
+        showNotification('Błąd importu: Dane muszą być listą decków lub pojedynczym obiektem decku.', 3000, 'error'); return;
+    }
     
     const istniejaceDecki = getSavedDecks();
     let nowoDodaneDecki = []; let pominieteDuplikatyCount = 0; let bledneFormatyCount = 0;
@@ -1886,48 +2559,74 @@ function importujDeckiZPolaTekstowego() {
         if (zwalidowanyDeck) {
             const indexIstniejacego = istniejaceDecki.findIndex(d => d.id === zwalidowanyDeck.id);
             if (indexIstniejacego > -1) {
-                pominieteDuplikatyCount++;
+                pominieteDuplikatyCount++; 
                 console.warn(`[IMPORT_DECK_FIELD_WARN_DUPLICATE] Deck ID '${zwalidowanyDeck.id}' ("${zwalidowanyDeck.name}") już istnieje. Pomijam.`);
-            } else { istniejaceDecki.push(zwalidowanyDeck); nowoDodaneDecki.push(zwalidowanyDeck); }
-        } else bledneFormatyCount++;
+            } else {
+                istniejaceDecki.push(zwalidowanyDeck);
+                nowoDodaneDecki.push(zwalidowanyDeck);
+            }
+        } else {
+            bledneFormatyCount++;
+        }
     });
-    setSavedDecks(istniejaceDecki);
+
+    setSavedDecks(istniejaceDecki); 
+
     let komunikatKoncowy = "";
     if (nowoDodaneDecki.length > 0) komunikatKoncowy += `Dodano ${nowoDodaneDecki.length} nowych deck(ów). `;
     if (pominieteDuplikatyCount > 0) komunikatKoncowy += `${pominieteDuplikatyCount} deck(ów) pominięto (duplikaty ID). `;
     if (bledneFormatyCount > 0) komunikatKoncowy += `Pominięto ${bledneFormatyCount} nieprawidłowych decków. `;
 
-    if (komunikatKoncowy.trim() === "" && deckiDoSprawdzenia.length > 0) showNotification('Żadne nowe decki nie zostały dodane.', 3000, 'info');
-    else if (komunikatKoncowy.trim() === "" && deckiDoSprawdzenia.length === 0) showNotification('Pole nie zawierało decków.', 3000, 'info');
-    else showNotification(`Import zakończony! ${komunikatKoncowy.trim()}`, 4500, 'success');
+    if (komunikatKoncowy.trim() === "" && deckiDoSprawdzenia.length > 0) {
+        showNotification('Żadne nowe decki nie zostały dodane (mogą być duplikatami lub błędami formatu).', 3000, 'info');
+    } else if (komunikatKoncowy.trim() === "" && deckiDoSprawdzenia.length === 0) {
+        showNotification('Pole nie zawierało danych decków do importu.', 3000, 'info');
+    } else {
+        showNotification(`Import decków zakończony! ${komunikatKoncowy.trim()}`, 4500, 'success');
+    }
 
-    if (nowoDodaneDecki.length > 0 && poleTekstoweDecki) poleTekstoweDecki.value = '';
-    if (document.getElementById('galeriaDeckow')?.classList.contains('active')) displaySavedDecks();
-    console.log(`[IMPORT_DECK_FIELD_5] Zakończono. Dodano: ${nowoDodaneDecki.length}, Duplikaty: ${pominieteDuplikatyCount}, Błędne: ${bledneFormatyCount}`);
+    if (nowoDodaneDecki.length > 0 && poleTekstoweDecki) poleTekstoweDecki.value = ''; 
+    
+    if (document.getElementById('galeriaDeckow')?.classList.contains('active')) {
+        displaySavedDecks();
+    }
+    console.log(`[IMPORT_DECK_FIELD_5] Zakończono import decków. Dodano: ${nowoDodaneDecki.length}, Duplikaty: ${pominieteDuplikatyCount}, Błędne: ${bledneFormatyCount}`);
 }
 
 // =================================
 // Czyszczenie Danych i Inicjalizacja
 // =================================
-function wykonajWyczyszczenieDanych() {
-    // if (!confirm("CZY NA PEWNO chcesz usunąć WSZYSTKO?")) return; // Można przywrócić
-    setMagazyn([]); setSavedDecks([]); 
-    showNotification('Wszystkie dane wyczyszczone!', 3000, 'success');
-    const aktywnaStronaId = document.querySelector('.page.active')?.id;
-    if (aktywnaStronaId) {
-        if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-        if (aktywnaStronaId === 'generator') wyczyscLosowanie();
-        if (aktywnaStronaId === 'deck') renderDeckBuilder(); 
-        if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
-    }
-    const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
-    const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
-    if (aktywnaStronaId === 'importexport') {
-         if(poleJsonMagazyn) poleJsonMagazyn.value = '';
-         if(poleJsonDecki) poleJsonDecki.value = '';
-    }
-}
+    function wykonajWyczyszczenieDanych() {
+        // Logika czyszczenia wykonywana jest teraz bezpośrednio:
+        setMagazyn([]); 
+        setSavedDecks([]); 
+        localStorage.removeItem(SCORES_KEY); 
+        scores = { player1: 0, player2: 0 }; 
+        playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
 
+        showNotification('Wszystkie dane aplikacji (magazyn, decki, wyniki) zostały wyczyszczone!', 3000, 'success');
+        
+        const aktywnaStronaId = document.querySelector('.page.active')?.id;
+        if (aktywnaStronaId) {
+            if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+            if (aktywnaStronaId === 'generator') wyczyscLosowanie();
+            if (aktywnaStronaId === 'deck') {
+                clearCurrentDeckForBuilder(); 
+            }
+            if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
+            if (aktywnaStronaId === 'licznikPunktow') { 
+                displayScores();
+                displayPlayerNames();
+            }
+        }
+        const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
+        const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
+        if (aktywnaStronaId === 'importexport') {
+             if(poleJsonMagazyn) poleJsonMagazyn.value = '';
+             if(poleJsonDecki) poleJsonDecki.value = '';
+        }
+    }
+    
 document.addEventListener('DOMContentLoaded', function() {
     sidebar = document.getElementById('sidebar');
     appContainer = document.getElementById('app-container');
@@ -1937,7 +2636,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     wynikiDivGenerator = document.getElementById('wyniki');
     placeholderActualImgGenerator = document.getElementById('placeholder-img');
-    deckBuilderContainerDeckPage = document.getElementById("deck-builder");
+    // deckBuilderContainerDeckPage - nie jest już potrzebny jako globalna zmienna,
+    // kontenery dla D&D są pobierane wewnątrz funkcji renderujących
+
+    initializeOrResetCurrentDeck(); // Inicjalizujemy pusty deck builder na starcie
 
     if (typeof VANTA !== 'undefined' && VANTA.NET && typeof THREE !== 'undefined') {
         try {
@@ -1949,19 +2651,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const domyslnyLink = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]'); 
     if (domyslnyLink) navigateTo('generator', domyslnyLink); 
-    else { console.error("Brak domyślnego linku."); navigateTo('generator', null); }
+    else { 
+        console.error("Brak domyślnego linku nawigacyjnego. Ustawiam 'generator' jako domyślny."); 
+        navigateTo('generator', null); 
+    }
 
     if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
     else console.error("#sidebarToggleBtn nie znaleziony.");
 
     // Inicjalizacja licznika punktów, jeśli jest to strona startowa (mało prawdopodobne, ale dla kompletności)
-    if (document.getElementById('licznikPunktow')?.classList.contains('active')) {
-        loadScoresFromLocalStorage();
-    }
+    // lub gdy nawigujemy do niej - obsłużone w navigateTo
 });
 </script>
 
-
+<!-- Domyślna Baza Danych JSON -->
+</script>
 <script id="domyslnaBazaDanychJson" type="application/json">
 [
   {
