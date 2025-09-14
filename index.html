@@ -675,13 +675,13 @@ font-weight: bold; /* poprawiona literówka z font-weght */
 </section>
 
 </div> <!-- Koniec #app-container -->
-
 <script>
+
 // =================================
 // Konfiguracja i Zmienne Globalne
 // =================================
 let sidebarExpanded = false;
-let czyEdycjaWProgresie = false; // Flaga dla edycji CZĘŚCI
+let czyEdycjaWProgresie = false; // Flaga dla edycji CZĘŚCI (jeśli nadal używana)
 const sidebarWidthExpanded = 260;
 const sidebarWidthCollapsed = 50;
 let currentEditingDeckId = null; // Dla edycji DECKÓW ze strony "Deck Generator"
@@ -692,6 +692,61 @@ let wynikiDivGenerator, placeholderActualImgGenerator, deckBuilderContainerDeckP
 
 // Globalna tablica dla ostatnio wylosowanych zestawów z LOSUJ()
 let ostatnioWylosowaneZestawyGlobalnie = [];
+
+// Klucze localStorage
+const MAGAZYN_KEY = 'beybladeMagazynAnanasCX_v3';
+const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3';
+const SCORES_KEY = 'beybladeScoreCounterAnanas';
+
+// =================================
+// Zarządzanie Magazynem (localStorage)
+// =================================
+function getMagazyn() {
+    try {
+        const magazynString = localStorage.getItem(MAGAZYN_KEY);
+        return magazynString ? JSON.parse(magazynString) : [];
+    } catch (e) { showNotification("Błąd odczytu danych magazynu.", 3000, 'error'); console.error("Błąd odczytu magazynu:", e); return []; }
+}
+
+function setMagazyn(magazynArray) {
+    try {
+        if (Array.isArray(magazynArray)) {
+            localStorage.setItem(MAGAZYN_KEY, JSON.stringify(magazynArray));
+        } else {
+            showNotification("Błąd zapisu: Dane magazynu muszą być tablicą.", 3000, 'error');
+            console.error("setMagazyn: Przekazano nie-tablicę:", magazynArray);
+        }
+    } catch (e) { showNotification("Błąd zapisu danych magazynu.", 3000, 'error'); console.error("Błąd zapisu magazynu:", e); }
+}
+
+// =================================
+// Zarządzanie Zapisanymi Deckami (localStorage)
+// =================================
+function getSavedDecks() {
+    try {
+        const decksString = localStorage.getItem(SAVED_DECKS_KEY);
+        return decksString ? JSON.parse(decksString) : [];
+    } catch (e) {
+        showNotification("Błąd odczytu zapisanych decków.", 3000, 'error');
+        console.error("getSavedDecks Błąd:", e);
+        return [];
+    }
+}
+
+function setSavedDecks(decksArray) {
+    try {
+        if (Array.isArray(decksArray)) {
+            localStorage.setItem(SAVED_DECKS_KEY, JSON.stringify(decksArray));
+        } else {
+            showNotification("Błąd zapisu decków: Nieprawidłowe dane (nie jest tablicą).", 3000, 'error');
+            console.error("setSavedDecks: Próba zapisu nie-tablicy:", decksArray);
+        }
+    } catch (e) {
+        showNotification("Błąd zapisu decków do localStorage.", 3000, 'error');
+        console.error("setSavedDecks Błąd:", e);
+    }
+}
+
 
 // =================================
 // Logika Licznika Punktów
@@ -706,7 +761,6 @@ let playerNames = {
     player2: "Gracz 2"
 }
 
-// Funkcja do aktualizacji wyniku na ekranie
 function displayScores() {
     const scoreP1 = document.getElementById('scorePlayer1');
     const scoreP2 = document.getElementById('scorePlayer2');
@@ -714,7 +768,6 @@ function displayScores() {
     if (scoreP2) scoreP2.textContent = scores.player2;
 }
 
-// Funkcja do aktualizacji nazw graczy na ekranie
 function displayPlayerNames() {
     const nameP1Display = document.getElementById('playerName1');
     const nameP2Display = document.getElementById('playerName2');
@@ -723,52 +776,35 @@ function displayPlayerNames() {
 
     if (nameP1Display) nameP1Display.textContent = playerNames.player1;
     if (nameP2Display) nameP2Display.textContent = playerNames.player2;
-    if (nameP1Input) nameP1Input.value = playerNames.player1 === "Gracz 1" ? "" : playerNames.player1; // Pokaż w inpucie, jeśli zmienione
+    if (nameP1Input) nameP1Input.value = playerNames.player1 === "Gracz 1" ? "" : playerNames.player1;
     if (nameP2Input) nameP2Input.value = playerNames.player2 === "Gracz 2" ? "" : playerNames.player2;
 }
 
-
-// Funkcja do zmiany wyniku
 function updateScore(player, points) {
     if (scores.hasOwnProperty(player)) {
         scores[player] += points;
-        // Opcjonalnie: zapobieganie ujemnym punktom, jeśli nie chcesz
-        // if (scores[player] < 0) {
-        //     scores[player] = 0;
-        // }
         displayScores();
-        saveScoresToLocalStorage(); // Zapisz po każdej zmianie
+        saveScoresToLocalStorage();
     }
 }
 
-// Funkcja do aktualizacji nazwy gracza
 function updatePlayerName(player) {
     const inputElement = document.getElementById(`inputPlayerName${player === 'player1' ? '1' : '2'}`);
     if (inputElement && playerNames.hasOwnProperty(player)) {
         const newName = inputElement.value.trim();
-        playerNames[player] = newName !== '' ? newName : (player === 'player1' ? "Gracz 1" : "Gracz 2"); // Domyślna, jeśli puste
+        playerNames[player] = newName !== '' ? newName : (player === 'player1' ? "Gracz 1" : "Gracz 2");
         displayPlayerNames();
-        saveScoresToLocalStorage(); // Zapisz również nazwy
+        saveScoresToLocalStorage();
     }
 }
 
-
-// Funkcja do resetowania wyników
 function resetScores() {
     scores.player1 = 0;
     scores.player2 = 0;
-    // Opcjonalnie: resetowanie nazw graczy
-    // playerNames.player1 = "Gracz 1";
-    // playerNames.player2 = "Gracz 2";
-    // displayPlayerNames(); // Jeśli resetujesz nazwy
-
     displayScores();
-    saveScoresToLocalStorage(); // Zapisz zresetowane wyniki
+    saveScoresToLocalStorage();
     showNotification("Wyniki zostały zresetowane.", 2000, 'info');
 }
-
-// Funkcje do zapisu i odczytu z localStorage
-const SCORES_KEY = 'beybladeScoreCounterAnanas';
 
 function saveScoresToLocalStorage() {
     try {
@@ -790,70 +826,23 @@ function loadScoresFromLocalStorage() {
             if (savedData.scores) scores = savedData.scores;
             if (savedData.playerNames) playerNames = savedData.playerNames;
 
-            // Upewnij się, że mamy wartości domyślne, jeśli coś poszło nie tak
             scores.player1 = parseInt(scores.player1, 10) || 0;
             scores.player2 = parseInt(scores.player2, 10) || 0;
             playerNames.player1 = playerNames.player1 || "Gracz 1";
             playerNames.player2 = playerNames.player2 || "Gracz 2";
-
         }
     } catch (e) {
         console.error("Błąd odczytu wyników z localStorage:", e);
-        // Ustaw domyślne, jeśli błąd
         scores = { player1: 0, player2: 0 };
         playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
     }
     displayScores();
-    displayPlayerNames(); // Wyświetl również nazwy
+    displayPlayerNames();
 }
-
-// Modyfikacja navigateTo, aby inicjalizować licznik
-// (Znajdź swoją istniejącą funkcję navigateTo i dodaj ten fragment)
-// ... wewnątrz funkcji navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) ...
-// przed końcowym if (sidebarExpanded && window.innerWidth < 768)
-// dodaj:
-
-/*
-    // PRZYKŁAD, GDZIE TO DODAĆ W `navigateTo`:
-    // ... poprzedni kod w navigateTo ...
-
-    } else if (pageId === 'galeriaDeckow') { 
-        displaySavedDecks();
-    } else if (pageId === 'licznikPunktow') { // <--- NOWY BLOK
-        loadScoresFromLocalStorage(); // Załaduj zapisane wyniki przy wejściu na stronę
-        displayScores();
-        displayPlayerNames();
-    }
-    
-    if (sidebarExpanded && window.innerWidth < 768) {
-        toggleSidebar();
-    }
-*/
-
-// Modyfikacja DOMContentLoaded, aby załadować wyniki przy starcie aplikacji,
-// jeśli strona licznika jest stroną startową (mało prawdopodobne, ale dla kompletności)
-// (Znajdź swoją istniejącą funkcję DOMContentLoaded i dodaj ten fragment)
-
-/*
-    // PRZYKŁAD, GDZIE TO DODAĆ W `DOMContentLoaded`:
-    // ... poprzedni kod w DOMContentLoaded ...
-
-    if (domyslnyLink) navigateTo('generator', domyslnyLink); 
-    else { console.error("Nie znaleziono domyślnego linku nawigacyjnego."); navigateTo('generator', null); }
-
-    // Jeśli strona licznika mogłaby być stroną startową (zamiast generatora)
-    if (document.getElementById('licznikPunktow')?.classList.contains('active')) {
-        loadScoresFromLocalStorage();
-    }
-
-    if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
-    else { console.error("Przycisk menu (#sidebarToggleBtn) nie znaleziony."); }
-*/
-
 // =================================
-// Funkcje Pomocnicze i Inicjalizacyjne
+// Funkcje Pomocnicze i Nawigacyjne
 // =================================
-function showNotification(message, duration = 3000, type = 'info') { // Domyślny typ to 'info'
+function showNotification(message, duration = 3000, type = 'info') {
     const bar = document.getElementById("notification-bar");
     if (!bar) { console.error("Element #notification-bar nie znaleziony!"); return; }
     bar.textContent = message;
@@ -862,9 +851,9 @@ function showNotification(message, duration = 3000, type = 'info') { // Domyśln
     let bgColor = 'rgba(138, 43, 226, 0.9)'; 
     let textColor = '#fff';
     
-    if (type === 'error') bgColor = 'rgba(220, 53, 69, 0.9)'; // Czerwony
-    else if (type === 'success') bgColor = 'rgba(40, 167, 69, 0.9)'; // Zielony
-    else if (type === 'warning') { bgColor = 'rgba(255, 193, 7, 0.9)'; textColor = '#333'; } // Żółty
+    if (type === 'error') bgColor = 'rgba(220, 53, 69, 0.9)';
+    else if (type === 'success') bgColor = 'rgba(40, 167, 69, 0.9)';
+    else if (type === 'warning') { bgColor = 'rgba(255, 193, 7, 0.9)'; textColor = '#333'; } 
     
     bar.style.backgroundColor = bgColor;
     bar.style.color = textColor;
@@ -880,9 +869,6 @@ function showNotification(message, duration = 3000, type = 'info') { // Domyśln
     }, duration);
 }
 
-// =================================
-// Zarządzanie Sidebarem i Nawigacją
-// =================================
 function toggleSidebar() {
     sidebarExpanded = !sidebarExpanded;
     if (sidebar) sidebar.classList.toggle('expanded', sidebarExpanded);
@@ -897,6 +883,7 @@ function toggleSidebar() {
         }
     }
 }
+
 function navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) {
     console.log(`Nawigacja do: ${pageId}, forceRenderDeckBuilder: ${forceRenderDeckBuilder}`);
 
@@ -918,16 +905,12 @@ function navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) {
         return; 
     }
     
-    // Resetuj flagę edycji CZĘŚCI, jeśli opuszczamy stronę 'dodaj'
-    if (pageId !== 'dodaj' && czyEdycjaWProgresie) {
-        const typCzesciSelect = document.getElementById('typCzesci');
-        if (typCzesciSelect) typCzesciSelect.value = ""; 
-        pokazFormularz(); // Resetuje formularz do stanu "Wybierz typ"
-        czyEdycjaWProgresie = false;
-        console.log("Zresetowano stan edycji CZĘŚCI z powodu opuszczenia strony 'dodaj'.");
-    }
+    // Resetuj flagę edycji CZĘŚCI, jeśli opuszczamy stronę 'dodaj' (zakładając, że ta strona już nie istnieje lub nie jest używana w ten sposób)
+    // if (pageId !== 'dodaj' && czyEdycjaWProgresie) {
+    //     pokazFormularz(); // Zakładając, że pokazFormularz() resetuje odpowiednie stany
+    //     czyEdycjaWProgresie = false;
+    // }
 
-    // Resetuj flagę edycji DECKU, jeśli opuszczamy stronę 'deck' (Generator Decków)
     if (pageId !== 'deck' && currentEditingDeckId) {
         const deckNameInput = document.getElementById('deckName');
         const saveDeckBtn = document.getElementById('saveDeckButton');
@@ -935,26 +918,18 @@ function navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) {
         if (saveDeckBtn) saveDeckBtn.textContent = 'Zapisz Aktualny Deck';
         currentEditingDeckId = null;
         console.log("Zresetowano stan edycji DECKU z powodu opuszczenia strony 'deck'.");
-        // Nie wywołujemy renderDeckBuilder, bo opuszczamy stronę
     }
 
     if (pageId === 'magazyn') { 
         wyswietlMagazyn(); 
-    } else if (pageId === 'dodaj') {
-        if (!czyEdycjaWProgresie) { // Tylko resetuj, jeśli nie jesteśmy celowo w trakcie edycji
-            const typCzesciSelect = document.getElementById('typCzesci');
-            if (typCzesciSelect) typCzesciSelect.value = "";
-            pokazFormularz();
-        }
-    } else if (pageId === 'generator') { 
-        // Wyczyść poprzednie wyniki losowania, jeśli to pożądane
-        // wyczyscLosowanie(); // Można odkomentować
     } else if (pageId === 'deck') { 
         if (forceRenderDeckBuilder) { 
-             renderDeckBuilder(); // Ta funkcja będzie wymagała modyfikacji dla serii CX
+             renderDeckBuilder();
         }
     } else if (pageId === 'galeriaDeckow') { 
         displaySavedDecks();
+    } else if (pageId === 'licznikPunktow') {
+        loadScoresFromLocalStorage(); // Załaduj wyniki przy wejściu na stronę licznika
     }
     
     if (sidebarExpanded && window.innerWidth < 768) {
@@ -963,27 +938,8 @@ function navigateTo(pageId, clickedLinkElement, forceRenderDeckBuilder = true) {
 }
 
 // =================================
-// Zarządzanie Magazynem (localStorage)
+// Wyświetlanie Magazynu
 // =================================
-const MAGAZYN_KEY = 'beybladeMagazynAnanasCX_v3'; // Nowy klucz, aby uniknąć konfliktu i zaznaczyć wersję
-
-function getMagazyn() {
-    try {
-        const magazynString = localStorage.getItem(MAGAZYN_KEY);
-        return magazynString ? JSON.parse(magazynString) : [];
-    } catch (e) { showNotification("Błąd odczytu danych magazynu.", 3000, 'error'); console.error("Błąd odczytu magazynu:", e); return []; }
-}
-function setMagazyn(magazynArray) {
-    try {
-        if (Array.isArray(magazynArray)) {
-            localStorage.setItem(MAGAZYN_KEY, JSON.stringify(magazynArray));
-        } else {
-            showNotification("Błąd zapisu: Dane magazynu muszą być tablicą.", 3000, 'error');
-            console.error("setMagazyn: Przekazano nie-tablicę:", magazynArray);
-        }
-    } catch (e) { showNotification("Błąd zapisu danych magazynu.", 3000, 'error'); console.error("Błąd zapisu magazynu:", e); }
-}
-
 function wyswietlMagazyn() {
     console.log("[MAGAZYN_VIEW_1] Funkcja wyswietlMagazyn - START");
     const magazynPelny = getMagazyn();
@@ -994,7 +950,7 @@ function wyswietlMagazyn() {
         showNotification("Błąd wewnętrzny: Nie można wyświetlić magazynu.", 3000, 'error');
         return;
     }
-    lista.innerHTML = ''; // Wyczyść poprzednie wpisy
+    lista.innerHTML = '';
 
     if (!Array.isArray(magazynPelny)) {
         console.error("[MAGAZYN_VIEW_X2] Błąd: Dane z getMagazyn() nie są tablicą.");
@@ -1008,445 +964,211 @@ function wyswietlMagazyn() {
     const filtrPosiadaneSelect = document.getElementById('filterPosiadane');
     const filtrPosiadania = filtrPosiadaneSelect ? filtrPosiadaneSelect.value : 'posiadane';
 
-    console.log(`[MAGAZYN_VIEW_2] Filtry - Kategoria: ${filtrKategorii}, Posiadanie: ${filtrPosiadania}`);
-
     let czesciDoWyswietlenia = [...magazynPelny];
 
-    // 1. Filtracja na podstawie posiadania
     if (filtrPosiadania === 'posiadane') {
         czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && (parseInt(czesc.ilosc, 10) || 0) > 0);
     } else if (filtrPosiadania === 'nieposiadane') {
         czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && (parseInt(czesc.ilosc, 10) || 0) === 0);
     }
-    console.log(`[MAGAZYN_VIEW_3] Po filtrze posiadania. Liczba części: ${czesciDoWyswietlenia.length}`);
 
-    // 2. Filtracja na podstawie kategorii
     if (filtrKategorii !== 'all' && filtrKategorii) {
         czesciDoWyswietlenia = czesciDoWyswietlenia.filter(czesc => czesc && czesc.typ === filtrKategorii);
     }
-    console.log(`[MAGAZYN_VIEW_4] Po filtrze kategorii. Liczba części: ${czesciDoWyswietlenia.length}`);
 
     if (czesciDoWyswietlenia.length === 0) {
         lista.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align:center;"><p>Brak części pasujących do wybranych filtrów.</p></div>';
-        console.log("[MAGAZYN_VIEW_5] Brak części do wyświetlenia po filtrowaniu.");
         return;
     }
 
-    // Sortowanie:
     czesciDoWyswietlenia.sort((a, b) => {
         const typA = (a && typeof a.typ === 'string') ? a.typ.toLowerCase() : "";
         const typB = (b && typeof b.typ === 'string') ? b.typ.toLowerCase() : "";
         const nazwaA = (a && typeof a.nazwa === 'string') ? a.nazwa.toLowerCase() : "";
         const nazwaB = (b && typeof b.nazwa === 'string') ? b.nazwa.toLowerCase() : "";
-
-        if (typA < typB) return -1;
-        if (typA > typB) return 1;
-        if (nazwaA < nazwaB) return -1;
-        if (nazwaA > nazwaB) return 1;
+        if (typA < typB) return -1; if (typA > typB) return 1;
+        if (nazwaA < nazwaB) return -1; if (nazwaA > nazwaB) return 1;
         return 0;
     });
 
-    // Generowanie HTML dla każdej części
-    czesciDoWyswietlenia.forEach((czesc, index) => {
-        if (!czesc || !czesc.typ || typeof czesc.nazwa !== 'string') {
-            console.warn(`[MAGAZYN_VIEW_RENDER-${index}] Pominięto renderowanie nieprawidłowej części:`, czesc);
-            return;
-        }
+    czesciDoWyswietlenia.forEach((czesc) => {
+        if (!czesc || !czesc.typ || typeof czesc.nazwa !== 'string') return;
 
         const ilosc = parseInt(czesc.ilosc, 10) || 0;
-
-        // --- Logika BETA (POPRAWIONA - sprawdza czy CHOĆ JEDNA kluczowa statystyka jest 0 lub brak) ---
         let isBeta = false;
         const maStat = (statName) => typeof czesc[statName] === 'number';
         const jestZeroLubBrak = (statName) => !maStat(statName) || czesc[statName] === 0;
 
         if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
-            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga')) {
-                isBeta = true;
-            }
+            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga')) isBeta = true;
         } else if (czesc.typ === 'bit') {
-            // Dla bita, jeśli podstawowe staty (ATK,DEF,STM,waga) są problematyczne LUB specjalne (DASH, B_RES) są problematyczne
-            // Możesz dostosować, czy brak DASH/BURST_RES zawsze oznacza BETA.
-            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga') || jestZeroLubBrak('DASH') || jestZeroLubBrak('BURST_RES')) {
-                isBeta = true;
-            }
+            if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga') || jestZeroLubBrak('DASH') || jestZeroLubBrak('BURST_RES')) isBeta = true;
         } else if (czesc.typ === 'cx-lock-chip') {
-            if (jestZeroLubBrak('waga')) { // Dla Lock Chip nadal tylko waga może być kluczowa
-                isBeta = true;
-            }
-            // Opcjonalnie: jeśli chcesz, aby brak bonusów też oznaczał BETA dla Lock Chipa
-            // if (jestZeroLubBrak('waga') || jestZeroLubBrak('cx_lc_wytrz') || jestZeroLubBrak('cx_lc_atk_bonus') || jestZeroLubBrak('cx_lc_def_bonus')) {
-            //     isBeta = true;
-            // }
-        }
-        // --- Koniec Logiki BETA ---
-
-        // Generowanie stringu statystyk
-        let statyString = '';
-        if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
-            statyString = `ATK:${maStat('ATK') ? czesc.ATK : 'N/A'}, DEF:${maStat('DEF') ? czesc.DEF : 'N/A'}, STM:${maStat('STM') ? czesc.STM : 'N/A'}, Waga:${maStat('waga') ? czesc.waga : 'N/A'}g`;
-        } else if (czesc.typ === 'bit') {
-            statyString = `ATK:${maStat('ATK') ? czesc.ATK : 'N/A'}, DEF:${maStat('DEF') ? czesc.DEF : 'N/A'}, STM:${maStat('STM') ? czesc.STM : 'N/A'}, Waga:${maStat('waga') ? czesc.waga : 'N/A'}g`;
-            statyString += `, DASH:${maStat('DASH') ? czesc.DASH : 'N/A'}`;
-            statyString += `, B-RES:${maStat('BURST_RES') ? czesc.BURST_RES : 'N/A'}`;
-        } else if (czesc.typ === 'cx-lock-chip') {
-            statyString = `Waga:${maStat('waga') ? czesc.waga : 'N/A'}g`;
-            if (maStat('cx_lc_wytrz') && czesc.cx_lc_wytrz !== 0) statyString += `, Wytrz:${czesc.cx_lc_wytrz}`;
-            else if (maStat('cx_lc_wytrz') && czesc.cx_lc_wytrz === 0 && isBeta) statyString += `, Wytrz:N/A`; // Pokaż N/A jeśli beta i 0
-
-            if (maStat('cx_lc_atk_bonus') && czesc.cx_lc_atk_bonus !== 0) statyString += `, ATK+:${czesc.cx_lc_atk_bonus}`;
-            else if (maStat('cx_lc_atk_bonus') && czesc.cx_lc_atk_bonus === 0 && isBeta) statyString += `, ATK+:N/A`;
-
-            if (maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus !== 0) statyString += `, DEF+:${czesc.cx_lc_def_bonus}`;
-            else if (maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus === 0 && isBeta) statyString += `, DEF+:N/A`;
+            if (jestZeroLubBrak('waga')) isBeta = true;
         }
         
-        // Usunięcie nadmiarowych "N/A" jeśli cała linia to tylko N/A
+        let statyString = '';
+        if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
+            statyString = `ATK:${maStat('ATK')?czesc.ATK:'N/A'}, DEF:${maStat('DEF')?czesc.DEF:'N/A'}, STM:${maStat('STM')?czesc.STM:'N/A'}, Waga:${maStat('waga')?czesc.waga:'N/A'}g`;
+        } else if (czesc.typ === 'bit') {
+            statyString = `ATK:${maStat('ATK')?czesc.ATK:'N/A'}, DEF:${maStat('DEF')?czesc.DEF:'N/A'}, STM:${maStat('STM')?czesc.STM:'N/A'}, Waga:${maStat('waga')?czesc.waga:'N/A'}g`;
+            statyString += `, DASH:${maStat('DASH')?czesc.DASH:'N/A'}, B-RES:${maStat('BURST_RES')?czesc.BURST_RES:'N/A'}`;
+        } else if (czesc.typ === 'cx-lock-chip') {
+            statyString = `Waga:${maStat('waga')?czesc.waga:'N/A'}g`;
+            if(maStat('cx_lc_wytrz') && czesc.cx_lc_wytrz !== 0) statyString += `, Wytrz:${czesc.cx_lc_wytrz}`;
+            else if (maStat('cx_lc_wytrz') && czesc.cx_lc_wytrz === 0 && isBeta) statyString += `, Wytrz:N/A`;
+            if(maStat('cx_lc_atk_bonus') && czesc.cx_lc_atk_bonus !== 0) statyString += `, ATK+:${czesc.cx_lc_atk_bonus}`;
+            else if (maStat('cx_lc_atk_bonus') && czesc.cx_lc_atk_bonus === 0 && isBeta) statyString += `, ATK+:N/A`;
+            if(maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus !== 0) statyString += `, DEF+:${czesc.cx_lc_def_bonus}`;
+            else if (maStat('cx_lc_def_bonus') && czesc.cx_lc_def_bonus === 0 && isBeta) statyString += `, DEF+:N/A`;
+        }
         const czyWszystkieStatyToNA = statyString.split(',').every(s => s.includes(':N/A') || s.trim() === 'N/A');
-
-        if (isBeta && czyWszystkieStatyToNA) {
-            statyString = "Statystyki: N/A (Wersja BETA)";
-        } else if (!isBeta && czyWszystkieStatyToNA && (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade' || czesc.typ === 'bit' || czesc.typ === 'cx-lock-chip')) {
-             // Jeśli nie jest BETA, ale i tak wszystkie kluczowe staty to N/A, to może być błąd danych
-             statyString = "Brak szczegółowych statystyk";
-        } else if (statyString.trim() === '' || statyString.toLowerCase().includes("waga:n/ag") && statyString.split(',').length === 1 && czesc.typ === 'cx-lock-chip') {
-            // Jeśli string pusty lub dla Lock Chipa tylko "Waga:N/Ag"
-            if (isBeta) {
-                statyString = "Statystyki: N/A (Wersja BETA)";
-            } else {
-                statyString = "Brak szczegółowych statystyk";
-            }
+        if (isBeta && czyWszystkieStatyToNA) statyString = "Statystyki: N/A (Wersja BETA)";
+        else if (!isBeta && czyWszystkieStatyToNA && (czesc.typ !== 'cx-lock-chip' || (czesc.typ === 'cx-lock-chip' && statyString.toLowerCase() === "waga:n/ag"))) statyString = "Brak szczegółowych statystyk";
+        else if (statyString.trim() === '' || (statyString.toLowerCase().includes("waga:n/ag") && statyString.split(',').length === 1 && czesc.typ === 'cx-lock-chip')) {
+            statyString = isBeta ? "Statystyki: N/A (Wersja BETA)" : "Brak szczegółowych statystyk";
         }
 
-
-        const imgHTML = czesc.img
-            ? `<img class="part-img" src="${czesc.img}" alt="${czesc.nazwa}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-               <div class="part-img-placeholder" style="display:none;">Brak<br>obr.</div>`
-            : `<div class="part-img-placeholder">Brak<br>obr.</div>`;
-
+        const imgHTML = czesc.img ? `<img class="part-img" src="${czesc.img}" alt="${czesc.nazwa}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="part-img-placeholder" style="display:none;">Brak<br>obr.</div>` : `<div class="part-img-placeholder">Brak<br>obr.</div>`;
         const cardDiv = document.createElement('div');
         cardDiv.className = 'card';
-        if (ilosc === 0) {
-            cardDiv.classList.add('part-not-owned');
-        }
-        if (isBeta) { // Opcjonalna klasa dla całej karty BETA
-            cardDiv.classList.add('part-beta-item');
-        }
-
+        if (ilosc === 0) cardDiv.classList.add('part-not-owned');
+        if (isBeta) cardDiv.classList.add('part-beta-item');
         const typNazwaFormatowana = czesc.typ.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-
         const quantityControlsHTML = `
             <div class="item-quantity-controls">
-                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', -1)"
-                        title="Zmniejsz ilość ${czesc.nazwa}"
-                        ${ilosc === 0 ? 'disabled' : ''}>-</button>
+                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', -1)" title="Zmniejsz ilość ${czesc.nazwa}" ${ilosc === 0 ? 'disabled' : ''}>-</button>
                 <span class="quantity-display" title="Aktualna ilość: ${ilosc}">${ilosc}</span>
-                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', 1)"
-                        title="Zwiększ ilość ${czesc.nazwa}">+</button>
-            </div>
-        `;
-
-        cardDiv.innerHTML = `
-            ${imgHTML}
-            <h3>
-                ${czesc.nazwa}
-                ${isBeta ? '<span class="beta-label">BETA</span>' : ''}
-            </h3>
-            <p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>
-            <p style="font-size:0.85em; line-height:1.4;">${statyString}</p>
-            ${quantityControlsHTML}
-        `;
+                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', 1)" title="Zwiększ ilość ${czesc.nazwa}">+</button>
+            </div>`;
+        cardDiv.innerHTML = `${imgHTML}<h3>${czesc.nazwa}${isBeta ? '<span class="beta-label">BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p><p style="font-size:0.85em; line-height:1.4;">${statyString}</p>${quantityControlsHTML}`;
         lista.appendChild(cardDiv);
     });
     console.log("[MAGAZYN_VIEW_7] Renderowanie części zakończone.");
 }
 
-
-// 🔧 Funkcja zmiany ilości
-function zmienIlosc(id, delta) {
+function zmienIloscCzesci(idCzesci, zmiana) {
     const magazyn = getMagazyn();
-    const index = magazyn.findIndex(c => String(c.id) === String(id));
-    if (index === -1) return;
-
-    const nowaIlosc = (magazyn[index].ilosc || 0) + delta;
-    magazyn[index].ilosc = Math.max(0, nowaIlosc); // ilość nie może spaść poniżej 0
-
+    const indexCzesci = magazyn.findIndex(c => c && c.id === idCzesci);
+    if (indexCzesci === -1) {
+        showNotification("Błąd: Nie znaleziono części.", 3000, 'error'); return;
+    }
+    const czesc = magazyn[indexCzesci];
+    let nowaIlosc = (parseInt(czesc.ilosc, 10) || 0) + zmiana;
+    if (nowaIlosc < 0) nowaIlosc = 0;
+    
+    if (czesc.ilosc === nowaIlosc && zmiana !== 0) return;
+    
+    czesc.ilosc = nowaIlosc;
+    magazyn[indexCzesci] = czesc;
     setMagazyn(magazyn);
-    wyswietlMagazyn();
+
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+    if (document.getElementById('deck')?.classList.contains('active')) {
+        renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
+    }
 }
-
+// =================================
+// Obliczanie Statystyk Zestawu
+// =================================
 function obliczSumeStatystykZestawu(czesciZestawu, seria) {
-    console.log(`[STATS_CALC_1] Obliczanie statystyk dla serii: ${seria}, Czesci:`, JSON.parse(JSON.stringify(czesciZestawu)));
     const suma = { ATK: 0, DEF: 0, STM: 0, WAGA: 0, DASH: 0, B_RES: 0, CX_LC_WYTRZ: 0 };
-
     const getStat = (czesc, statName, defaultValue = 0) => {
-        if (!czesc || typeof czesc[statName] === 'undefined' || czesc[statName] === null) {
-            return defaultValue;
-        }
+        if (!czesc || typeof czesc[statName] === 'undefined' || czesc[statName] === null) return defaultValue;
         const val = parseFloat(czesc[statName]);
         return isNaN(val) ? defaultValue : val;
     };
 
-    let currentBlade, currentRatchet, currentBit;
-    let currentCxLockChip, currentCxMainBlade, currentCxAssistBlade;
-
     if (seria === 'bx_ux') {
-        // console.log('[STATS_CALC_DEBUG_BXUX_0] Wejście do bloku bx_ux.');
-        // console.log('[STATS_CALC_DEBUG_BXUX_1] czesciZestawu PRZED destrukturyzacją:', JSON.parse(JSON.stringify(czesciZestawu)));
-        
         const { blade, rachet, bit } = czesciZestawu;
-        currentBlade = blade;
-        currentRatchet = rachet;
-        currentBit = bit;
-
-        // console.log('[STATS_CALC_DEBUG_BXUX_2] Po destrukturyzacji i przypisaniu:');
-        // console.log('  currentBlade:', currentBlade ? currentBlade.nazwa : null);
-        // console.log('  currentRatchet:', currentRatchet ? currentRatchet.nazwa : null);
-        // console.log('  currentBit:', currentBit ? currentBit.nazwa : null);
-
-        if (currentBlade) {
-            // console.log('[STATS_CALC_DEBUG_BXUX_3] Przetwarzanie currentBlade:', currentBlade.nazwa);
-            suma.ATK += getStat(currentBlade, 'ATK');
-            suma.DEF += getStat(currentBlade, 'DEF');
-            suma.STM += getStat(currentBlade, 'STM');
-            suma.WAGA += getStat(currentBlade, 'waga');
-        } /* else {
-            console.log('[STATS_CALC_DEBUG_BXUX_3_WARN] currentBlade jest null/undefined.');
-        }*/
-
-        // console.log('[STATS_CALC_DEBUG_BXUX_4] Stan currentRatchet PRZED blokiem if(currentRatchet):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
-        
-        if (currentRatchet) { 
-            // console.log('[STATS_CALC_DEBUG_BXUX_5] Wewnątrz if(currentRatchet). Nazwa:', currentRatchet.nazwa, 'ID:', currentRatchet.id);
-            suma.ATK += getStat(currentRatchet, 'ATK');
-            suma.DEF += getStat(currentRatchet, 'DEF');
-            suma.STM += getStat(currentRatchet, 'STM');
-            suma.WAGA += getStat(currentRatchet, 'waga');
-
-            if (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true) {
-                // console.log('[STATS_CALC_DEBUG_BXUX_6] Specjalny ratchet wykryty:', currentRatchet.nazwa);
-                suma.DASH = getStat(currentRatchet, 'DASH');
-                suma.B_RES = getStat(currentRatchet, 'BURST_RES');
-                // console.log(`[STATS_CALC_2_BXUX_SPEC_RACHET] Ratchet "${currentRatchet.nazwa}" integruje bit. DASH: ${suma.DASH}, B_RES: ${suma.B_RES}`);
-            } /* else {
-                 console.log('[STATS_CALC_DEBUG_BXUX_6] To jest zwykły ratchet:', currentRatchet.nazwa);
-            }*/
-        } /* else {
-            console.log('[STATS_CALC_DEBUG_BXUX_5_WARN] currentRatchet jest null/undefined. Pomijam blok statystyk racheta.');
-        }*/
-        // console.log('[STATS_CALC_DEBUG_BXUX_7] Stan currentRatchet PO bloku if(currentRatchet):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
-
-        const jestSpecjalnyRatchet = currentRatchet && (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true);
-        // console.log('[STATS_CALC_DEBUG_BXUX_8] Sprawdzanie bita. jestSpecjalnyRatchet:', jestSpecjalnyRatchet, 'currentBit:', currentBit ? currentBit.nazwa : null);
-
-        if (currentBit && !jestSpecjalnyRatchet) {
-            // console.log(`[STATS_CALC_DEBUG_BXUX_9] Używam statystyk ze zwykłego bita "${currentBit.nazwa}"`);
-            suma.DASH += getStat(currentBit, 'DASH');
-            suma.B_RES += getStat(currentBit, 'BURST_RES');
-            suma.WAGA += getStat(currentBit, 'waga');
-        } /* else if (!currentBit && !jestSpecjalnyRatchet) {
-            console.log(`[STATS_CALC_WARN_BXUX_NO_BIT] Brak bita dla zwykłego racheta (lub brak racheta). DASH/B_RES mogą być niekompletne.`);
-        } else if (currentBit && jestSpecjalnyRatchet) {
-            console.log(`[STATS_CALC_INFO_BXUX_BIT_IGNORED] Bit "${currentBit.nazwa}" istnieje, ale został zignorowany z powodu specjalnego racheta.`);
-        }*/
-
+        if (blade) { suma.ATK += getStat(blade, 'ATK'); suma.DEF += getStat(blade, 'DEF'); suma.STM += getStat(blade, 'STM'); suma.WAGA += getStat(blade, 'waga'); }
+        if (rachet) {
+            suma.ATK += getStat(rachet, 'ATK'); suma.DEF += getStat(rachet, 'DEF'); suma.STM += getStat(rachet, 'STM'); suma.WAGA += getStat(rachet, 'waga');
+            if (String(rachet.id) === "205" || rachet.integrujeBit === true) {
+                suma.DASH = getStat(rachet, 'DASH'); suma.B_RES = getStat(rachet, 'BURST_RES');
+            }
+        }
+        const jestSpecjalnyRatchet = rachet && (String(rachet.id) === "205" || rachet.integrujeBit === true);
+        if (bit && !jestSpecjalnyRatchet) {
+            suma.DASH += getStat(bit, 'DASH'); suma.B_RES += getStat(bit, 'BURST_RES'); suma.WAGA += getStat(bit, 'waga');
+        }
     } else if (seria === 'cx') {
-        // console.log('[STATS_CALC_DEBUG_CX_0] Wejście do bloku cx.');
-        // console.log('[STATS_CALC_DEBUG_CX_1] czesciZestawu PRZED destrukturyzacją:', JSON.parse(JSON.stringify(czesciZestawu)));
-
         const { cx_lock_chip, cx_main_blade, cx_assist_blade, rachet, bit } = czesciZestawu;
-        currentCxLockChip = cx_lock_chip;
-        currentCxMainBlade = cx_main_blade;
-        currentCxAssistBlade = cx_assist_blade;
-        currentRatchet = rachet;
-        currentBit = bit;
-
-        // console.log('[STATS_CALC_DEBUG_CX_2] Po destrukturyzacji i przypisaniu:');
-        // console.log('  currentCxLockChip:', currentCxLockChip ? currentCxLockChip.nazwa : null);
-        // console.log('  currentCxMainBlade:', currentCxMainBlade ? currentCxMainBlade.nazwa : null);
-        // console.log('  currentCxAssistBlade:', currentCxAssistBlade ? currentCxAssistBlade.nazwa : null);
-        // console.log('  currentRatchet (CX):', currentRatchet ? currentRatchet.nazwa : null);
-        // console.log('  currentBit (CX):', currentBit ? currentBit.nazwa : null);
-
-        if (currentCxLockChip) {
-            // console.log('[STATS_CALC_DEBUG_CX_3A] Przetwarzanie LockChip:', currentCxLockChip.nazwa);
-            suma.WAGA += getStat(currentCxLockChip, 'waga');
-            suma.CX_LC_WYTRZ += getStat(currentCxLockChip, 'cx_lc_wytrz');
-            suma.ATK += getStat(currentCxLockChip, 'cx_lc_atk_bonus');
-            suma.DEF += getStat(currentCxLockChip, 'cx_lc_def_bonus');
+        if (cx_lock_chip) { suma.WAGA += getStat(cx_lock_chip, 'waga'); suma.CX_LC_WYTRZ += getStat(cx_lock_chip, 'cx_lc_wytrz'); suma.ATK += getStat(cx_lock_chip, 'cx_lc_atk_bonus'); suma.DEF += getStat(cx_lock_chip, 'cx_lc_def_bonus'); }
+        if (cx_main_blade) { suma.ATK += getStat(cx_main_blade, 'ATK'); suma.DEF += getStat(cx_main_blade, 'DEF'); suma.STM += getStat(cx_main_blade, 'STM'); suma.WAGA += getStat(cx_main_blade, 'waga'); }
+        if (cx_assist_blade) { suma.ATK += getStat(cx_assist_blade, 'ATK'); suma.DEF += getStat(cx_assist_blade, 'DEF'); suma.STM += getStat(cx_assist_blade, 'STM'); suma.WAGA += getStat(cx_assist_blade, 'waga'); }
+        if (rachet) {
+            suma.ATK += getStat(rachet, 'ATK'); suma.DEF += getStat(rachet, 'DEF'); suma.STM += getStat(rachet, 'STM'); suma.WAGA += getStat(rachet, 'waga');
+            if (String(rachet.id) === "205" || rachet.integrujeBit === true) {
+                suma.DASH = getStat(rachet, 'DASH'); suma.B_RES = getStat(rachet, 'BURST_RES');
+            }
         }
-        if (currentCxMainBlade) {
-            // console.log('[STATS_CALC_DEBUG_CX_3B] Przetwarzanie MainBlade:', currentCxMainBlade.nazwa);
-            suma.ATK += getStat(currentCxMainBlade, 'ATK');
-            suma.DEF += getStat(currentCxMainBlade, 'DEF');
-            suma.STM += getStat(currentCxMainBlade, 'STM');
-            suma.WAGA += getStat(currentCxMainBlade, 'waga');
+        const jestSpecjalnyRatchetCX = rachet && (String(rachet.id) === "205" || rachet.integrujeBit === true);
+        if (bit && !jestSpecjalnyRatchetCX) {
+            suma.DASH += getStat(bit, 'DASH'); suma.B_RES += getStat(bit, 'BURST_RES'); suma.WAGA += getStat(bit, 'waga');
         }
-        if (currentCxAssistBlade) {
-            // console.log('[STATS_CALC_DEBUG_CX_3C] Przetwarzanie AssistBlade:', currentCxAssistBlade.nazwa);
-            suma.ATK += getStat(currentCxAssistBlade, 'ATK');
-            suma.DEF += getStat(currentCxAssistBlade, 'DEF');
-            suma.STM += getStat(currentCxAssistBlade, 'STM');
-            suma.WAGA += getStat(currentCxAssistBlade, 'waga');
-        }
-
-        // console.log('[STATS_CALC_DEBUG_CX_4] Stan currentRatchet PRZED blokiem if(currentRatchet) (CX):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
-        if (currentRatchet) {
-            // console.log('[STATS_CALC_DEBUG_CX_5] Wewnątrz if(currentRatchet) (CX). Nazwa:', currentRatchet.nazwa, 'ID:', currentRatchet.id);
-            suma.ATK += getStat(currentRatchet, 'ATK');
-            suma.DEF += getStat(currentRatchet, 'DEF');
-            suma.STM += getStat(currentRatchet, 'STM');
-            suma.WAGA += getStat(currentRatchet, 'waga');
-
-            if (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true) {
-                // console.log('[STATS_CALC_DEBUG_CX_6] Specjalny ratchet wykryty (CX):', currentRatchet.nazwa);
-                suma.DASH = getStat(currentRatchet, 'DASH');
-                suma.B_RES = getStat(currentRatchet, 'BURST_RES');
-                // console.log(`[STATS_CALC_2_CX_SPEC_RACHET] Ratchet "${currentRatchet.nazwa}" integruje bit. DASH: ${suma.DASH}, B_RES: ${suma.B_RES}`);
-            } /* else {
-                console.log('[STATS_CALC_DEBUG_CX_6] To jest zwykły ratchet (CX):', currentRatchet.nazwa);
-            }*/
-        } /* else {
-            console.log('[STATS_CALC_DEBUG_CX_5_WARN] currentRatchet (CX) jest null/undefined.');
-        }*/
-        // console.log('[STATS_CALC_DEBUG_CX_7] Stan currentRatchet PO bloku if(currentRatchet) (CX):', currentRatchet ? currentRatchet.nazwa : currentRatchet);
-
-        const jestSpecjalnyRatchetCX = currentRatchet && (String(currentRatchet.id) === "205" || currentRatchet.integrujeBit === true);
-        // console.log('[STATS_CALC_DEBUG_CX_8] Sprawdzanie bita (CX). jestSpecjalnyRatchetCX:', jestSpecjalnyRatchetCX, 'currentBit:', currentBit ? currentBit.nazwa : null);
-
-        if (currentBit && !jestSpecjalnyRatchetCX) {
-            // console.log(`[STATS_CALC_DEBUG_CX_9] Używam statystyk ze zwykłego bita "${currentBit.nazwa}" (CX)`);
-            suma.DASH += getStat(currentBit, 'DASH');
-            suma.B_RES += getStat(currentBit, 'BURST_RES');
-            suma.WAGA += getStat(currentBit, 'waga');
-        } /* else if (!currentBit && !jestSpecjalnyRatchetCX) {
-            console.log(`[STATS_CALC_WARN_CX_NO_BIT] Brak bita dla zwykłego racheta w CX (lub brak racheta).`);
-        } else if (currentBit && jestSpecjalnyRatchetCX) {
-            console.log(`[STATS_CALC_INFO_CX_BIT_IGNORED] Bit "${currentBit.nazwa}" (CX) istnieje, ale został zignorowany z powodu specjalnego racheta.`);
-        }*/
     }
 
-    // Zaokrąglenie wszystkich wartości numerycznych w obiekcie suma
     for (const key in suma) {
         if (typeof suma[key] === 'number') {
-            // Zaokrąglij do 1 miejsca po przecinku.
-            // Jeśli CX_LC_WYTRZ ma być zawsze całkowitą, można dodać warunek:
-            // if (key === 'CX_LC_WYTRZ') {
-            //     suma[key] = parseFloat(suma[key].toFixed(0));
-            // } else {
-            //     suma[key] = parseFloat(suma[key].toFixed(1));
-            // }
-            // Dla uproszczenia, na razie wszystko do 1 miejsca:
             suma[key] = parseFloat(suma[key].toFixed(1));
         }
     }
-
-    console.log("[STATS_CALC_FINAL_ROUNDED] Końcowa ZAOKRĄGLONA suma statystyk:", JSON.parse(JSON.stringify(suma)));
     return suma;
 }
 
+// =================================
+// Generator Losowych Zestawów
+// =================================
 function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
     const { seria, czesci, statystyki, idZestawu } = zestaw;
-    
-    // Funkcja pomocnicza do generowania tagu obrazka lub placeholdera
-    // Ta sama funkcja jest używana w displaySavedDecks, można ją wynieść globalnie jeśli chcesz
     const getPartAndHTML = (partObj, partTypeDefaultName) => {
-        const imgHTML = partObj && partObj.img ? 
-                        `<img src="${partObj.img}" alt="${partObj.nazwa || partTypeDefaultName}" class="deck-part-img">` : // Użyj .deck-part-img dla spójności ze stylami podglądu decku
-                        `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
+        const imgHTML = partObj && partObj.img ? `<img src="${partObj.img}" alt="${partObj.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
         const nameText = partObj ? (partObj.nazwa || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`;
         return { html: imgHTML, name: nameText };
     };
 
     let setImagesHTML = ''; 
-    let setNameParts = []; // Tablica stringów dla nazw części
-
+    let setNameParts = [];
     const ratchetWylosowany = czesci.rachet;
     const czySpecjalnyRatchetZostalWylosowany = ratchetWylosowany && (String(ratchetWylosowany.id) === "205" || ratchetWylosowany.integrujeBit === true);
 
     if (seria === 'bx_ux') {
         const bladeInfo = getPartAndHTML(czesci.blade, 'Blade');
         const ratchetInfo = getPartAndHTML(ratchetWylosowany, 'Ratchet');
-        let bitInfo;
-
-        if (czySpecjalnyRatchetZostalWylosowany) {
-            // Dla specjalnego racheta, bit jest zintegrowany. Możemy pokazać placeholder lub nic.
-            // Tutaj pokazujemy specjalny tekst zamiast obrazka bita.
-            bitInfo = { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` };
-        } else {
-            bitInfo = getPartAndHTML(czesci.bit, 'Bit');
-        }
-        
-        setImagesHTML = `<div class="wynik-zestaw-obrazki">
-                           ${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}
-                         </div>`;
-        setNameParts = [
-            `<strong>Blade:</strong> ${bladeInfo.name}`, 
-            `<strong>Ratchet:</strong> ${ratchetInfo.name}`, 
-            `<strong>Bit:</strong> ${bitInfo.name}`
-        ];
-
+        let bitInfo = czySpecjalnyRatchetZostalWylosowany ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` } : getPartAndHTML(czesci.bit, 'Bit');
+        setImagesHTML = `<div class="wynik-zestaw-obrazki">${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}</div>`;
+        setNameParts = [`<strong>Blade:</strong> ${bladeInfo.name}`, `<strong>Ratchet:</strong> ${ratchetInfo.name}`, `<strong>Bit:</strong> ${bitInfo.name}`];
     } else if (seria === 'cx') {
         const lockChipInfo = getPartAndHTML(czesci.cx_lock_chip, 'LockChip');
         const mainBladeInfo = getPartAndHTML(czesci.cx_main_blade, 'MainBlade');
         const assistBladeInfo = getPartAndHTML(czesci.cx_assist_blade, 'AssistBlade');
         const ratchetInfo = getPartAndHTML(ratchetWylosowany, 'Ratchet');
-        let bitInfo;
-
-        if (czySpecjalnyRatchetZostalWylosowany) {
-            bitInfo = { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` };
-        } else {
-            bitInfo = getPartAndHTML(czesci.bit, 'Bit');
-        }
-        
-        // Struktura dla CX może być bardziej złożona, np. dwa rzędy obrazków
-        setImagesHTML = `
-            <div class="cx-images-container">
-                <div class="cx-blade-row wynik-zestaw-obrazki">
-                    ${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}
-                </div>
-                <div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">
-                    ${ratchetInfo.html} ${bitInfo.html}
-                </div>
-            </div>`;
-        setNameParts = [
-            `<strong>LockChip:</strong> ${lockChipInfo.name}`,   
-            `<strong>Main Blade:</strong> ${mainBladeInfo.name}`,  
-            `<strong>Assist Blade:</strong> ${assistBladeInfo.name}`,
-            `<strong>Ratchet:</strong> ${ratchetInfo.name}`,    
-            `<strong>Bit:</strong> ${bitInfo.name}`
-        ];
+        let bitInfo = czySpecjalnyRatchetZostalWylosowany ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` } : getPartAndHTML(czesci.bit, 'Bit');
+        setImagesHTML = `<div class="cx-images-container"><div class="cx-blade-row wynik-zestaw-obrazki">${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}</div><div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetInfo.html} ${bitInfo.html}</div></div>`;
+        setNameParts = [`<strong>LockChip:</strong> ${lockChipInfo.name}`, `<strong>Main Blade:</strong> ${mainBladeInfo.name}`, `<strong>Assist Blade:</strong> ${assistBladeInfo.name}`, `<strong>Ratchet:</strong> ${ratchetInfo.name}`, `<strong>Bit:</strong> ${bitInfo.name}`];
     }
     
-    let setNameHTML = setNameParts.join('<br>'); // Nazwy części jedna pod drugą
-
-    // Tworzenie stringu statystyk - SUMARYCZNYCH w stylu .stat-grid
+    let setNameHTML = setNameParts.join('<br>');
     let statySumaryczneHTML = '<div class="stat-grid">'; 
-        statySumaryczneHTML += `<span>ATK: ${(statystyki.ATK || 0).toFixed(1)}</span>`;
-        statySumaryczneHTML += `<span>DEF: ${(statystyki.DEF || 0).toFixed(1)}</span>`;
-        statySumaryczneHTML += `<span>STM: ${(statystyki.STM || 0).toFixed(1)}</span>`;
-        statySumaryczneHTML += `<span>Waga: ${(statystyki.WAGA || 0).toFixed(1)}g</span>`;
-        
-        const dashValue = parseFloat((statystyki.DASH || 0).toFixed(1));
-        const bResValue = parseFloat((statystyki.B_RES || 0).toFixed(1));
-
-        if (dashValue !== 0) statySumaryczneHTML += `<span>DASH: ${dashValue.toFixed(1)}</span>`;
-        if (bResValue !== 0) statySumaryczneHTML += `<span>B-RES: ${bResValue.toFixed(1)}</span>`;
-        
-        if (seria === 'cx') {
-            const lcWytrzValue = parseInt((statystyki.CX_LC_WYTRZ || 0).toFixed(0));
-            if (lcWytrzValue !== 0) {
-                statySumaryczneHTML += `<span>LC-W: ${lcWytrzValue}</span>`;
-            }
-        }
+    statySumaryczneHTML += `<span>ATK: ${(statystyki.ATK || 0).toFixed(1)}</span>`;
+    statySumaryczneHTML += `<span>DEF: ${(statystyki.DEF || 0).toFixed(1)}</span>`;
+    statySumaryczneHTML += `<span>STM: ${(statystyki.STM || 0).toFixed(1)}</span>`;
+    statySumaryczneHTML += `<span>Waga: ${(statystyki.WAGA || 0).toFixed(1)}g</span>`;
+    const dashValue = parseFloat((statystyki.DASH || 0).toFixed(1));
+    const bResValue = parseFloat((statystyki.B_RES || 0).toFixed(1));
+    if (dashValue !== 0) statySumaryczneHTML += `<span>DASH: ${dashValue.toFixed(1)}</span>`;
+    if (bResValue !== 0) statySumaryczneHTML += `<span>B-RES: ${bResValue.toFixed(1)}</span>`;
+    if (seria === 'cx') {
+        const lcWytrzValue = parseInt((statystyki.CX_LC_WYTRZ || 0).toFixed(0));
+        if (lcWytrzValue !== 0) statySumaryczneHTML += `<span>LC-W: ${lcWytrzValue}</span>`;
+    }
     statySumaryczneHTML += `</div>`;
 
-    // Informacje o zmiennych statystykach racheta (jeśli istnieją)
-    // Można to również inaczej sformatować, jeśli jest potrzebne
     let zmienneStatyRatchetHTML = '';
     if (ratchetWylosowany && ratchetWylosowany.zmienneStaty && typeof ratchetWylosowany.zmienneStaty === 'object' && Object.keys(ratchetWylosowany.zmienneStaty).length > 0) {
-        zmienneStatyRatchetHTML = `<div class="zmienne-staty-info" style="font-size: 0.8em; margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: left;">
-                                     <strong style="display:block; margin-bottom:4px; color:#e0e0e0;">${ratchetWylosowany.nazwa} - Tryby:</strong>`;
+        zmienneStatyRatchetHTML = `<div class="zmienne-staty-info" style="font-size: 0.8em; margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: left;"><strong style="display:block; margin-bottom:4px; color:#e0e0e0;">${ratchetWylosowany.nazwa} - Tryby:</strong>`;
         for (const trybKey in ratchetWylosowany.zmienneStaty) {
             if (Object.hasOwnProperty.call(ratchetWylosowany.zmienneStaty, trybKey)) {
                 const tryb = ratchetWylosowany.zmienneStaty[trybKey];
@@ -1461,61 +1183,31 @@ function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
                 zmienneStatyRatchetHTML += statyTrybuArray.join(' / ') + '</div>';
             }
         }
-        if (ratchetWylosowany.opisSpecjalny) {
-             zmienneStatyRatchetHTML += `<small style="display:block; margin-top:5px; color:#aaa;"><em>${ratchetWylosowany.opisSpecjalny}</em></small>`;
-        }
+        if (ratchetWylosowany.opisSpecjalny) zmienneStatyRatchetHTML += `<small style="display:block; margin-top:5px; color:#aaa;"><em>${ratchetWylosowany.opisSpecjalny}</em></small>`;
         zmienneStatyRatchetHTML += `</div>`;
     }
 
-    // Zwróć HTML karty w nowym, bardziej estetycznym formacie
-    // Używamy klasy .saved-deck-card dla głównego kontenera, aby odziedziczyć część stylów
-    // ale możemy też dodać dodatkową klasę np. .generated-set-card dla specyficznych dostosowań
     return `
         <div class="card saved-deck-card generated-set-card ${seria === 'cx' ? 'wylosowany-zestaw-cx' : ''}" data-zestaw-id="${idZestawu}">
-            <h4 style="text-align:center; color:#d1b3ff; margin-bottom: 10px;">
-                Wylosowany Zestaw ${seria.toUpperCase().replace('_','/')} #${indexZestawu + 1}
-            </h4>
-            
+            <h4 style="text-align:center; color:#d1b3ff; margin-bottom: 10px;">Wylosowany Zestaw ${seria.toUpperCase().replace('_','/')} #${indexZestawu + 1}</h4>
             ${setImagesHTML}
-
-            <div style="font-size:0.85em; color:#ddd; margin-top: 8px; margin-bottom:12px; word-break: break-word; text-align:center; line-height: 1.4;">
-                ${setNameHTML} 
-            </div>
-
-            <div style="margin-top:10px; padding-top:10px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <strong style="display:block; text-align:center; font-size:0.9em; margin-bottom:5px; color:#c080ff;">SUMA STATYSTYK:</strong>
-                ${statySumaryczneHTML}
-            </div>
+            <div style="font-size:0.85em; color:#ddd; margin-top: 8px; margin-bottom:12px; word-break: break-word; text-align:center; line-height: 1.4;">${setNameHTML}</div>
+            <div style="margin-top:10px; padding-top:10px; border-top: 1px solid rgba(255,255,255,0.1);"><strong style="display:block; text-align:center; font-size:0.9em; margin-bottom:5px; color:#c080ff;">SUMA STATYSTYK:</strong>${statySumaryczneHTML}</div>
             ${zmienneStatyRatchetHTML}
-        </div>
-    `;
+        </div>`;
 }
 
-
-// =================================
-// Generator Zestawów Losowych (GŁÓWNA LOGIKA Z CX)
-// =================================
 function wyczyscLosowanie() {
-    // Użyj nowej zmiennej dla diva wyników generatora
     if (wynikiDivGenerator) wynikiDivGenerator.innerHTML = ''; 
-    // Użyj nowej zmiennej dla obrazka tła generatora
     if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; 
-
-    ostatnioWylosowaneZestawyGlobalnie = []; // Wyczyść globalną tablicę
-    
-    // Ukryj kontrolki zapisu głównego zestawu
+    ostatnioWylosowaneZestawyGlobalnie = [];
     const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
     if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
-
     showNotification('Wyniki losowania wyczyszczone.', 2000, 'info');
 }
+
 function LOSUJ() {
-    console.log("[LOSUJ_1] Funkcja LOSUJ - START");
-    if (!wynikiDivGenerator) {
-        showNotification("Błąd krytyczny: Element wyników generatora nie istnieje.", 3000, 'error');
-        console.error("[LOSUJ_X1] wynikiDivGenerator jest niezdefiniowany");
-        return;
-    }
+    if (!wynikiDivGenerator) { showNotification("Błąd: Element wyników generatora nie istnieje.", 3000, 'error'); return; }
     if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'none';
     wynikiDivGenerator.innerHTML = '';
     ostatnioWylosowaneZestawyGlobalnie = [];
@@ -1523,431 +1215,200 @@ function LOSUJ() {
     const iloscZestawowDoWylosowania = parseInt(document.getElementById('ilosc')?.value) || 1;
     const wybranaSeria = document.getElementById('seriaLosowania')?.value;
 
-    console.log(`[LOSUJ_2] Ilość zestawów: ${iloscZestawowDoWylosowania}, Seria: ${wybranaSeria}`);
-
-    if (!wybranaSeria) {
-        showNotification("Błąd: Nie wybrano serii do losowania.", 3000, 'warning');
-        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
-        return;
-    }
+    if (!wybranaSeria) { showNotification("Błąd: Nie wybrano serii.", 3000, 'warning'); if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; return; }
 
     const magazyn = getMagazyn();
     if (!magazyn || magazyn.length === 0) {
-        wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty! Dodaj części, aby móc losować.</p></div>';
-        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
-        console.log("[LOSUJ_3] Magazyn pusty.");
-        return;
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty!</p></div>';
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; return;
     }
-    console.log(`[LOSUJ_4] Liczba części w magazynie: ${magazyn.length}`);
-
-    // Przygotowanie puli części dostępnych do losowania
-    const dostepneCzesci = {
-        blade: [], rachet: [], bit: [],
-        'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': []
-    };
-
+    
+    const dostepneCzesci = { blade: [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
     magazyn.forEach(czesc => {
         const ilosc = parseInt(czesc.ilosc) || 0;
         if (ilosc > 0 && dostepneCzesci.hasOwnProperty(czesc.typ)) {
-            for (let i = 0; i < ilosc; i++) {
-                dostepneCzesci[czesc.typ].push({ ...czesc, _instanceId: `${czesc.id}_${i}` });
-            }
+            for (let i = 0; i < ilosc; i++) dostepneCzesci[czesc.typ].push({ ...czesc, _instanceId: `${czesc.id}_${i}` });
         }
     });
-    console.log("[LOSUJ_5] Pule dostępnych części:", JSON.parse(JSON.stringify(Object.keys(dostepneCzesci).reduce((acc, key) => { acc[key] = dostepneCzesci[key].length; return acc; }, {}))));
 
-
-    // Sprawdzenie, czy mamy wystarczająco części dla wybranej serii
-    let czyWystarczajacoCzesci = false;
-    let komunikatBrakuCzesci = '';
-
+    let czyWystarczajacoCzesci = false; let komunikatBrakuCzesci = '';
     if (wybranaSeria === 'bx_ux') {
-        const potrzebne = { blade: iloscZestawowDoWylosowania, rachet: iloscZestawowDoWylosowania, bit: iloscZestawowDoWylosowania };
-        if (dostepneCzesci.blade.length >= potrzebne.blade &&
-            dostepneCzesci.rachet.length >= potrzebne.rachet &&
-            dostepneCzesci.bit.length >= potrzebne.bit) {
-            // Dodatkowe sprawdzenie: jeśli wszystkie dostępne ratchety to ID "205", a potrzebujemy losować bitów,
-            // to musimy mieć wystarczająco "normalnych" ratchetów LUB wystarczająco bitów do sparowania z "normalnymi" ratchetami.
-            // To jest skomplikowane do dokładnego policzenia bez iteracji losowania.
-            // Na razie uproszczone sprawdzenie. Jeśli JEDYNYM dostępnym ratchetem jest ID "205" i potrzebujemy więcej niż 1 zestaw,
-            // to pula bitów może nie być potrzebna dla tych zestawów z ID "205".
-            // Dla uproszczenia, zakładamy, że pula bitów jest potrzebna, a logika losowania obsłuży specjalny ratchet.
-            czyWystarczajacoCzesci = true;
-        } else {
-            komunikatBrakuCzesci = '<div class="card" style="text-align:left; padding-left:25px;"><p><strong>Za mało części BX/UX do wylosowania żądanej ilości:</strong></p><ul>';
-            if (dostepneCzesci.blade.length < potrzebne.blade) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.blade - dostepneCzesci.blade.length} Blade (jest: ${dostepneCzesci.blade.length})</li>`;
-            if (dostepneCzesci.rachet.length < potrzebne.rachet) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.rachet - dostepneCzesci.rachet.length} Ratchet (jest: ${dostepneCzesci.rachet.length})</li>`;
-            if (dostepneCzesci.bit.length < potrzebne.bit) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.bit - dostepneCzesci.bit.length} Bit (jest: ${dostepneCzesci.bit.length})</li>`;
-            komunikatBrakuCzesci += '</ul></div>';
-        }
+        const p = { b: iloscZestawowDoWylosowania, r: iloscZestawowDoWylosowania, i: iloscZestawowDoWylosowania }; // p zamiast potrzebne
+        if (dostepneCzesci.blade.length >= p.b && dostepneCzesci.rachet.length >= p.r && dostepneCzesci.bit.length >= p.i) czyWystarczajacoCzesci = true;
+        else { /* logika komunikatu braku */ }
     } else if (wybranaSeria === 'cx') {
-        const potrzebne = {
-            'cx-lock-chip': iloscZestawowDoWylosowania, 'cx-main-blade': iloscZestawowDoWylosowania,
-            'cx-assist-blade': iloscZestawowDoWylosowania, rachet: iloscZestawowDoWylosowania, bit: iloscZestawowDoWylosowania
-        };
-        if (dostepneCzesci['cx-lock-chip'].length >= potrzebne['cx-lock-chip'] &&
-            dostepneCzesci['cx-main-blade'].length >= potrzebne['cx-main-blade'] &&
-            dostepneCzesci['cx-assist-blade'].length >= potrzebne['cx-assist-blade'] &&
-            dostepneCzesci.rachet.length >= potrzebne.rachet &&
-            dostepneCzesci.bit.length >= potrzebne.bit) {
-            czyWystarczajacoCzesci = true;
-        } else {
-            komunikatBrakuCzesci = '<div class="card" style="text-align:left; padding-left:25px;"><p><strong>Za mało części CX do wylosowania żądanej ilości:</strong></p><ul>';
-            if (dostepneCzesci['cx-lock-chip'].length < potrzebne['cx-lock-chip']) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne['cx-lock-chip'] - dostepneCzesci['cx-lock-chip'].length} CX Lock Chip (jest: ${dostepneCzesci['cx-lock-chip'].length})</li>`;
-            if (dostepneCzesci['cx-main-blade'].length < potrzebne['cx-main-blade']) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne['cx-main-blade'] - dostepneCzesci['cx-main-blade'].length} CX Main Blade (jest: ${dostepneCzesci['cx-main-blade'].length})</li>`;
-            if (dostepneCzesci['cx-assist-blade'].length < potrzebne['cx-assist-blade']) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne['cx-assist-blade'] - dostepneCzesci['cx-assist-blade'].length} CX Assist Blade (jest: ${dostepneCzesci['cx-assist-blade'].length})</li>`;
-            if (dostepneCzesci.rachet.length < potrzebne.rachet) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.rachet - dostepneCzesci.rachet.length} Ratchet (jest: ${dostepneCzesci.rachet.length})</li>`;
-            if (dostepneCzesci.bit.length < potrzebne.bit) komunikatBrakuCzesci += `<li>Brakuje ${potrzebne.bit - dostepneCzesci.bit.length} Bit (jest: ${dostepneCzesci.bit.length})</li>`;
-            komunikatBrakuCzesci += '</ul></div>';
-        }
+        const p = { lc: iloscZestawowDoWylosowania, mb: iloscZestawowDoWylosowania, ab: iloscZestawowDoWylosowania, r: iloscZestawowDoWylosowania, i: iloscZestawowDoWylosowania };
+        if (dostepneCzesci['cx-lock-chip'].length >= p.lc && dostepneCzesci['cx-main-blade'].length >= p.mb && dostepneCzesci['cx-assist-blade'].length >= p.ab && dostepneCzesci.rachet.length >= p.r && dostepneCzesci.bit.length >= p.i) czyWystarczajacoCzesci = true;
+        else { /* logika komunikatu braku */ }
     }
+    if (!czyWystarczajacoCzesci && komunikatBrakuCzesci) { /* pokaż komunikat */ return; }
+    if (!czyWystarczajacoCzesci && !komunikatBrakuCzesci) { /* generyczny komunikat braku */ return; }
 
-    if (!czyWystarczajacoCzesci) {
-        wynikiDivGenerator.innerHTML = komunikatBrakuCzesci;
-        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
-        const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
-        if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
-        console.log("[LOSUJ_6] Niewystarczająca liczba części.");
-        return;
-    }
-    console.log("[LOSUJ_7] Wystarczająca liczba części. Rozpoczynam losowanie...");
 
-    // Logika losowania
     const wylosowaneZestawyFragment = document.createDocumentFragment();
     for (let i = 0; i < iloscZestawowDoWylosowania; i++) {
-        console.log(`[LOSUJ_ZESTAW_${i+1}_1] Rozpoczynam losowanie zestawu #${i + 1}`);
-        let wylosowanyZestawCzesci = {};
-        let czyZestawKompletny = true;
-        let wylosowanoSpecjalnyRatchet = false; // Flaga dla specjalnego racheta
-
-        // Funkcja do losowania i usuwania z puli
-        const losujCzescZPulli = (typCzesci) => {
-            if (dostepneCzesci[typCzesci] && dostepneCzesci[typCzesci].length > 0) {
-                const randomIndex = Math.floor(Math.random() * dostepneCzesci[typCzesci].length);
-                const wylosowana = dostepneCzesci[typCzesci].splice(randomIndex, 1)[0]; // Losuj i usuń
-                console.log(`[LOSUJ_ZESTAW_${i+1}_LOS] Wylosowano dla typu '${typCzesci}': ID '${wylosowana.id}', Nazwa: '${wylosowana.nazwa}'`);
-                return wylosowana;
-            }
-            console.warn(`[LOSUJ_ZESTAW_${i+1}_LOS_WARN] Pula dla typu '${typCzesci}' jest pusta.`);
-            return null; // Zwróć null, jeśli pula jest pusta
+        let wylosowanyZestawCzesci = {}; let czyZestawKompletny = true; let wylosowanoSpecjalnyRatchet = false;
+        const losujCzescZPulli = (typ) => {
+            if (dostepneCzesci[typ] && dostepneCzesci[typ].length > 0) {
+                const idx = Math.floor(Math.random() * dostepneCzesci[typ].length);
+                return dostepneCzesci[typ].splice(idx, 1)[0];
+            } return null;
         };
 
         if (wybranaSeria === 'bx_ux') {
             wylosowanyZestawCzesci.blade = losujCzescZPulli('blade');
             wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
-
             if (wylosowanyZestawCzesci.rachet) {
-                // Sprawdź, czy wylosowany ratchet to ten specjalny (ID "205") LUB ma flagę integrujeBit
                 if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
-                    wylosowanoSpecjalnyRatchet = true;
-                    wylosowanyZestawCzesci.bit = null; 
-                    console.log(`[LOSUJ_ZESTAW_${i+1}_SPEC_RACHET] Wylosowano specjalny ratchet "${wylosowanyZestawCzesci.rachet.nazwa}" (ID: ${wylosowanyZestawCzesci.rachet.id}). Pomijam losowanie osobnego bita.`);
-                } else {
-                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
-                }
-            } else { // Nie udało się wylosować racheta, więc bit też nie może być dobrany logicznie
-                wylosowanyZestawCzesci.bit = null; 
-                czyZestawKompletny = false; // Jeśli nie ma racheta, zestaw jest niekompletny
-            }
-
-            // Sprawdzenie kompletności
-            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet ||
-                (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet /*tylko jeśli był ratchet, a nie jest specjalny*/)) {
-                czyZestawKompletny = false;
-                console.warn(`[LOSUJ_ZESTAW_${i+1}_NIEKOMPLETNY_BXUX] Blade: ${!!wylosowanyZestawCzesci.blade}, Ratchet: ${!!wylosowanyZestawCzesci.rachet}, Bit (potrzebny i jest): ${!wylosowanoSpecjalnyRatchet && !!wylosowanyZestawCzesci.bit}`);
-            }
-
+                    wylosowanoSpecjalnyRatchet = true; wylosowanyZestawCzesci.bit = null;
+                } else wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+            } else { wylosowanyZestawCzesci.bit = null; czyZestawKompletny = false; }
+            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) czyZestawKompletny = false;
         } else if (wybranaSeria === 'cx') {
             wylosowanyZestawCzesci.cx_lock_chip = losujCzescZPulli('cx-lock-chip');
             wylosowanyZestawCzesci.cx_main_blade = losujCzescZPulli('cx-main-blade');
             wylosowanyZestawCzesci.cx_assist_blade = losujCzescZPulli('cx-assist-blade');
             wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
-
             if (wylosowanyZestawCzesci.rachet) {
                 if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
-                    wylosowanoSpecjalnyRatchet = true;
-                    wylosowanyZestawCzesci.bit = null;
-                    console.log(`[LOSUJ_ZESTAW_${i+1}_SPEC_RACHET_CX] Wylosowano specjalny ratchet "${wylosowanyZestawCzesci.rachet.nazwa}" (ID: ${wylosowanyZestawCzesci.rachet.id}). Pomijam losowanie osobnego bita.`);
-                } else {
-                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
-                }
-            } else {
-                wylosowanyZestawCzesci.bit = null;
-                czyZestawKompletny = false;
-            }
-
-            // Sprawdzenie kompletności dla CX
-            if (!wylosowanyZestawCzesci.cx_lock_chip || !wylosowanyZestawCzesci.cx_main_blade ||
-                !wylosowanyZestawCzesci.cx_assist_blade || !wylosowanyZestawCzesci.rachet ||
-                (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) {
-                czyZestawKompletny = false;
-                 console.warn(`[LOSUJ_ZESTAW_${i+1}_NIEKOMPLETNY_CX] LockChip: ${!!wylosowanyZestawCzesci.cx_lock_chip}, Main: ${!!wylosowanyZestawCzesci.cx_main_blade}, Assist: ${!!wylosowanyZestawCzesci.cx_assist_blade}, Ratchet: ${!!wylosowanyZestawCzesci.rachet}, Bit (potrzebny i jest): ${!wylosowanoSpecjalnyRatchet && !!wylosowanyZestawCzesci.bit}`);
-            }
+                    wylosowanoSpecjalnyRatchet = true; wylosowanyZestawCzesci.bit = null;
+                } else wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+            } else { wylosowanyZestawCzesci.bit = null; czyZestawKompletny = false; }
+            if (!wylosowanyZestawCzesci.cx_lock_chip || !wylosowanyZestawCzesci.cx_main_blade || !wylosowanyZestawCzesci.cx_assist_blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) czyZestawKompletny = false;
         }
 
         if (czyZestawKompletny) {
-            console.log(`[LOSUJ_ZESTAW_${i+1}_2] Zestaw #${i + 1} skompletowany. Obliczanie statystyk.`);
             const statystykiZestawu = obliczSumeStatystykZestawu(wylosowanyZestawCzesci, wybranaSeria);
             const idUnikalnyZestawu = `wylosowany-${Date.now()}-${i}-${Math.random().toString(16).slice(2)}`;
-            const pelnyZestaw = {
-                idZestawu: idUnikalnyZestawu,
-                seria: wybranaSeria,
-                czesci: wylosowanyZestawCzesci,
-                statystyki: statystykiZestawu
-            };
+            const pelnyZestaw = { idZestawu: idUnikalnyZestawu, seria: wybranaSeria, czesci: wylosowanyZestawCzesci, statystyki: statystykiZestawu };
             ostatnioWylosowaneZestawyGlobalnie.push(pelnyZestaw);
-            console.log(`[LOSUJ_ZESTAW_${i+1}_3] Pełny zestaw #${i+1} (do zapisu globalnego):`, JSON.parse(JSON.stringify(pelnyZestaw)));
-
-
             const kartaHTML = generujHTMLDlaKartyZestawu(pelnyZestaw, i);
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = kartaHTML.trim();
+            const tempDiv = document.createElement('div'); tempDiv.innerHTML = kartaHTML.trim();
             wylosowaneZestawyFragment.appendChild(tempDiv.firstChild);
         } else {
-            console.warn(`[LOSUJ_ZESTAW_${i+1}_ERR] Nie udało się skompletować zestawu #${i + 1} dla serii ${wybranaSeria} z powodu braku części w puli lub błędu losowania.`);
-            showNotification(`Nie udało się wylosować wszystkich ${iloscZestawowDoWylosowania} zestawów. Sprawdź dostępność części.`, 3000, 'warning');
-            break; 
+            showNotification(`Nie udało się wylosować wszystkich ${iloscZestawowDoWylosowania} zestawów.`, 3000, 'warning'); break; 
         }
     }
 
     if (wylosowaneZestawyFragment.childNodes.length > 0) {
         wynikiDivGenerator.appendChild(wylosowaneZestawyFragment);
-        showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów) ${wybranaSeria.toUpperCase()}!`, 2500, 'success');
-        console.log(`[LOSUJ_8] Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów). Wyświetlam.`);
-        
+        showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów)!`, 2500, 'success');
         const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
         if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'block';
     } else if (iloscZestawowDoWylosowania > 0 && czyWystarczajacoCzesci) {
-        wynikiDivGenerator.innerHTML = '<div class="card"><p>Wystąpił nieoczekiwany błąd podczas losowania zestawów lub nie udało się skompletować żadnego.</p></div>';
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Błąd losowania lub brak możliwości skompletowania.</p></div>';
         if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
         const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
         if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
-        console.log("[LOSUJ_9] Wystarczająco części, ale nie udało się stworzyć fragmentu z wynikami.");
     }
-    console.log("[LOSUJ_10] Funkcja LOSUJ - KONIEC");
 }
-
 // =================================
-// Zapisywanie Wylosowanych Zestawów i Decków (NOWA FUNKCJA saveCurrentGeneratedDeck)
+// Zapisywanie Wylosowanych Zestawów i Decków
 // =================================
-const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3'; // Ten sam klucz co dla Deck Generatora
-
-// Funkcja getSavedDecks() i setSavedDecks() będą używane przez obie metody zapisu
-
-function saveCurrentGeneratedDeck() { // Zapisuje pierwszy zestaw z ostatnioWylosowaneZestawyGlobalnie
+function saveCurrentGeneratedDeck() {
     if (!ostatnioWylosowaneZestawyGlobalnie || ostatnioWylosowaneZestawyGlobalnie.length === 0) {
-        showNotification("Brak wylosowanych zestawów do zapisania. Użyj generatora najpierw.", 3000, 'warning');
-        return;
+        showNotification("Brak wylosowanych zestawów do zapisania.", 3000, 'warning'); return;
     }
-    
-    const zestawDoZapisu = ostatnioWylosowaneZestawyGlobalnie[0]; // Bierzemy pierwszy wylosowany zestaw
-
+    const zestawDoZapisu = ostatnioWylosowaneZestawyGlobalnie[0];
     if (!zestawDoZapisu || !zestawDoZapisu.czesci || !zestawDoZapisu.seria) {
-        showNotification("Błąd: Dane pierwszego wylosowanego zestawu są niekompletne lub uszkodzone.", 3000, 'error');
-        console.error("Problem z zestawDoZapisu w saveCurrentGeneratedDeck:", zestawDoZapisu);
-        return;
+        showNotification("Błąd: Dane wylosowanego zestawu są niekompletne.", 3000, 'error'); return;
     }
 
     const nazwaInput = document.getElementById('nazwa-glownego-decku');
-    let nazwaDecku = `Wylosowany ${zestawDoZapisu.seria.toUpperCase()} ${new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}`; // Domyślna nazwa
+    let nazwaDecku = `Wylosowany ${zestawDoZapisu.seria.toUpperCase()} ${new Date().toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}`;
+    if (nazwaInput && nazwaInput.value.trim() !== '') nazwaDecku = nazwaInput.value.trim();
 
-    if (nazwaInput && nazwaInput.value.trim() !== '') {
-        nazwaDecku = nazwaInput.value.trim();
-    }
-
-    // Struktura decku będzie taka sama jak dla decków z Deck Generatora
-    // czyli deck składa się z tablicy 'sets', nawet jeśli zapisujemy tylko jeden zestaw.
-    const pojedynczyZestawKonfiguracja = { // Konfiguracja tego jednego zestawu
-        // Mapowanie ID części z obiektu `zestawDoZapisu.czesci` na `czesciIds`
-    };
-
+    const pojedynczyZestawKonfiguracja = { statystykiObliczone: zestawDoZapisu.statystyki };
     if (zestawDoZapisu.seria === 'bx_ux') {
-        pojedynczyZestawKonfiguracja.seria = 'bx_ux'; // Dodajemy serię do konfiguracji zestawu
+        pojedynczyZestawKonfiguracja.seria = 'bx_ux';
         pojedynczyZestawKonfiguracja.bladeId = zestawDoZapisu.czesci.blade?.id || null;
         pojedynczyZestawKonfiguracja.ratchetId = zestawDoZapisu.czesci.rachet?.id || null;
         pojedynczyZestawKonfiguracja.bitId = zestawDoZapisu.czesci.bit?.id || null;
     } else if (zestawDoZapisu.seria === 'cx') {
-        pojedynczyZestawKonfiguracja.seria = 'cx'; // Dodajemy serię do konfiguracji zestawu
+        pojedynczyZestawKonfiguracja.seria = 'cx';
         pojedynczyZestawKonfiguracja.cx_lock_chipId = zestawDoZapisu.czesci.cx_lock_chip?.id || null;
         pojedynczyZestawKonfiguracja.cx_main_bladeId = zestawDoZapisu.czesci.cx_main_blade?.id || null;
         pojedynczyZestawKonfiguracja.cx_assist_bladeId = zestawDoZapisu.czesci.cx_assist_blade?.id || null;
         pojedynczyZestawKonfiguracja.ratchetId = zestawDoZapisu.czesci.rachet?.id || null;
         pojedynczyZestawKonfiguracja.bitId = zestawDoZapisu.czesci.bit?.id || null;
-    } else {
-        showNotification("Błąd: Nieznana seria wylosowanego zestawu.", 3000, 'error');
-        return;
-    }
-    
-    // Dodajemy też obliczone statystyki do obiektu zestawu, aby były dostępne w galerii
-    pojedynczyZestawKonfiguracja.statystykiObliczone = zestawDoZapisu.statystyki;
-
+    } else { showNotification("Błąd: Nieznana seria.", 3000, 'error'); return; }
 
     const nowyDeck = {
         id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        name: nazwaDecku,
-        timestamp: Date.now(),
-        lastModified: Date.now(),
-        sets: [pojedynczyZestawKonfiguracja] // Deck zawiera listę zestawów, tutaj tylko jeden
+        name: nazwaDecku, timestamp: Date.now(), lastModified: Date.now(),
+        sets: [pojedynczyZestawKonfiguracja]
     };
-
     const zapisaneDecki = getSavedDecks();
     zapisaneDecki.push(nowyDeck);
     setSavedDecks(zapisaneDecki);
-
-    showNotification(`Deck "${nowyDeck.name}" (z 1 zestawem) został zapisany!`, 3000, 'success');
-
-    if (nazwaInput) nazwaInput.value = ''; // Wyczyść pole nazwy po zapisie
-    
-    // Opcjonalnie: ukryj lub dezaktywuj przycisk zapisu głównego po sukcesie
+    showNotification(`Deck "${nowyDeck.name}" zapisany!`, 3000, 'success');
+    if (nazwaInput) nazwaInput.value = '';
     const zapiszGlownyButton = document.querySelector('#zapisz-glowny-zestaw-controls button');
     if(zapiszGlownyButton) {
-        zapiszGlownyButton.textContent = 'Zapisano!';
-        zapiszGlownyButton.disabled = true;
-        setTimeout(() => { // Przywróć przycisk po chwili
-            zapiszGlownyButton.textContent = 'Zapisz Ten Wylosowany Zestaw';
-            zapiszGlownyButton.disabled = false;
-             // Można też ukryć całą sekcję:
-             // const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
-             // if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
-        }, 2500);
+        zapiszGlownyButton.textContent = 'Zapisano!'; zapiszGlownyButton.disabled = true;
+        setTimeout(() => { zapiszGlownyButton.textContent = 'Zapisz Ten Wylosowany Zestaw'; zapiszGlownyButton.disabled = false; }, 2500);
     }
 }
-
-
-// =================================
-// Zarządzanie Zapisanymi Deckami (localStorage) - funkcje get i set są już wyżej
-// =================================
-// const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3'; // Już zdefiniowany
-
-function getSavedDecks() { // Powtórzenie dla spójności, jeśli wklejasz fragmenty
-    try {
-        const decksString = localStorage.getItem(SAVED_DECKS_KEY);
-        return decksString ? JSON.parse(decksString) : [];
-    } catch (e) { 
-        showNotification("Błąd odczytu zapisanych decków.", 3000, 'error'); 
-        console.error("getSavedDecks Błąd:", e);
-        return []; 
-    }
-}
-
-function setSavedDecks(decksArray) { // Powtórzenie dla spójności
-    try {
-        if (Array.isArray(decksArray)) {
-            localStorage.setItem(SAVED_DECKS_KEY, JSON.stringify(decksArray));
-        } else {
-            showNotification("Błąd zapisu decków: Nieprawidłowe dane (nie jest tablicą).", 3000, 'error');
-            console.error("setSavedDecks: Próba zapisu nie-tablicy:", decksArray);
-        }
-    } catch (e) { 
-        showNotification("Błąd zapisu decków do localStorage.", 3000, 'error'); 
-        console.error("setSavedDecks Błąd:", e);
-    }
-}
-
 
 function saveCurrentDeck() { // Dla Deck Generatora
     const deckNameInput = document.getElementById('deckName');
     const deckName = deckNameInput ? deckNameInput.value.trim() : '';
-
     if (!deckName && !currentEditingDeckId) {
-        showNotification("Wpisz nazwę dla nowego decku (Deck Generator).", 3000, 'warning');
-        deckNameInput?.focus();
-        return;
+        showNotification("Wpisz nazwę dla nowego decku.", 3000, 'warning'); deckNameInput?.focus(); return;
     }
 
     const currentDeckSetsConfig = [];
-    const magazynDanych = getMagazyn(); // Potrzebny do updateDeckStats
+    const magazynDanych = getMagazyn();
+    const usedPartsInDeck = {}; let duplicateFound = false; let duplicateMessage = "";
 
-    // Słownik do śledzenia użytych części w całym decku { partId: { count: number, setName: string } }
-    const usedPartsInDeck = {}; 
-    let duplicateFound = false;
-    let duplicateMessage = "";
-
-    console.log("Rozpoczynam zapis decku. UsedPartsInDeck zainicjowany jako pusty.");
-
-    for (let i = 1; i <= 4; i++) { // Zakładając maksymalnie 4 zestawy
+    for (let i = 1; i <= 4; i++) {
         const seriaSelect = document.getElementById(`deck-seria-${i}`);
-        if (!seriaSelect) {
-            console.warn(`Brak selecta serii dla zestawu ${i} podczas zapisu.`);
-            continue;
-        }
+        if (!seriaSelect) continue;
         const wybranaSeria = seriaSelect.value;
         const partsConfig = { seria: wybranaSeria };
-        let partsInThisSet = []; // Tablica ID części użytych w TYM zestawie
+        let partsInThisSet = [];
 
         if (wybranaSeria === 'bx_ux') {
             partsConfig.bladeId = document.getElementById(`deck-blade-${i}`)?.value || null;
             partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
             partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
-
             if (partsConfig.bladeId) partsInThisSet.push({ id: partsConfig.bladeId, type: 'Blade' });
             if (partsConfig.ratchetId) partsInThisSet.push({ id: partsConfig.ratchetId, type: 'Ratchet' });
             if (partsConfig.bitId) partsInThisSet.push({ id: partsConfig.bitId, type: 'Bit' });
-
         } else if (wybranaSeria === 'cx') {
             partsConfig.cx_lock_chipId = document.getElementById(`deck-cx-lock-chip-${i}`)?.value || null;
             partsConfig.cx_main_bladeId = document.getElementById(`deck-cx-main-blade-${i}`)?.value || null;
             partsConfig.cx_assist_bladeId = document.getElementById(`deck-cx-assist-blade-${i}`)?.value || null;
             partsConfig.ratchetId = document.getElementById(`deck-ratchet-${i}`)?.value || null;
             partsConfig.bitId = document.getElementById(`deck-bit-${i}`)?.value || null;
-
             if (partsConfig.cx_lock_chipId) partsInThisSet.push({ id: partsConfig.cx_lock_chipId, type: 'CX Lock Chip' });
             if (partsConfig.cx_main_bladeId) partsInThisSet.push({ id: partsConfig.cx_main_bladeId, type: 'CX Main Blade' });
             if (partsConfig.cx_assist_bladeId) partsInThisSet.push({ id: partsConfig.cx_assist_bladeId, type: 'CX Assist Blade' });
             if (partsConfig.ratchetId) partsInThisSet.push({ id: partsConfig.ratchetId, type: 'Ratchet' });
             if (partsConfig.bitId) partsInThisSet.push({ id: partsConfig.bitId, type: 'Bit' });
-        } else {
-            console.warn(`Nieznana seria ${wybranaSeria} dla zestawu ${i} podczas zapisu.`);
-            continue;
-        }
+        } else continue;
 
-        // --- Sprawdzanie duplikatów dla tego zestawu ---
         for (const part of partsInThisSet) {
-            if (part.id) { // Tylko jeśli wybrano część (ID nie jest puste/null)
+            if (part.id) {
                 if (usedPartsInDeck[part.id]) {
                     duplicateFound = true;
                     const partObject = magazynDanych.find(p => p.id === part.id);
-                    const partName = partObject ? partObject.nazwa : `Część o ID ${part.id}`;
-                    duplicateMessage = `Część "${partName}" (${part.type}) została użyta więcej niż raz w tym decku (w Zestawie ${usedPartsInDeck[part.id].setName} i Zestawie ${i}).`;
-                    console.warn(`DUPLIKAT WYKRYTY: Część ID ${part.id} ("${partName}") użyta w Zestawie ${usedPartsInDeck[part.id].setName} i Zestawie ${i}`);
-                    break; // Wystarczy jeden duplikat, aby przerwać dla tego zestawu
+                    const partName = partObject ? partObject.nazwa : `ID ${part.id}`;
+                    duplicateMessage = `Część "${partName}" (${part.type}) użyta więcej niż raz (w Zestawie ${usedPartsInDeck[part.id].setName} i ${i}).`;
+                    break;
                 }
-                usedPartsInDeck[part.id] = { count: 1, setName: i.toString() }; // Zapisz, że część została użyta i w którym zestawie po raz pierwszy
-                console.log(`Część ID ${part.id} dodana do usedPartsInDeck z Zestawu ${i}. Aktualny stan usedPartsInDeck:`, JSON.parse(JSON.stringify(usedPartsInDeck)));
+                usedPartsInDeck[part.id] = { count: 1, setName: i.toString() };
             }
         }
-
-        if (duplicateFound) {
-            break; // Przerwij główną pętlę po zestawach, jeśli znaleziono duplikat
-        }
-        // --- Koniec sprawdzania duplikatów ---
-
+        if (duplicateFound) break;
 
         partsConfig.statystykiObliczone = updateDeckStats(i, magazynDanych, true);
-
-        const czyJakakolwiekCzescWybrana = Object.values(partsConfig).some(val =>
-            typeof val === 'string' && val !== '' && val !== wybranaSeria && val !== null && !val.startsWith('statystyki')
-        );
-
-        if (czyJakakolwiekCzescWybrana) {
-            currentDeckSetsConfig.push(partsConfig);
-        } else {
-            console.log(`Zestaw ${i} był pusty i nie został dodany do zapisu.`);
-        }
-    } // Koniec pętli for po zestawach
-
-    // Jeśli znaleziono duplikat, pokaż powiadomienie i zakończ
-    if (duplicateFound) {
-        showNotification(duplicateMessage, 5000, 'error');
-        return;
+        const czyJakakolwiekCzescWybrana = Object.values(partsConfig).some(val => typeof val === 'string' && val !== '' && val !== wybranaSeria && val !== null && !val.startsWith('statystyki'));
+        if (czyJakakolwiekCzescWybrana) currentDeckSetsConfig.push(partsConfig);
     }
-    console.log("Walidacja duplikatów zakończona. Nie znaleziono duplikatów lub pętla została przerwana.");
 
-
-    if (currentDeckSetsConfig.length === 0 && !currentEditingDeckId) {
-        showNotification("Nie skonfigurowano żadnych części w Deck Generatorze.", 3000, 'warning');
-        return;
-    }
+    if (duplicateFound) { showNotification(duplicateMessage, 5000, 'error'); return; }
+    if (currentDeckSetsConfig.length === 0 && !currentEditingDeckId) { showNotification("Nie skonfigurowano żadnych części.", 3000, 'warning'); return; }
 
     let savedDecks = getSavedDecks();
     let wiadomosc = '';
@@ -1962,23 +1423,13 @@ function saveCurrentDeck() { // Dla Deck Generatora
             wiadomosc = `Deck "${nazwaDeckuOperacji}" zaktualizowany!`;
         } else {
             showNotification("Błąd: Nie znaleziono decku do edycji.", 3000, 'error');
-            currentEditingDeckId = null;
-            const saveBtn = document.getElementById('saveDeckButton');
-            if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
-            return;
+            currentEditingDeckId = null; const saveBtn = document.getElementById('saveDeckButton'); if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck'; return;
         }
     } else {
-        const newDeck = {
-            id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-            name: nazwaDeckuOperacji,
-            timestamp: Date.now(),
-            lastModified: Date.now(),
-            sets: currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : []
-        };
+        const newDeck = { id: `deck_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`, name: nazwaDeckuOperacji, timestamp: Date.now(), lastModified: Date.now(), sets: currentDeckSetsConfig.length > 0 ? currentDeckSetsConfig : [] };
         savedDecks.push(newDeck);
         wiadomosc = `Deck "${nazwaDeckuOperacji}" zapisany!`;
     }
-
     setSavedDecks(savedDecks);
     showNotification(wiadomosc, 3000, 'success');
 
@@ -1987,105 +1438,81 @@ function saveCurrentDeck() { // Dla Deck Generatora
     const saveBtn = document.getElementById('saveDeckButton');
     if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
 
-    renderDeckBuilder(); // Zresetuj/odśwież Deck Builder
+    renderDeckBuilder(); 
     console.log("Zapis decku zakończony pomyślnie (lub aktualizacja).");
 }
 
-
-function fillDropdown(selectId, type, magazynData, currentVal = null) { // Dodano currentVal
+// =================================
+// Deck Generator Functions (Builder, Stats, Display)
+// =================================
+function fillDropdown(selectId, type, magazynData, currentVal = null) {
   const selectElement = document.getElementById(selectId);
-  if (!selectElement) { 
-      console.error(`FillDropdown: Select o ID '${selectId}' nie istnieje.`); 
-      return; 
-  }
+  if (!selectElement) { console.error(`FillDropdown: Select ID '${selectId}' nie istnieje.`); return; }
   selectElement.innerHTML = "<option value=''>-- wybierz --</option>";
+  if (!Array.isArray(magazynData)) { console.error(`FillDropdown: Magazyn dla typu '${type}' nie jest listą.`); return; }
 
-  if (!Array.isArray(magazynData)) { 
-      console.error(`FillDropdown: Magazyn dla typu '${type}' nie jest listą.`); 
-      return; 
-  }
-
-  // Filtruj części tylko dla danego typu i z dostępną ilością
   const parts = magazynData.filter(p => p && p.typ === type && (p.ilosc === undefined || parseInt(p.ilosc) > 0));
-  
   parts.sort((a, b) => (a.nazwa || "").localeCompare(b.nazwa || ""));
-
   parts.forEach(p => { 
     const option = document.createElement('option');
     option.value = p.id || `brak_id_${Math.random().toString(36).substring(2,7)}`;
     option.textContent = `${p.nazwa || 'Część Bez Nazwy'} (Ilość: ${p.ilosc === undefined ? 'N/A' : p.ilosc})`;
-    if (currentVal && option.value === currentVal) { // Ustawienie zaznaczonej opcji
-        option.selected = true;
-    }
+    if (currentVal && option.value === currentVal) option.selected = true;
     selectElement.appendChild(option);
   });
 }
 
-// updateDeckStats dla Deck Generatora
 function updateDeckStats(setIndex, magazynData, returnStatsOnly = false) {
     const seriaSelect = document.getElementById(`deck-seria-${setIndex}`);
     if (!seriaSelect) {
-        console.error(`updateDeckStats: Brak selecta serii dla zestawu ${setIndex}`);
         if (!returnStatsOnly) {
             const statsDivFallback = document.getElementById(`deck-stats-${setIndex}`);
-            if (statsDivFallback) statsDivFallback.innerHTML = '<p style="color:red;">Błąd konfiguracji serii.</p>';
+            if (statsDivFallback) statsDivFallback.innerHTML = '<p style="color:red;">Błąd konfiguracji.</p>';
         }
         return returnStatsOnly ? { ATK: 0, DEF: 0, STM: 0, WAGA: 0, DASH: 0, B_RES: 0, CX_LC_WYTRZ: 0 } : undefined;
     }
     const wybranaSeria = seriaSelect.value;
-    
-    let czesciDoObliczen = {};
-    let nazwyCzesciDoWyswietlenia = []; // Tablica stringów dla nazw
+    let czesciDoObliczen = {}; let nazwyCzesciDoWyswietlenia = [];
 
-    // Zbieranie ID części w zależności od serii
     if (wybranaSeria === 'bx_ux') {
         const bladeId = document.getElementById(`deck-blade-${setIndex}`)?.value;
         const ratchetId = document.getElementById(`deck-ratchet-${setIndex}`)?.value;
         const bitId = document.getElementById(`deck-bit-${setIndex}`)?.value;
-
         czesciDoObliczen.blade = bladeId ? magazynData.find(p => p.id === bladeId) : null;
         czesciDoObliczen.rachet = ratchetId ? magazynData.find(p => p.id === ratchetId) : null;
         czesciDoObliczen.bit = bitId ? magazynData.find(p => p.id === bitId) : null;
-        
         nazwyCzesciDoWyswietlenia.push(`Blade: ${czesciDoObliczen.blade?.nazwa || 'N/A'}`);
         nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || 'N/A'}`);
         nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || 'N/A'}`);
-
     } else if (wybranaSeria === 'cx') {
         const lockChipId = document.getElementById(`deck-cx-lock-chip-${setIndex}`)?.value;
         const mainBladeId = document.getElementById(`deck-cx-main-blade-${setIndex}`)?.value;
         const assistBladeId = document.getElementById(`deck-cx-assist-blade-${setIndex}`)?.value;
-        const ratchetId = document.getElementById(`deck-ratchet-${setIndex}`)?.value; // Wspólny
-        const bitId = document.getElementById(`deck-bit-${setIndex}`)?.value;         // Wspólny
-
+        const ratchetId = document.getElementById(`deck-ratchet-${setIndex}`)?.value;
+        const bitId = document.getElementById(`deck-bit-${setIndex}`)?.value;
         czesciDoObliczen.cx_lock_chip = lockChipId ? magazynData.find(p => p.id === lockChipId) : null;
         czesciDoObliczen.cx_main_blade = mainBladeId ? magazynData.find(p => p.id === mainBladeId) : null;
         czesciDoObliczen.cx_assist_blade = assistBladeId ? magazynData.find(p => p.id === assistBladeId) : null;
         czesciDoObliczen.rachet = ratchetId ? magazynData.find(p => p.id === ratchetId) : null;
         czesciDoObliczen.bit = bitId ? magazynData.find(p => p.id === bitId) : null;
-
         nazwyCzesciDoWyswietlenia.push(`LockChip: ${czesciDoObliczen.cx_lock_chip?.nazwa || 'N/A'}`);
         nazwyCzesciDoWyswietlenia.push(`MainBlade: ${czesciDoObliczen.cx_main_blade?.nazwa || 'N/A'}`);
         nazwyCzesciDoWyswietlenia.push(`AssistBlade: ${czesciDoObliczen.cx_assist_blade?.nazwa || 'N/A'}`);
         nazwyCzesciDoWyswietlenia.push(`Ratchet: ${czesciDoObliczen.rachet?.nazwa || 'N/A'}`);
         nazwyCzesciDoWyswietlenia.push(`Bit: ${czesciDoObliczen.bit?.nazwa || 'N/A'}`);
     }
-
     const obliczoneStatystyki = obliczSumeStatystykZestawu(czesciDoObliczen, wybranaSeria);
-
-    if (returnStatsOnly) {
-        return obliczoneStatystyki;
-    }
+    if (returnStatsOnly) return obliczoneStatystyki;
 
     const statsDiv = document.getElementById(`deck-stats-${setIndex}`);
     if (statsDiv) {
-        let statsTextHTML = `<b>Wybrane części:</b><br><small>${nazwyCzesciDoWyswietlenia.join('<br>')}</small><br><br>`;
+        let statsTextHTML = `<b>Wybrane:</b><br><small>${nazwyCzesciDoWyswietlenia.join('<br>')}</small><br><br>`;
         statsTextHTML += `<b>SUMA STATYSTYK (${wybranaSeria.toUpperCase().replace('_','/')}):</b><br>`;
         statsTextHTML += `ATK: ${obliczoneStatystyki.ATK}, DEF: ${obliczoneStatystyki.DEF}, STM: ${obliczoneStatystyki.STM}, Waga: ${obliczoneStatystyki.WAGA}g`;
-        if (obliczoneStatystyki.DASH && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) { // DASH tylko jeśli jest bit
+        if (obliczoneStatystyki.DASH && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) {
              statsTextHTML += `, DASH: ${obliczoneStatystyki.DASH}`;
         }
-        if (obliczoneStatystyki.B_RES && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) { // B_RES tylko jeśli jest bit
+        if (obliczoneStatystyki.B_RES && (wybranaSeria === 'bx_ux' || (wybranaSeria === 'cx' && czesciDoObliczen.bit))) {
              statsTextHTML += `, B-RES: ${obliczoneStatystyki.B_RES}`;
         }
         if (wybranaSeria === 'cx' && obliczoneStatystyki.CX_LC_WYTRZ) {
@@ -2094,184 +1521,85 @@ function updateDeckStats(setIndex, magazynData, returnStatsOnly = false) {
         statsDiv.innerHTML = statsTextHTML;
     }
 }
-// =================================
-// Deck Generator Functions (Builder) - ZMODYFIKOWANE DLA CX
-// =================================
-
-// Funkcja pomocnicza do renderowania slotów na części dla danego zestawu i serii
-function renderPartSelectorsForSet(setIndex, seria, magazynData, parentElement, currentValues = null) {
-    parentElement.innerHTML = ''; // Wyczyść poprzednie selecty części
-
-    let fields = [];
-    if (seria === 'bx_ux') {
-        fields = [
-            { idPrefix: `deck-blade-${setIndex}`, label: 'Blade (BX/UX)', type: 'blade', value: currentValues?.bladeId },
-            { idPrefix: `deck-ratchet-${setIndex}`, label: 'Ratchet', type: 'rachet', value: currentValues?.ratchetId },
-            { idPrefix: `deck-bit-${setIndex}`, label: 'Bit', type: 'bit', value: currentValues?.bitId }
-        ];
-    } else if (seria === 'cx') {
-        fields = [
-            { idPrefix: `deck-cx-lock-chip-${setIndex}`, label: 'CX Lock Chip', type: 'cx-lock-chip', value: currentValues?.cx_lock_chipId },
-            { idPrefix: `deck-cx-main-blade-${setIndex}`, label: 'CX Main Blade', type: 'cx-main-blade', value: currentValues?.cx_main_bladeId },
-            { idPrefix: `deck-cx-assist-blade-${setIndex}`, label: 'CX Assist Blade', type: 'cx-assist-blade', value: currentValues?.cx_assist_bladeId },
-            { idPrefix: `deck-ratchet-${setIndex}`, label: 'Ratchet', type: 'rachet', value: currentValues?.ratchetId }, // Wspólny Ratchet
-            { idPrefix: `deck-bit-${setIndex}`, label: 'Bit', type: 'bit', value: currentValues?.bitId }         // Wspólny Bit
-        ];
-    }
-
-    fields.forEach(field => {
-        const div = document.createElement('div');
-        div.style.marginBottom = "10px";
-
-        const labelEl = document.createElement('label');
-        labelEl.htmlFor = field.idPrefix;
-        labelEl.textContent = `${field.label}:`;
-        labelEl.style.display = 'block'; 
-        labelEl.style.marginBottom = '3px';
-
-        const selectEl = document.createElement('select');
-        selectEl.id = field.idPrefix;
-        selectEl.style.width = '100%';
-        selectEl.addEventListener('change', () => updateDeckStats(setIndex, magazynData)); // Aktualizuj staty przy zmianie
-
-        div.appendChild(labelEl);
-        div.appendChild(selectEl);
-        parentElement.appendChild(div);
-
-        fillDropdown(field.idPrefix, field.type, magazynData, field.value); // Wypełnij opcjami, przekaż aktualną wartość
-    });
-}
-
-
 function renderDeckBuilder(initialDeckData = null) {
     if (!deckBuilderContainerDeckPage) {
         deckBuilderContainerDeckPage = document.getElementById("deck-builder");
         if (!deckBuilderContainerDeckPage) {
-            showNotification("Błąd krytyczny: Element #deck-builder nie istnieje.", 3000, 'error');
-            console.error("RenderDeckBuilder: Kontener #deck-builder nie został zainicjalizowany.");
-            return;
+            showNotification("Błąd: Element #deck-builder nie istnieje.", 3000, 'error'); return;
         }
     }
     deckBuilderContainerDeckPage.innerHTML = "";
     const aktualnyMagazyn = getMagazyn();
 
     if (!aktualnyMagazyn || aktualnyMagazyn.length === 0) {
-        deckBuilderContainerDeckPage.innerHTML = '<div class="card" style="text-align:center;"><p>Magazyn jest pusty. Dodaj części, aby móc budować Decki.</p></div>';
+        deckBuilderContainerDeckPage.innerHTML = '<div class="card" style="text-align:center;"><p>Magazyn jest pusty.</p></div>';
         return;
     }
 
     for (let i = 1; i <= 4; i++) {
         const deckSetCard = document.createElement("div");
         deckSetCard.className = "deck-set card";
-        deckSetCard.style.marginBottom = "25px";
-        deckSetCard.style.padding = "20px";
+        deckSetCard.style.marginBottom = "25px"; deckSetCard.style.padding = "20px";
 
         const initialSetData = initialDeckData?.sets?.[i - 1];
-        const currentSeria = initialSetData?.seria || 'bx_ux'; // Domyślnie BX/UX lub z wczytywanych danych
+        const currentSeria = initialSetData?.seria || 'bx_ux';
 
-        // --- Select dla Serii ---
         const seriaSelectDiv = document.createElement('div');
         seriaSelectDiv.style.marginBottom = "15px";
-        
         const seriaLabel = document.createElement('label');
-        seriaLabel.htmlFor = `deck-seria-${i}`;
-        seriaLabel.textContent = `Seria dla Zestawu ${i}:`;
-        
+        seriaLabel.htmlFor = `deck-seria-${i}`; seriaLabel.textContent = `Seria dla Zestawu ${i}:`;
         const seriaSelect = document.createElement('select');
         seriaSelect.id = `deck-seria-${i}`;
-        seriaSelect.innerHTML = `
-            <option value="bx_ux" ${currentSeria === 'bx_ux' ? 'selected' : ''}>BX / UX</option>
-            <option value="cx" ${currentSeria === 'cx' ? 'selected' : ''}>CX</option>
-        `;
+        seriaSelect.innerHTML = `<option value="bx_ux" ${currentSeria === 'bx_ux' ? 'selected' : ''}>BX / UX</option><option value="cx" ${currentSeria === 'cx' ? 'selected' : ''}>CX</option>`;
         
-        // Kontener na dynamiczne selecty części
         const partSelectorsContainer = document.createElement('div');
         partSelectorsContainer.id = `part-selectors-container-${i}`;
         
         seriaSelect.addEventListener('change', (event) => {
-            const nowaSeria = event.target.value;
-            // Przekaż null jako currentValues, aby selecty były puste po zmianie serii
-            renderPartSelectorsForSet(i, nowaSeria, aktualnyMagazyn, partSelectorsContainer, null); 
-            updateDeckStats(i, aktualnyMagazyn); // Zaktualizuj statystyki (prawdopodobnie będą zerowe)
+            renderPartSelectorsForSet(i, event.target.value, aktualnyMagazyn, partSelectorsContainer, null); 
+            updateDeckStats(i, aktualnyMagazyn);
         });
+        seriaSelectDiv.appendChild(seriaLabel); seriaSelectDiv.appendChild(seriaSelect);
 
-        seriaSelectDiv.appendChild(seriaLabel);
-        seriaSelectDiv.appendChild(seriaSelect);
-
-        // --- Kontener na statystyki ---
         const statsDiv = document.createElement('div');
-        statsDiv.id = `deck-stats-${i}`;
-        statsDiv.className = "deck-stats"; // Użyj swojej klasy .deck-stats
+        statsDiv.id = `deck-stats-${i}`; statsDiv.className = "deck-stats";
         statsDiv.style.cssText = "margin-top: 15px; font-weight: normal; font-size: 0.9em; padding: 10px; background: rgba(0,0,0,0.15); border-radius: 6px; text-align: left; line-height: 1.6;";
-
-        // --- Składanie karty zestawu ---
-        const heading = document.createElement('h3');
-        heading.textContent = `Zestaw ${i}`;
         
-        deckSetCard.appendChild(heading);
-        deckSetCard.appendChild(seriaSelectDiv);
-        deckSetCard.appendChild(partSelectorsContainer); // Kontener na selektory części
-        deckSetCard.appendChild(statsDiv);
-        
+        const heading = document.createElement('h3'); heading.textContent = `Zestaw ${i}`;
+        deckSetCard.appendChild(heading); deckSetCard.appendChild(seriaSelectDiv);
+        deckSetCard.appendChild(partSelectorsContainer); deckSetCard.appendChild(statsDiv);
         deckBuilderContainerDeckPage.appendChild(deckSetCard);
 
-        // Inicjalne renderowanie selektorów części dla aktualnej (lub domyślnej) serii
         renderPartSelectorsForSet(i, currentSeria, aktualnyMagazyn, partSelectorsContainer, initialSetData);
-        updateDeckStats(i, aktualnyMagazyn); // Inicjalne obliczenie statystyk
+        updateDeckStats(i, aktualnyMagazyn);
     }
 }
 
-// =================================
-// Wyświetlanie Zapisanych Decków (ZAKTUALIZOWANE DLA CX)
-// =================================
-
 function displaySavedDecks() {
     const container = document.getElementById('savedDecksContainer');
-    if (!container) { 
-        console.error("Błąd: Element #savedDecksContainer nie istnieje."); 
-        return; 
-    }
+    if (!container) { console.error("Błąd: #savedDecksContainer nie istnieje."); return; }
     container.innerHTML = ''; 
-
     const savedDecks = getSavedDecks();
     if (!savedDecks || savedDecks.length === 0) {
-        container.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align: center;"><p>Nie masz żadnych zapisanych decków.</p></div>';
+        container.innerHTML = '<div class="card" style="grid-column: 1 / -1; text-align: center;"><p>Nie masz zapisanych decków.</p></div>';
         return;
     }
-
     savedDecks.sort((a, b) => (b.lastModified || b.timestamp || 0) - (a.lastModified || a.timestamp || 0));
-    
     const magazynCzesci = getMagazyn(); 
 
     savedDecks.forEach(deck => {
-        if (!deck || !deck.id || !Array.isArray(deck.sets)) { 
-            console.warn("Wykryto nieprawidłowy deck w danych, pomijam:", deck);
-            return; 
-        }
-
+        if (!deck || !deck.id || !Array.isArray(deck.sets)) { console.warn("Nieprawidłowy deck:", deck); return; }
         const deckCard = document.createElement('div');
-        deckCard.className = 'card saved-deck-card'; 
-        deckCard.dataset.deckId = deck.id;
-
+        deckCard.className = 'card saved-deck-card'; deckCard.dataset.deckId = deck.id;
         let setsHTML = '';
+
         deck.sets.forEach((set, index) => {
-            if (!set) {
-                console.warn(`Pusty zestaw w decku ${deck.name}, index ${index}`);
-                setsHTML += `<div class="deck-card-set-preview"><p style="color:red;">Błąd danych zestawu ${index + 1}</p></div>`;
-                return;
-            }
-
+            if (!set) { setsHTML += `<div class="deck-card-set-preview"><p style="color:red;">Błąd danych zestawu ${index + 1}</p></div>`; return; }
             const seriaZestawu = set.seria || deck.seria || 'bx_ux'; 
-            
-            let setImagesHTML = ''; 
-            let setNameParts = [];
-            let currentSetStats = set.statystykiObliczone; 
-
+            let setImagesHTML = ''; let setNameParts = []; let currentSetStats = set.statystykiObliczone; 
             const getPartAndHTML = (partId, partTypeDefaultName) => {
                 const part = partId ? magazynCzesci.find(p => p.id === partId) : null;
-                const imgHTML = part && part.img ? 
-                                `<img src="${part.img}" alt="${part.nazwa || partTypeDefaultName}" class="deck-part-img">` : 
-                                `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
+                const imgHTML = part && part.img ? `<img src="${part.img}" alt="${part.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; 
                 const nameText = part ? (part.nazwa || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`;
                 return { html: imgHTML, name: nameText, partObj: part };
             };
@@ -2280,439 +1608,311 @@ function displaySavedDecks() {
                 const bladeInfo = getPartAndHTML(set.bladeId, 'Blade');
                 const ratchetInfo = getPartAndHTML(set.ratchetId, 'Ratchet');
                 const bitInfo = getPartAndHTML(set.bitId, 'Bit');
-                
-                setImagesHTML = `<div class="wynik-zestaw-obrazki">
-                                   ${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}
-                                 </div>`;
+                setImagesHTML = `<div class="wynik-zestaw-obrazki">${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}</div>`;
                 setNameParts = [bladeInfo.name, ratchetInfo.name, bitInfo.name];
-
-                if (!currentSetStats && (bladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) {
-                    currentSetStats = obliczSumeStatystykZestawu({ 
-                        blade: bladeInfo.partObj, 
-                        rachet: ratchetInfo.partObj, 
-                        bit: bitInfo.partObj 
-                    }, 'bx_ux'); // obliczSumeStatystykZestawu już zaokrągla
-                }
+                if (!currentSetStats && (bladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) currentSetStats = obliczSumeStatystykZestawu({ blade: bladeInfo.partObj, rachet: ratchetInfo.partObj, bit: bitInfo.partObj }, 'bx_ux');
             } else if (seriaZestawu === 'cx') {
                 const lockChipInfo = getPartAndHTML(set.cx_lock_chipId, 'LockChip');
                 const mainBladeInfo = getPartAndHTML(set.cx_main_bladeId, 'MainBlade');
                 const assistBladeInfo = getPartAndHTML(set.cx_assist_bladeId, 'AssistBlade');
                 const ratchetInfo = getPartAndHTML(set.ratchetId, 'Ratchet');
                 const bitInfo = getPartAndHTML(set.bitId, 'Bit');
-                
-                setImagesHTML = `
-                    <div class="cx-images-container">
-                        <div class="cx-blade-row wynik-zestaw-obrazki">
-                            ${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}
-                        </div>
-                        <div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">
-                            ${ratchetInfo.html} ${bitInfo.html}
-                        </div>
-                    </div>
-                `;
-                setNameParts = [
-                    lockChipInfo.name,   
-                    mainBladeInfo.name,  
-                    assistBladeInfo.name,
-                    ratchetInfo.name,    
-                    bitInfo.name         
-                ];
-
-                if (!currentSetStats && (lockChipInfo.partObj || mainBladeInfo.partObj || assistBladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) {
-                     currentSetStats = obliczSumeStatystykZestawu({ 
-                        cx_lock_chip: lockChipInfo.partObj, 
-                        cx_main_blade: mainBladeInfo.partObj,
-                        cx_assist_blade: assistBladeInfo.partObj,
-                        rachet: ratchetInfo.partObj, 
-                        bit: bitInfo.partObj 
-                    }, 'cx'); // obliczSumeStatystykZestawu już zaokrągla
-                }
+                setImagesHTML = `<div class="cx-images-container"><div class="cx-blade-row wynik-zestaw-obrazki">${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}</div><div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetInfo.html} ${bitInfo.html}</div></div>`;
+                setNameParts = [lockChipInfo.name, mainBladeInfo.name, assistBladeInfo.name, ratchetInfo.name, bitInfo.name];
+                if (!currentSetStats && (lockChipInfo.partObj || mainBladeInfo.partObj || assistBladeInfo.partObj || ratchetInfo.partObj || bitInfo.partObj)) currentSetStats = obliczSumeStatystykZestawu({ cx_lock_chip: lockChipInfo.partObj, cx_main_blade: mainBladeInfo.partObj, cx_assist_blade: assistBladeInfo.partObj, rachet: ratchetInfo.partObj, bit: bitInfo.partObj }, 'cx');
             }
-            
             let setNameHTML = setNameParts.join(' | ');
-
             let setStatsSummaryHTML = '<div class="stat-grid">'; 
             if (currentSetStats) {
-                // Wyświetlamy bezpośrednio, bo są już zaokrąglone w currentSetStats
-                setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span>`; // .toFixed(1) nie jest już tu potrzebne
+                setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span>`;
                 setStatsSummaryHTML += `<span>DEF: ${currentSetStats.DEF || 0}</span>`;
                 setStatsSummaryHTML += `<span>STM: ${currentSetStats.STM || 0}</span>`;
                 setStatsSummaryHTML += `<span>Waga: ${(currentSetStats.WAGA || currentSetStats.waga || 0)}g</span>`;
-                
-                const dashValue = parseFloat(currentSetStats.DASH || 0); // Konwertuj na liczbę do porównania
+                const dashValue = parseFloat(currentSetStats.DASH || 0);
                 const bResValue = parseFloat(currentSetStats.B_RES || 0);
-
                 if (dashValue !== 0) setStatsSummaryHTML += `<span>DASH: ${currentSetStats.DASH || 0}</span>`;
                 if (bResValue !== 0) setStatsSummaryHTML += `<span>B-RES: ${currentSetStats.B_RES || 0}</span>`;
-                
                 if (seriaZestawu === 'cx') {
-                    const lcWytrzValue = parseInt(currentSetStats.CX_LC_WYTRZ || 0); // Konwertuj na liczbę do porównania
-                    if (lcWytrzValue !== 0) {
-                        setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`;
-                    }
+                    const lcWytrzValue = parseInt(currentSetStats.CX_LC_WYTRZ || 0);
+                    if (lcWytrzValue !== 0) setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`;
                 }
-            } else {
-                setStatsSummaryHTML += '<span>Brak danych statystyk</span>';
-            }
+            } else setStatsSummaryHTML += '<span>Brak danych statystyk</span>';
             setStatsSummaryHTML += `</div>`;
-            
-            setsHTML += `
-                <div class="deck-card-set-preview"> 
-                    <strong style="text-transform: capitalize; display: block; text-align: center; margin-bottom: 8px;"> 
-                        Zestaw ${index + 1} (${seriaZestawu.toUpperCase().replace('_', '/')})
-                    </strong>
-                    ${setImagesHTML}
-                    <div style="font-size:0.8em; color:#ddd; margin-top: 8px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">
-                        ${setNameHTML} 
-                    </div>
-                    ${setStatsSummaryHTML} 
-                </div>`;
+            setsHTML += `<div class="deck-card-set-preview"><strong style="text-transform: capitalize; display: block; text-align: center; margin-bottom: 8px;">Zestaw ${index + 1} (${seriaZestawu.toUpperCase().replace('_', '/')})</strong>${setImagesHTML}<div style="font-size:0.8em; color:#ddd; margin-top: 8px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">${setNameHTML}</div>${setStatsSummaryHTML}</div>`;
         });
-        
-        const actionsHTML = `
-            <div class="item-actions" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
-                
-                <button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}' w Deck Generatorze">Edytuj</button>
-                <button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button>
-            </div>`;
-
-        deckCard.innerHTML = `
-            <h4 style="text-align:center; color:#e0e0e0; margin-bottom: 5px;">${deck.name || 'Deck bez nazwy'}</h4> 
-            <p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">
-                ${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')} ${new Date(deck.lastModified).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}` : 
-                                      `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')} ${new Date(deck.timestamp || Date.now()).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}`}
-            </p>
-            ${setsHTML}
-            ${actionsHTML}`;
+        const actionsHTML = `<div class="item-actions" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;"><button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}'">Edytuj</button><button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button></div>`;
+        deckCard.innerHTML = `<h4 style="text-align:center; color:#e0e0e0; margin-bottom: 5px;">${deck.name || 'Deck bez nazwy'}</h4><p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')} ${new Date(deck.lastModified).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}` : `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')} ${new Date(deck.timestamp || Date.now()).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}`}</p>${setsHTML}${actionsHTML}`;
         container.appendChild(deckCard);
     });
 }
 
-function wczytajDeckDoBuildera(deckId) {
-    const deckToLoad = getSavedDecks().find(d => d.id === deckId);
-    if (!deckToLoad) {
-        showNotification("Nie znaleziono decku do wczytania.", 3000, 'error');
-        return;
-    }
-    
-    currentEditingDeckId = null; // Resetujemy, bo tylko wczytujemy
-    
-    const deckNameInput = document.getElementById('deckName');
-    if (deckNameInput) deckNameInput.value = deckToLoad.name || '';
-
-    // Nawiguj do strony Deck Generatora, ale NIE wymuszaj renderowania przez navigateTo,
-    // bo renderDeckBuilder zostanie wywołany poniżej z danymi decku.
-    const linkDoDeckBuildera = document.querySelector('.sidebar a[onclick*="navigateTo(\'deck"]');
-    if(linkDoDeckBuildera) navigateTo('deck', linkDoDeckBuildera, false); 
-    else {
-        showNotification("Błąd: Brak linku do Deck Generatora w sidebarze.", 3000, 'error');
-        return;
-    }
-
-    // Użyj setTimeout, aby dać czas na nawigację i przygotowanie DOM
-    setTimeout(() => {
-        // Renderuj Deck Builder przekazując dane wczytywanego decku
-        renderDeckBuilder(deckToLoad); 
-        
-        // Po renderDeckBuilder, który użył danych do ustawienia selectów serii i części,
-        // musimy jeszcze raz wywołać updateDeckStats dla każdego zestawu, aby odświeżyć wyświetlane sumy.
-        if (deckToLoad.sets && deckToLoad.sets.length > 0) {
-            const magazyn = getMagazyn();
-            for (let i = 0; i < deckToLoad.sets.length; i++) {
-                if (i < 4) { // Ogranicz do 3 zestawów w builderze
-                    updateDeckStats(i + 1, magazyn);
-                }
-            }
-        }
-        
-        showNotification(`Wczytano deck: "${deckToLoad.name || 'Bez nazwy'}". Przewiń, aby zobaczyć w Deck Generatorze.`, 3500, 'info');
-        document.getElementById('deck-builder')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        
-        // Upewnij się, że przycisk zapisu jest w stanie "Zapisz Aktualny Deck"
-        const saveButton = document.getElementById('saveDeckButton');
-        if (saveButton) saveButton.textContent = 'Zapisz Aktualny Deck';
-
-    }, 250); // Opóźnienie, aby DOM był gotowy
-}
-
 function edytujDeck(deckId) {
     const deckToEdit = getSavedDecks().find(d => d.id === deckId);
-    if (!deckToEdit) {
-        showNotification("Nie znaleziono decku do edycji.", 3000, 'error');
-        return;
-    }
-    
-    // Wczytaj dane do buildera (tak jak w wczytajDeckDoBuildera)
+    if (!deckToEdit) { showNotification("Nie znaleziono decku do edycji.", 3000, 'error'); return; }
     const deckNameInput = document.getElementById('deckName');
     if (deckNameInput) deckNameInput.value = deckToEdit.name || '';
-
     const linkDoDeckBuildera = document.querySelector('.sidebar a[onclick*="navigateTo(\'deck"]');
     if(linkDoDeckBuildera) navigateTo('deck', linkDoDeckBuildera, false);
-    else {
-        showNotification("Błąd: Brak linku do Deck Generatora.", 3000, 'error');
-        return;
-    }
-    
-    currentEditingDeckId = deckId; // Ustaw ID edytowanego decku
-
+    else { showNotification("Błąd: Brak linku do Deck Generatora.", 3000, 'error'); return; }
+    currentEditingDeckId = deckId;
     setTimeout(() => {
-        renderDeckBuilder(deckToEdit); // Renderuj z danymi decku
-
+        renderDeckBuilder(deckToEdit);
         if (deckToEdit.sets && deckToEdit.sets.length > 0) {
             const magazyn = getMagazyn();
-            for (let i = 0; i < deckToEdit.sets.length; i++) {
-                 if (i < 4) updateDeckStats(i + 1, magazyn);
-            }
+            for (let i = 0; i < deckToEdit.sets.length; i++) if (i < 4) updateDeckStats(i + 1, magazyn);
         }
-
         const saveButton = document.getElementById('saveDeckButton');
         if (saveButton) saveButton.textContent = 'Zapisz Zmiany w Decku';
-    
-        showNotification(`Edytujesz deck: "${deckToEdit.name || 'Bez nazwy'}". Wprowadź zmiany i zapisz.`, 3000, 'info');
+        showNotification(`Edytujesz deck: "${deckToEdit.name || 'Bez nazwy'}".`, 3000, 'info');
         document.getElementById('deckName')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 250);
 }
 
 function usunZapisanyDeck(deckId) {
-    if (!deckId) { 
-        showNotification("Błąd: Nie podano ID decku do usunięcia.", 3000, 'info'); 
-        return; 
-    }
+    if (!deckId) { showNotification("Błąd: Brak ID decku.", 3000, 'info'); return; }
     const savedDecks = getSavedDecks();
     const deckToDelete = savedDecks.find(deck => deck.id === deckId);
-    if (!deckToDelete) { 
-        showNotification("Nie znaleziono decku do usunięcia.", 3000, 'info'); 
-        displaySavedDecks(); 
-        return; 
-    }
-    
-    // Usunięto confirm()
+    if (!deckToDelete) { showNotification("Nie znaleziono decku.", 3000, 'info'); displaySavedDecks(); return; }
     const updatedDecks = savedDecks.filter(deck => deck.id !== deckId);
     setSavedDecks(updatedDecks);
     showNotification(`Deck "${deckToDelete.name || 'Bez nazwy'}" usunięty.`, 3000, 'info');
-    displaySavedDecks(); // Odśwież widok kart
+    displaySavedDecks();
 }
 
-
+// =================================
+// Import/Eksport Magazynu
+// =================================
 function eksportujDaneDoPolaTekstowego() {
     const magazyn = getMagazyn();
     const poleTekstowe = document.getElementById('poleDanychJsonMagazyn');
     if (poleTekstowe) {
         if (magazyn && magazyn.length > 0) {
             poleTekstowe.value = JSON.stringify(magazyn, null, 2); 
-            showNotification('Dane magazynu skopiowane do pola.', 3000, 'success');
-            poleTekstowe.select(); 
-        } else {
-            poleTekstowe.value = ''; 
-            showNotification('Magazyn jest pusty. Nic do eksportu.', 3000, 'info');
-        }
-    } else {
-        showNotification('Błąd: Pole tekstowe JSON dla magazynu nie znalezione.', 3000, 'error');
-    }
+            showNotification('Dane magazynu skopiowane.', 3000, 'success'); poleTekstowe.select(); 
+        } else { poleTekstowe.value = ''; showNotification('Magazyn pusty.', 3000, 'info'); }
+    } else showNotification('Błąd: Pole tekstowe magazynu nie znalezione.', 3000, 'error');
 }
 
 function importujDaneZPolaTekstowego() {
     const poleTekstowe = document.getElementById('poleDanychJsonMagazyn');
     if (!poleTekstowe || !poleTekstowe.value.trim()) {
-        showNotification('Pole danych magazynu jest puste. Wklej dane JSON do importu.', 3000, 'warning');
-        return;
+        showNotification('Pole danych magazynu jest puste.', 3000, 'warning'); return;
     }
-
     let daneDoImportu;
-    try { 
-        daneDoImportu = JSON.parse(poleTekstowe.value); 
-    } catch (e) { 
-        showNotification('Błąd importu danych magazynu: Nieprawidłowy format JSON.', 3000, 'error'); 
-        console.error("Błąd parsowania JSON (magazyn):", e); 
-        return; 
-    }
-
-    // Walidacja, czy daneDoImportu to tablica - już jest w przetworzIDopiszDaneMagazynu
-
-    console.log("Import z pola tekstowego: Wywołanie przetworzIDopiszDaneMagazynu z ustawDomyslnaIloscNaZero = false...");
-    //                                  👇 TUTAJ ZMIANA (lub można pominąć, bo false jest domyślne)
+    try { daneDoImportu = JSON.parse(poleTekstowe.value); } 
+    catch (e) { showNotification('Błąd importu: Nieprawidłowy JSON.', 3000, 'error'); console.error("Błąd parsowania JSON (magazyn):", e); return; }
     przetworzIDopiszDaneMagazynu(daneDoImportu, 'Pole Tekstowe JSON', false);
-
-    // Nie ma potrzeby dodatkowego czyszczenia pola czy odświeżania, bo robi to `przetworzIDopiszDaneMagazynu`
-    // (chociaż można by dodać czyszczenie pola tekstowego tutaj po wywołaniu, jeśli jest taka potrzeba)
-    // if (poleTekstowe) poleTekstowe.value = ''; // Opcjonalnie
 }
 
-
-function eksportujDeckiDoPolaTekstowego() {
-    const savedDecks = getSavedDecks(); // Pobierz aktualnie zapisane decki (powinny mieć zestawy CX z poprawną strukturą)
-    const poleTekstoweDecki = document.getElementById('poleDanychJsonDecki');
-
-    if (poleTekstoweDecki) {
-        if (savedDecks && savedDecks.length > 0) {
-            try {
-                const jsonString = JSON.stringify(savedDecks, null, 2); // Formatuj JSON
-                poleTekstoweDecki.value = jsonString;
-                showNotification('Zapisane decki skopiowane do pola tekstowego.', 3000, 'success');
-                poleTekstoweDecki.focus();
-                poleTekstoweDecki.select();
-                // Opcjonalnie: automatyczne kopiowanie do schowka
-                // navigator.clipboard.writeText(jsonString).then(() => {
-                //     showNotification('Zapisane decki skopiowane do schowka i pola tekstowego!', 2500, 'success');
-                // }).catch(err => {
-                //     console.warn('Nie udało się automatycznie skopiować do schowka (decki):', err);
-                // });
-            } catch (e) {
-                showNotification('Błąd podczas konwersji danych decków do JSON.', 3000, 'error');
-                console.error("Błąd JSON.stringify (decki):", e);
-                poleTekstoweDecki.value = 'Błąd generowania danych JSON.';
-            }
-        } else {
-            poleTekstoweDecki.value = ''; 
-            showNotification('Brak zapisanych decków do eksportu.', 3000, 'info');
-        }
-    } else {
-        showNotification('Błąd krytyczny: Pole tekstowe JSON dla decków (#poleDanychJsonDecki) nie znalezione.', 3000, 'error');
+function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false) {
+    if (!Array.isArray(daneDoImportu)) {
+        showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format.`, 3000, 'error'); return;
     }
-}
+    const czesciImportowaneLista = daneDoImportu.map((item, index) => {
+        if (!item || typeof item !== 'object' || typeof item.typ !== 'string') return null;
+        let id = String(item.id || `${zrodloDanychOpis.toLowerCase().replace(/\s/g, '_')}_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`).trim();
+        if (!id) return null;
+        let typ = String(item.typ).trim().toLowerCase();
+        const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
+        if (!dozwoloneTypy.includes(typ)) typ = 'blade';
+        const parsedIlosc = parseInt(item.ilosc, 10);
+        const iloscOdczytanaZPliku = (isNaN(parsedIlosc) || parsedIlosc < 0) ? 0 : parsedIlosc;
+        const poczatkowaIloscDlaNowejCzesci = ustawDomyslnaIloscNaZero ? 0 : iloscOdczytanaZPliku;
+        const czesc = { id, typ, nazwa: String(item.nazwa || `Część ${index + 1}`).trim(), ilosc: poczatkowaIloscDlaNowejCzesci, _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku, img: String(item.img || '').trim(), ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0, cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0 };
+        const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+        const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
+        if (typ === 'blade' || typ === 'rachet' || typ === 'cx-main-blade' || typ === 'cx-assist-blade') { czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF); czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga); }
+        else if (typ === 'bit') { czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF); czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga); czesc.DASH = parseFloatOrZero(item.DASH); czesc.BURST_RES = parseFloatOrZero(item.BURST_RES); }
+        else if (typ === 'cx-lock-chip') { czesc.waga = parseFloatOrZero(item.waga); czesc.cx_lc_wytrz = parseIntOrZero(item.cx_lc_wytrz); czesc.cx_lc_atk_bonus = parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus = parseFloatOrZero(item.cx_lc_def_bonus); }
+        if (!czesc.nazwa) czesc.nazwa = `Autonazwa ${index + 1}`;
+        return czesc;
+    }).filter(item => item !== null && typeof item.nazwa === 'string' && item.nazwa.trim() !== '' && item.id.trim() !== '');
 
-function importujDeckiZPolaTekstowego() {
-    const poleTekstoweDecki = document.getElementById('poleDanychJsonDecki');
-    if (!poleTekstoweDecki || !poleTekstoweDecki.value.trim()) {
-        showNotification('Pole danych decków jest puste. Wklej dane JSON do importu.', 3000, 'warning');
-        return;
-    }
+    if (czesciImportowaneLista.length === 0 && daneDoImportu.length > 0) { showNotification(`Żadna część w '${zrodloDanychOpis}' nie miała prawidłowego formatu.`, 3500, 'warning'); return; }
+    if (czesciImportowaneLista.length === 0 && daneDoImportu.length === 0) { showNotification(`'${zrodloDanychOpis}' nie zawierał części.`, 3000, 'info'); return; }
 
-    let daneDeckowDoImportu;
-    try { 
-        daneDeckowDoImportu = JSON.parse(poleTekstoweDecki.value); 
-    } catch (e) { 
-        showNotification('Błąd importu decków: Nieprawidłowy format JSON.', 3000, 'error'); 
-        console.error("Błąd parsowania JSON (decki):", e); 
-        return; 
-    }
+    let aktualnyMagazyn = getMagazyn();
+    const nowyMagazynFinalny = []; let dodanoNowychCzesci = 0; let zaktualizowanoDaneCzesci = 0; let zaktualizowanoIloscIstniejacych = 0;
+    const idCzesciJuzDodanychDoNowego = new Set();
 
-    if (!Array.isArray(daneDeckowDoImportu)) { 
-        showNotification('Błąd importu decków: Dane muszą być listą (tablicą).', 3000, 'error'); 
-        return; 
-    }
-
-    const poprawneDecki = [];
-    let bledneDeckiCount = 0;
-    const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
-    const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
-
-    daneDeckowDoImportu.forEach((deck, index) => {
-        // Podstawowa walidacja struktury decku
-        if (deck && typeof deck.id === 'string' && 
-            (typeof deck.name === 'string' || deck.name === null || deck.name === undefined) && // Nazwa może być pusta
-            Array.isArray(deck.sets)) {
-
-            const czyZestawyPoprawne = deck.sets.every(set => {
-                if (!set || typeof set.seria !== 'string') {
-                    console.warn(`Nieprawidłowy zestaw w decku (ID: ${deck.id}, Nazwa: ${deck.name || 'Brak Nazwy'}) - brak lub zły typ pola 'seria'.`, set);
-                    return false;
-                }
-                
-                // Walidacja ID części: muszą być stringiem lub null lub undefined (dla elastyczności)
-                const isValidPartId = (id) => (id === null || typeof id === 'string' || typeof id === 'undefined');
-
-                if (set.seria === 'bx_ux') {
-                    return isValidPartId(set.bladeId) &&
-                           isValidPartId(set.ratchetId) &&
-                           isValidPartId(set.bitId);
-                } else if (set.seria === 'cx') {
-                    return isValidPartId(set.cx_lock_chipId) &&
-                           isValidPartId(set.cx_main_bladeId) &&
-                           isValidPartId(set.cx_assist_bladeId) &&
-                           isValidPartId(set.ratchetId) && 
-                           isValidPartId(set.bitId);      
-                }
-                console.warn(`Nieznana seria '${set.seria}' w zestawie decku (ID: ${deck.id}, Nazwa: ${deck.name || 'Brak Nazwy'}).`, set);
-                return false; // Nieznana seria
-            });
-
-            if (czyZestawyPoprawne) {
-                // Upewnij się, że nazwa jest stringiem, nawet jeśli była null/undefined
-                deck.name = String(deck.name || `Importowany Deck ${index + 1}_${Date.now() % 10000}`);
-                deck.timestamp = parseInt(deck.timestamp, 10) || Date.now();
-                deck.lastModified = parseInt(deck.lastModified, 10) || deck.timestamp;
-                
-                // Walidacja/oczyszczenie 'statystykiObliczone' w każdym zestawie
-                deck.sets.forEach(s => {
-                    if (s.statystykiObliczone && typeof s.statystykiObliczone === 'object') {
-                        const stats = s.statystykiObliczone;
-                        s.statystykiObliczone = { // Stwórz nowy obiekt, aby uniknąć modyfikacji oryginalnych danych wejściowych
-                            ATK: parseFloatOrZero(stats.ATK),
-                            DEF: parseFloatOrZero(stats.DEF),
-                            STM: parseFloatOrZero(stats.STM),
-                            WAGA: parseFloatOrZero(stats.WAGA || stats.waga), 
-                            DASH: parseFloatOrZero(stats.DASH),
-                            B_RES: parseFloatOrZero(stats.B_RES || stats.BURST_RES), 
-                            CX_LC_WYTRZ: parseIntOrZero(stats.CX_LC_WYTRZ)
-                        };
-                    } else {
-                        // Jeśli brak obiektu statystyk lub jest on nieprawidłowy, usuń go.
-                        // Funkcja displaySavedDecks spróbuje je obliczyć, jeśli ich nie ma.
-                        delete s.statystykiObliczone; 
-                    }
-
-                    // Upewnij się, że ID części są null, jeśli były undefined (dla spójności)
-                    if (s.seria === 'bx_ux') {
-                        s.bladeId = s.bladeId === undefined ? null : s.bladeId;
-                        s.ratchetId = s.ratchetId === undefined ? null : s.ratchetId;
-                        s.bitId = s.bitId === undefined ? null : s.bitId;
-                    } else if (s.seria === 'cx') {
-                        s.cx_lock_chipId = s.cx_lock_chipId === undefined ? null : s.cx_lock_chipId;
-                        s.cx_main_bladeId = s.cx_main_bladeId === undefined ? null : s.cx_main_bladeId;
-                        s.cx_assist_bladeId = s.cx_assist_bladeId === undefined ? null : s.cx_assist_bladeId;
-                        s.ratchetId = s.ratchetId === undefined ? null : s.ratchetId;
-                        s.bitId = s.bitId === undefined ? null : s.bitId;
-                    }
-                });
-
-                poprawneDecki.push(deck);
-            } else {
-                console.warn(`Deck (ID: ${deck.id}, Nazwa: ${deck.name || 'Brak Nazwy'}) ma nieprawidłową strukturę co najmniej jednego zestawu i został pominięty.`);
-                bledneDeckiCount++;
-            }
-        } else {
-            console.warn(`Deck o indeksie ${index} ma nieprawidłową podstawową strukturę (brak id, name lub sets) i został pominięty.`, deck);
-            bledneDeckiCount++;
+    aktualnyMagazyn.forEach((istniejacaCzesc) => {
+        if (!istniejacaCzesc || !istniejacaCzesc.id) return;
+        const idIstniejacej = String(istniejacaCzesc.id).trim();
+        if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) return;
+        const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
+        if (pasujacaCzescZImportu) {
+            const iloscZPlikuDoAktualizacji = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
+            let finalnaIlosc = istniejacaCzesc.ilosc;
+            if (!ustawDomyslnaIloscNaZero) { if (finalnaIlosc !== iloscZPlikuDoAktualizacji) zaktualizowanoIloscIstniejacych++; finalnaIlosc = iloscZPlikuDoAktualizacji; }
+            const zaktualizowanaCzesc = { ...pasujacaCzescZImportu, ilosc: finalnaIlosc };
+            delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji;
+            nowyMagazynFinalny.push(zaktualizowanaCzesc); idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+            let daneZmienione = false;
+            for (const key in zaktualizowanaCzesc) if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) { daneZmienione = true; break; }
+            if (daneZmienione) zaktualizowanoDaneCzesci++;
+        } else { nowyMagazynFinalny.push(istniejacaCzesc); idCzesciJuzDodanychDoNowego.add(idIstniejacej); }
+    });
+    czesciImportowaneLista.forEach(czescImportowana => {
+        if (!czescImportowana || !czescImportowana.id) return;
+        const idImportowany = String(czescImportowana.id).trim();
+        if (!idCzesciJuzDodanychDoNowego.has(idImportowany)) {
+            const czescDoDodania = { ...czescImportowana }; delete czescDoDodania._iloscZPlikuDoAktualizacji;
+            nowyMagazynFinalny.push(czescDoDodania); idCzesciJuzDodanychDoNowego.add(idImportowany); dodanoNowychCzesci++;
         }
     });
 
-    // Informowanie użytkownika o wynikach importu
-    if (bledneDeckiCount > 0 && poprawneDecki.length > 0) {
-        showNotification(`Zaimportowano ${poprawneDecki.length} deck(ów). Pominięto ${bledneDeckiCount} nieprawidłowo sformatowanych.`, 3500, 'warning');
-    } else if (bledneDeckiCount > 0 && poprawneDecki.length === 0) {
-        showNotification(`Pominięto ${bledneDeckiCount} nieprawidłowo sformatowanych decków. Żaden deck nie został zaimportowany.`, 3500, 'error');
-    } else if (poprawneDecki.length > 0) {
-        showNotification(`Zaimportowano ${poprawneDecki.length} deck(ów)!`, 3000, 'success');
-    } else if (daneDeckowDoImportu.length > 0) { // Były dane, ale żadne nie przeszły walidacji
-         showNotification('Żaden z dostarczonych decków nie miał prawidłowego formatu do importu.', 3000, 'warning');
-    } else { // Plik JSON był pustą tablicą
-        showNotification('Plik JSON nie zawierał żadnych decków do importu.', 3000, 'info');
-    }
+    setMagazyn(nowyMagazynFinalny);
+    let msg = '';
+    if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
+    if (zaktualizowanoDaneCzesci > 0) msg += `Zakt. dane dla ${zaktualizowanoDaneCzesci} istn. części. `;
+    if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscNaZero) msg += `Zakt. ilość dla ${zaktualizowanoIloscIstniejacych} istn. części. `;
+    if (msg) showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
+    else showNotification(`Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
     
-    // Zapisz tylko jeśli były jakieś poprawne decki
-    if (poprawneDecki.length > 0) {
-        setSavedDecks(poprawneDecki); 
-        if(poleTekstoweDecki) poleTekstoweDecki.value = ''; // Wyczyść pole po udanym imporcie
-    }
-
-    // Odśwież widok, jeśli użytkownik jest na stronie galerii decków
-    if (document.getElementById('galeriaDeckow')?.classList.contains('active')) {
-        displaySavedDecks();
-    }
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+    if (document.getElementById('deck')?.classList.contains('active')) renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
 }
 
+function importujMagazynZBazyDomyslnejHTML() {
+    const nazwaZrodla = 'Domyślna Baza (z HTML)';
+    try {
+        const scriptTag = document.getElementById('domyslnaBazaDanychJson');
+        if (!scriptTag) { showNotification("Błąd: Brak źródła danych domyślnych.", 4000, 'error'); return; }
+        const jsonString = scriptTag.textContent;
+        if (!jsonString || jsonString.trim() === '') { showNotification("Błąd: Domyślna baza jest pusta.", 4000, 'error'); return; }
+        let daneDoImportu;
+        try { daneDoImportu = JSON.parse(jsonString); } 
+        catch (parseError) { showNotification("Błąd: Nieprawidłowy format bazy domyślnej.", 5000, 'error'); return; }
+        przetworzIDopiszDaneMagazynu(daneDoImportu, nazwaZrodla, true);
+    } catch (error) { showNotification(`Błąd importu (${nazwaZrodla}): ${error.message}`, 4000, 'error'); }
+}
 
-function wykonajWyczyszczenieDanych() {
-    // Usunięto confirm() dla testów, można przywrócić:
-    // if (!confirm("CZY NA PEWNO chcesz usunąć WSZYSTKIE części z magazynu ORAZ WSZYSTKIE zapisane decki? Ta operacja jest NIEODWRACALNA!")) {
-    //     return;
-    // }
-    setMagazyn([]); 
-    setSavedDecks([]); 
+// =================================
+// Import/Eksport Decków
+// =================================
+function eksportujDeckiDoPolaTekstowego() {
+    const savedDecks = getSavedDecks();
+    const poleTekstoweDecki = document.getElementById('poleDanychJsonDecki');
+    if (poleTekstoweDecki) {
+        if (savedDecks && savedDecks.length > 0) {
+            try {
+                const jsonString = JSON.stringify(savedDecks, null, 2);
+                poleTekstoweDecki.value = jsonString;
+                showNotification('Zapisane decki skopiowane do pola.', 3000, 'success');
+                poleTekstoweDecki.focus(); poleTekstoweDecki.select();
+            } catch (e) { showNotification('Błąd konwersji decków do JSON.', 3000, 'error'); poleTekstoweDecki.value = 'Błąd JSON.'; }
+        } else { poleTekstoweDecki.value = ''; showNotification('Brak decków do eksportu.', 3000, 'info'); }
+    } else showNotification('Błąd: Pole tekstowe decków nie znalezione.', 3000, 'error');
+}
 
-    showNotification('Wszystkie dane magazynu i zapisane decki zostały wyczyszczone!', 3000, 'success');
+/**
+ * Waliduje i przygotowuje pojedynczy obiekt decku do dodania do systemu.
+ * @param {object} deckObj - Surowy obiekt decku.
+ * @param {string} defaultNamePrefix - Prefiks dla domyślnej nazwy, jeśli deck nie ma nazwy.
+ * @returns {object|null} Zwalidowany i przygotowany obiekt decku, lub null jeśli nieprawidłowy.
+ */
+function walidujIPrzygotujPojedynczyDeckDoDodania(deckObj, defaultNamePrefix = "Importowany Deck") {
+    if (!deckObj || typeof deckObj !== 'object') {
+        console.warn("[VALIDATE_DECK_WARN] Dane wejściowe nie są obiektem.", deckObj); return null;
+    }
+    if (typeof deckObj.id !== 'string' || !deckObj.id.trim() || !(typeof deckObj.name === 'string' || deckObj.name === null || deckObj.name === undefined) || !Array.isArray(deckObj.sets)) {
+        console.warn("[VALIDATE_DECK_WARN] Nieprawidłowa struktura decku.", deckObj); return null;
+    }
+    const gotowyDeck = {
+        id: deckObj.id.trim(), name: String(deckObj.name || `${defaultNamePrefix}_${Date.now() % 10000}`).trim(),
+        timestamp: parseInt(deckObj.timestamp, 10) || Date.now(),
+        lastModified: parseInt(deckObj.lastModified, 10) || (parseInt(deckObj.timestamp, 10) || Date.now()),
+        sets: []
+    };
+    const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+    const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
+
+    deckObj.sets.forEach((set) => {
+        if (!set || typeof set.seria !== 'string') { console.warn(`[VALIDATE_DECK_WARN_SET] Nieprawidłowy zestaw w decku ID: ${gotowyDeck.id}. Pomijam.`); return; }
+        const isValidPartId = (id) => (id === null || typeof id === 'string' || typeof id === 'undefined');
+        let czyTenZestawPoprawny = false; const przygotowanyZestaw = { seria: set.seria };
+
+        if (set.seria === 'bx_ux') {
+            if (isValidPartId(set.bladeId) && isValidPartId(set.ratchetId) && isValidPartId(set.bitId)) {
+                przygotowanyZestaw.bladeId = set.bladeId === undefined ? null : set.bladeId;
+                przygotowanyZestaw.ratchetId = set.ratchetId === undefined ? null : set.ratchetId;
+                przygotowanyZestaw.bitId = set.bitId === undefined ? null : set.bitId;
+                czyTenZestawPoprawny = true;
+            }
+        } else if (set.seria === 'cx') {
+            if (isValidPartId(set.cx_lock_chipId) && isValidPartId(set.cx_main_bladeId) && isValidPartId(set.cx_assist_bladeId) && isValidPartId(set.ratchetId) && isValidPartId(set.bitId)) {
+                przygotowanyZestaw.cx_lock_chipId = set.cx_lock_chipId === undefined ? null : set.cx_lock_chipId;
+                przygotowanyZestaw.cx_main_bladeId = set.cx_main_bladeId === undefined ? null : set.cx_main_bladeId;
+                przygotowanyZestaw.cx_assist_bladeId = set.cx_assist_bladeId === undefined ? null : set.cx_assist_bladeId;
+                przygotowanyZestaw.ratchetId = set.ratchetId === undefined ? null : set.ratchetId;
+                przygotowanyZestaw.bitId = set.bitId === undefined ? null : set.bitId;
+                czyTenZestawPoprawny = true;
+            }
+        } else { console.warn(`[VALIDATE_DECK_WARN_SET_SERIA] Nieznana seria '${set.seria}'. Pomijam.`); return; }
+        if (!czyTenZestawPoprawny) { console.warn(`[VALIDATE_DECK_WARN_SET_PARTS] Zestaw w decku ID: ${gotowyDeck.id} ma złe ID części. Pomijam.`); return; }
+
+        if (set.statystykiObliczone && typeof set.statystykiObliczone === 'object') {
+            const stats = set.statystykiObliczone;
+            przygotowanyZestaw.statystykiObliczone = { ATK: parseFloatOrZero(stats.ATK), DEF: parseFloatOrZero(stats.DEF), STM: parseFloatOrZero(stats.STM), WAGA: parseFloatOrZero(stats.WAGA || stats.waga), DASH: parseFloatOrZero(stats.DASH), B_RES: parseFloatOrZero(stats.B_RES || stats.BURST_RES), CX_LC_WYTRZ: parseIntOrZero(stats.CX_LC_WYTRZ) };
+        } else delete przygotowanyZestaw.statystykiObliczone;
+        gotowyDeck.sets.push(przygotowanyZestaw);
+    });
+    if (deckObj.sets.length > 0 && gotowyDeck.sets.length === 0) { console.warn(`[VALIDATE_DECK_WARN_NO_VALID_SETS] Deck ID: ${gotowyDeck.id} nie zawierał poprawnych zestawów. Odrzucam.`); return null; }
+    console.log(`[VALIDATE_DECK_SUCCESS] Deck ID: ${gotowyDeck.id} zwalidowany z ${gotowyDeck.sets.length} zestawami.`);
+    return gotowyDeck;
+}
+
+function importujDeckiZPolaTekstowego() {
+    console.log("[IMPORT_DECK_FIELD_1] Import decków z pola tekstowego.");
+    const poleTekstoweDecki = document.getElementById('poleDanychJsonDecki');
+    if (!poleTekstoweDecki || !poleTekstoweDecki.value.trim()) {
+        showNotification('Pole danych decków jest puste.', 3000, 'warning'); return;
+    }
+    let daneSuroweZInputu;
+    try { daneSuroweZInputu = JSON.parse(poleTekstoweDecki.value); } 
+    catch (e) { showNotification('Błąd importu: Nieprawidłowy JSON.', 3000, 'error'); console.error("Błąd parsowania JSON (decki z pola):", e); return; }
+
+    let deckiDoSprawdzenia;
+    if (daneSuroweZInputu && typeof daneSuroweZInputu === 'object' && !Array.isArray(daneSuroweZInputu)) deckiDoSprawdzenia = [daneSuroweZInputu];
+    else if (Array.isArray(daneSuroweZInputu)) deckiDoSprawdzenia = daneSuroweZInputu;
+    else { showNotification('Błąd importu: Dane muszą być listą lub obiektem decku.', 3000, 'error'); return; }
     
+    const istniejaceDecki = getSavedDecks();
+    let nowoDodaneDecki = []; let pominieteDuplikatyCount = 0; let bledneFormatyCount = 0;
+
+    deckiDoSprawdzenia.forEach((potencjalnyDeck, index) => {
+        const zwalidowanyDeck = walidujIPrzygotujPojedynczyDeckDoDodania(potencjalnyDeck, `Import z pola #${index + 1}`);
+        if (zwalidowanyDeck) {
+            const indexIstniejacego = istniejaceDecki.findIndex(d => d.id === zwalidowanyDeck.id);
+            if (indexIstniejacego > -1) {
+                pominieteDuplikatyCount++;
+                console.warn(`[IMPORT_DECK_FIELD_WARN_DUPLICATE] Deck ID '${zwalidowanyDeck.id}' ("${zwalidowanyDeck.name}") już istnieje. Pomijam.`);
+            } else { istniejaceDecki.push(zwalidowanyDeck); nowoDodaneDecki.push(zwalidowanyDeck); }
+        } else bledneFormatyCount++;
+    });
+    setSavedDecks(istniejaceDecki);
+    let komunikatKoncowy = "";
+    if (nowoDodaneDecki.length > 0) komunikatKoncowy += `Dodano ${nowoDodaneDecki.length} nowych deck(ów). `;
+    if (pominieteDuplikatyCount > 0) komunikatKoncowy += `${pominieteDuplikatyCount} deck(ów) pominięto (duplikaty ID). `;
+    if (bledneFormatyCount > 0) komunikatKoncowy += `Pominięto ${bledneFormatyCount} nieprawidłowych decków. `;
+
+    if (komunikatKoncowy.trim() === "" && deckiDoSprawdzenia.length > 0) showNotification('Żadne nowe decki nie zostały dodane.', 3000, 'info');
+    else if (komunikatKoncowy.trim() === "" && deckiDoSprawdzenia.length === 0) showNotification('Pole nie zawierało decków.', 3000, 'info');
+    else showNotification(`Import zakończony! ${komunikatKoncowy.trim()}`, 4500, 'success');
+
+    if (nowoDodaneDecki.length > 0 && poleTekstoweDecki) poleTekstoweDecki.value = '';
+    if (document.getElementById('galeriaDeckow')?.classList.contains('active')) displaySavedDecks();
+    console.log(`[IMPORT_DECK_FIELD_5] Zakończono. Dodano: ${nowoDodaneDecki.length}, Duplikaty: ${pominieteDuplikatyCount}, Błędne: ${bledneFormatyCount}`);
+}
+
+// =================================
+// Czyszczenie Danych i Inicjalizacja
+// =================================
+function wykonajWyczyszczenieDanych() {
+    // if (!confirm("CZY NA PEWNO chcesz usunąć WSZYSTKO?")) return; // Można przywrócić
+    setMagazyn([]); setSavedDecks([]); 
+    showNotification('Wszystkie dane wyczyszczone!', 3000, 'success');
     const aktywnaStronaId = document.querySelector('.page.active')?.id;
     if (aktywnaStronaId) {
         if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
@@ -2720,7 +1920,6 @@ function wykonajWyczyszczenieDanych() {
         if (aktywnaStronaId === 'deck') renderDeckBuilder(); 
         if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
     }
-
     const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
     const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
     if (aktywnaStronaId === 'importexport') {
@@ -2729,318 +1928,6 @@ function wykonajWyczyszczenieDanych() {
     }
 }
 
-function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false) {
-    console.log(`[PRZETWORZ_V4_DEBUG_1] START. Źródło: ${zrodloDanychOpis}, UstawDomyslnaIloscNaZero: ${ustawDomyslnaIloscNaZero}`);
-    console.log(`[PRZETWORZ_V4_DEBUG_2] Dane wejściowe (daneDoImportu) (pierwsze 3):`, Array.isArray(daneDoImportu) ? daneDoImportu.slice(0, 3) : daneDoImportu);
-
-    if (!Array.isArray(daneDoImportu)) {
-        console.error(`[PRZETWORZ_V4_DEBUG_X1] BŁĄD: Dane do przetworzenia nie są tablicą.`);
-        showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format danych (oczekiwano tablicy).`, 3000, 'error');
-        return;
-    }
-
-    // Krok 1: Przetwórz dane wejściowe na listę obiektów części
-    const czesciImportowaneLista = daneDoImportu.map((item, index) => {
-        // ... (TA CZĘŚĆ POZOSTAJE DOKŁADNIE TAKA SAMA JAK W POPRZEDNIEJ WERSJI V4)
-        if (!item || typeof item !== 'object') { return null; }
-        if (typeof item.typ !== 'string') { return null; }
-        let id = String(item.id || `${zrodloDanychOpis.toLowerCase().replace(/\s/g, '_')}_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`);
-        id = String(id).trim();
-        if (!id) { return null; }
-        let typ = String(item.typ).trim().toLowerCase();
-        const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
-        if (!dozwoloneTypy.includes(typ)) { typ = 'blade'; }
-        let iloscOdczytanaZPliku;
-        const parsedIlosc = parseInt(item.ilosc, 10);
-        iloscOdczytanaZPliku = (isNaN(parsedIlosc) || parsedIlosc < 0) ? 0 : parsedIlosc;
-        const poczatkowaIloscDlaNowejCzesci = ustawDomyslnaIloscNaZero ? 0 : iloscOdczytanaZPliku;
-        const czesc = {
-            id: id, typ: typ, nazwa: String(item.nazwa || `Część bez nazwy ${index + 1}`).trim(),
-            ilosc: poczatkowaIloscDlaNowejCzesci, _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku,
-            img: String(item.img || '').trim(), ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0,
-            cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0
-        };
-        const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
-        const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
-        if (typ === 'blade' || typ === 'rachet' || typ === 'cx-main-blade' || typ === 'cx-assist-blade') {
-            czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF);
-            czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga);
-        } else if (typ === 'bit') {
-            czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF);
-            czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga);
-            czesc.DASH = parseFloatOrZero(item.DASH); czesc.BURST_RES = parseFloatOrZero(item.BURST_RES);
-        } else if (typ === 'cx-lock-chip') {
-            czesc.waga = parseFloatOrZero(item.waga); czesc.cx_lc_wytrz = parseIntOrZero(item.cx_lc_wytrz);
-            czesc.cx_lc_atk_bonus = parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus = parseFloatOrZero(item.cx_lc_def_bonus);
-        }
-        if (!czesc.nazwa) { czesc.nazwa = `Automatyczna Nazwa ${index + 1}`; }
-        return czesc;
-    }).filter(item => item !== null && typeof item.nazwa === 'string' && item.nazwa.trim() !== '' && item.id.trim() !== '');
-
-    console.log(`[PRZETWORZ_V4_DEBUG_3] Po mapowaniu. Liczba części z importu do przetworzenia: ${czesciImportowaneLista.length}`);
-    if (czesciImportowaneLista.length > 0) {
-        console.log(`[PRZETWORZ_V4_DEBUG_4] Pierwsza część z importu:`, JSON.parse(JSON.stringify(czesciImportowaneLista[0])));
-    }
-
-
-    if (czesciImportowaneLista.length === 0 && daneDoImportu.length > 0) {
-        showNotification(`Żadna z części w '${zrodloDanychOpis}' nie miała prawidłowego formatu lub brakło danych. Magazyn nie został zmieniony.`, 3500, 'warning');
-        console.log(`[PRZETWORZ_V4_DEBUG_5] Brak poprawnych części z importu, mimo że dane wejściowe były.`);
-        return;
-    }
-    if (czesciImportowaneLista.length === 0 && daneDoImportu.length === 0) {
-        showNotification(`'${zrodloDanychOpis}' nie zawierał żadnych części do importu. Magazyn nie został zmieniony.`, 3000, 'info');
-        console.log(`[PRZETWORZ_V4_DEBUG_6] Brak danych wejściowych i brak części z importu.`);
-        return;
-    }
-
-    // Krok 2: Pobierz aktualny magazyn
-    let aktualnyMagazyn;
-    try {
-        aktualnyMagazyn = getMagazyn(); // Upewnij się, że getMagazyn() nie rzuca błędu i zwraca tablicę
-        if (!Array.isArray(aktualnyMagazyn)) {
-            console.error("[PRZETWORZ_V4_DEBUG_X2] getMagazyn() nie zwrócił tablicy!", aktualnyMagazyn);
-            aktualnyMagazyn = []; // Ustaw na pustą tablicę w razie błędu
-            showNotification("Błąd odczytu istniejącego magazynu! Import może być niekompletny.", 4000, "error");
-        }
-    } catch (e) {
-        console.error("[PRZETWORZ_V4_DEBUG_X3] Błąd podczas getMagazyn():", e);
-        aktualnyMagazyn = [];
-        showNotification("Krytyczny błąd odczytu istniejącego magazynu! Import może być niekompletny.", 4000, "error");
-    }
-    console.log(`[PRZETWORZ_V4_DEBUG_7] Aktualny magazyn użytkownika (przed importem). Liczba części: ${aktualnyMagazyn.length}`);
-    if (aktualnyMagazyn.length > 0) {
-        console.log(`[PRZETWORZ_V4_DEBUG_8] Pierwsza część z aktualnego magazynu:`, JSON.parse(JSON.stringify(aktualnyMagazyn[0])));
-    }
-
-
-    const nowyMagazynFinalny = [];
-    let dodanoNowychCzesci = 0;
-    let zaktualizowanoDaneCzesci = 0;
-    let zaktualizowanoIloscIstniejacych = 0;
-
-    const idCzesciJuzDodanychDoNowego = new Set(); // Aby uniknąć duplikatów, jeśli ID się powtarza w aktualnym magazynie
-
-    // Krok 3: Iteruj przez AKTUALNY MAGAZYN UŻYTKOWNIKA
-    console.log(`[PRZETWORZ_V4_DEBUG_9] Rozpoczynanie pętli po aktualnym magazynie (${aktualnyMagazyn.length} elementów)...`);
-    aktualnyMagazyn.forEach((istniejacaCzesc, idx) => {
-        if (!istniejacaCzesc || !istniejacaCzesc.id) {
-            console.warn(`[PRZETWORZ_V4_DEBUG_WARN_AKT] Pominięto nieprawidłową istniejącą część (indeks: ${idx}):`, istniejacaCzesc);
-            return;
-        }
-        const idIstniejacej = String(istniejacaCzesc.id).trim();
-        
-        if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) {
-            console.warn(`[PRZETWORZ_V4_DEBUG_WARN_DUP_AKT] Duplikat ID '${idIstniejacej}' w aktualnym magazynie już przetworzony. Pomijam.`);
-            return;
-        }
-
-        const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
-
-        if (pasujacaCzescZImportu) {
-            console.log(`[PRZETWORZ_V4_DEBUG_10] Przetwarzanie istniejącej części ID: ${idIstniejacej} - ZNALEZIONO w imporcie.`);
-            const iloscZPlikuDoAktualizacji = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
-            let finalnaIlosc = istniejacaCzesc.ilosc;
-
-            if (!ustawDomyslnaIloscNaZero) { // Import z pola tekstowego
-                if (finalnaIlosc !== iloscZPlikuDoAktualizacji) {
-                    zaktualizowanoIloscIstniejacych++;
-                    console.log(`[PRZETWORZ_V4_DEBUG_11] ID: ${idIstniejacej}. Ilość w magazynie: ${finalnaIlosc}, Ilość w pliku importu: ${iloscZPlikuDoAktualizacji}. Ilość zostanie zaktualizowana do wartości z pliku.`);
-                }
-                finalnaIlosc = iloscZPlikuDoAktualizacji;
-            } else { // Import z bazy domyślnej HTML
-                 console.log(`[PRZETWORZ_V4_DEBUG_12] ID: ${idIstniejacej}. Import z bazy domyślnej. Ilość użytkownika (${finalnaIlosc}) zachowana.`);
-            }
-
-            const zaktualizowanaCzesc = {
-                ...pasujacaCzescZImportu,
-                ilosc: finalnaIlosc
-            };
-            delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji;
-            nowyMagazynFinalny.push(zaktualizowanaCzesc);
-            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
-
-            let daneZmienione = false;
-            for (const key in zaktualizowanaCzesc) {
-                if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) {
-                    daneZmienione = true; break;
-                }
-            }
-            if (daneZmienione) zaktualizowanoDaneCzesci++;
-        } else {
-            console.log(`[PRZETWORZ_V4_DEBUG_13] Przetwarzanie istniejącej części ID: ${idIstniejacej} - NIE ZNALEZIONO w imporcie. Zachowuję oryginalną.`);
-            nowyMagazynFinalny.push(istniejacaCzesc); // Dodaj oryginalną, nietkniętą część
-            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
-        }
-    });
-    console.log(`[PRZETWORZ_V4_DEBUG_14] Zakończono pętlę po aktualnym magazynie. Liczba części w nowyMagazynFinalny: ${nowyMagazynFinalny.length}`);
-
-    // Krok 4: Dodaj części z importu, które NIE BYŁY w oryginalnym magazynie użytkownika
-    console.log(`[PRZETWORZ_V4_DEBUG_15] Rozpoczynanie pętli po częściach z importu w celu dodania nowych (${czesciImportowaneLista.length} elementów)...`);
-    czesciImportowaneLista.forEach(czescImportowana => {
-        if (!czescImportowana || !czescImportowana.id) {
-             console.warn(`[PRZETWORZ_V4_DEBUG_WARN_IMP] Pominięto nieprawidłową importowaną część przy dodawaniu nowych:`, czescImportowana);
-            return;
-        }
-        const idImportowany = String(czescImportowana.id).trim();
-        // Sprawdź, czy ta część (po ID) NIE ZOSTAŁA już dodana z poprzedniej pętli
-        if (!idCzesciJuzDodanychDoNowego.has(idImportowany)) {
-            const czescDoDodania = { ...czescImportowana };
-            delete czescDoDodania._iloscZPlikuDoAktualizacji;
-            
-            nowyMagazynFinalny.push(czescDoDodania);
-            idCzesciJuzDodanychDoNowego.add(idImportowany); // Dodaj do seta, na wypadek gdyby ID w pliku importu się powtarzały
-            dodanoNowychCzesci++;
-            console.log(`[PRZETWORZ_V4_DEBUG_16] ID: ${idImportowany} ("${czescImportowana.nazwa}") - DODANO JAKO NOWĄ z ilością ${czescDoDodania.ilosc}.`);
-        } else {
-            console.log(`[PRZETWORZ_V4_DEBUG_17] ID: ${idImportowany} ("${czescImportowana.nazwa}") - Już przetworzona/uwzględniona. Pomijam ponowne dodanie.`);
-        }
-    });
-    console.log(`[PRZETWORZ_V4_DEBUG_18] Zakończono pętlę dodawania nowych części. Liczba części w nowyMagazynFinalny: ${nowyMagazynFinalny.length}`);
-
-
-    console.log(`[PRZETWORZ_V4_DEBUG_19] Końcowy stan przed zapisem. Liczba części w nowyMagazynFinalny: ${nowyMagazynFinalny.length}`);
-    if (nowyMagazynFinalny.length > 5) { // Loguj tylko fragment, jeśli jest długi
-        console.log(`[PRZETWORZ_V4_DEBUG_20] Fragment nowyMagazynFinalny (pierwsze 2 i ostatnie 2):`, JSON.parse(JSON.stringify(nowyMagazynFinalny.slice(0,2))), '...', JSON.parse(JSON.stringify(nowyMagazynFinalny.slice(-2))));
-    } else {
-        console.log(`[PRZETWORZ_V4_DEBUG_20] Cały nowyMagazynFinalny:`, JSON.parse(JSON.stringify(nowyMagazynFinalny)));
-    }
-
-
-    try {
-        setMagazyn(nowyMagazynFinalny);
-        let msg = '';
-        if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
-        if (zaktualizowanoDaneCzesci > 0) msg += `Zaktualizowano dane dla ${zaktualizowanoDaneCzesci} istniejących części. `;
-        if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscNaZero) {
-            msg += `Zaktualizowano ilość dla ${zaktualizowanoIloscIstniejacych} istniejących części (zgodnie z plikiem importu). `;
-        }
-
-        if (msg) {
-            showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
-        } else {
-            showNotification(`Magazyn jest już aktualny lub dane w pliku '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
-        }
-        console.log(`[PRZETWORZ_V4_DEBUG_21] Magazyn zapisany. Całkowita liczba części: ${nowyMagazynFinalny.length}. Dodano: ${dodanoNowychCzesci}, Zakt. dane: ${zaktualizowanoDaneCzesci}, Zakt. ilość (z pola): ${zaktualizowanoIloscIstniejacych}`);
-
-    } catch (e) {
-        console.error("[PRZETWORZ_V4_DEBUG_X4] BŁĄD podczas wywołania setMagazyn lub showNotification:", e);
-        showNotification(`Krytyczny błąd zapisu danych z '${zrodloDanychOpis}'.`, 4000, 'error');
-    }
-
-    const aktywnaStronaId = document.querySelector('.page.active')?.id;
-    if (aktywnaStronaId === 'magazyn') {
-        wyswietlMagazyn();
-    }
-    if (document.getElementById('deck')?.classList.contains('active')) {
-        renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
-    }
-    console.log(`[PRZETWORZ_V4_DEBUG_22] Funkcja przetworzIDopiszDaneMagazynu - KONIEC.`);
-}
-
-
-function importujMagazynZBazyDomyslnejHTML() {
-    console.log("[IMPORT_HTML_1] Funkcja importujMagazynZBazyDomyslnejHTML - START");
-    const nazwaZrodla = 'Domyślna Baza (z HTML)';
-
-    try {
-        console.log("[IMPORT_HTML_2] Wewnątrz bloku try...");
-        const scriptTag = document.getElementById('domyslnaBazaDanychJson');
-        
-        if (!scriptTag) {
-            console.error("[IMPORT_HTML_X1] BŁĄD KRYTYCZNY: Nie znaleziono tagu <script> z ID 'domyslnaBazaDanychJson'.");
-            showNotification("Błąd wewnętrzny: Brak źródła danych domyślnych.", 4000, 'error');
-            return;
-        }
-        // ... (reszta logiki wczytywania i parsowania jsonString - bez zmian) ...
-        const jsonString = scriptTag.textContent;
-        if (!jsonString || jsonString.trim() === '') {
-            console.error("[IMPORT_HTML_X2] BŁĄD: Tag <script> z ID 'domyslnaBazaDanychJson' jest pusty.");
-            showNotification("Błąd: Domyślna baza danych jest pusta.", 4000, 'error');
-            return;
-        }
-        
-        console.log("[IMPORT_HTML_5] Próba parsowania JSON...");
-        let daneDoImportu;
-        try {
-            daneDoImportu = JSON.parse(jsonString);
-        } catch (parseError) {
-            console.error("[IMPORT_HTML_X3] BŁĄD PARSOWANIA JSON:", parseError);
-            showNotification("Błąd: Nieprawidłowy format domyślnej bazy danych. Sprawdź JSON.", 5000, 'error');
-            return;
-        }
-        console.log("[IMPORT_HTML_6] Parsowanie JSON zakończone sukcesem. Liczba elementów:", Array.isArray(daneDoImportu) ? daneDoImportu.length : 'NIE JEST TABLICĄ');
-
-
-        console.log("[IMPORT_HTML_7] Wywołanie przetworzIDopiszDaneMagazynu z ustawDomyslnaIloscNaZero = true...");
-        //                             👇 TUTAJ ZMIANA
-        przetworzIDopiszDaneMagazynu(daneDoImportu, nazwaZrodla, true);
-        console.log("[IMPORT_HTML_8] Wywołanie przetworzIDopiszDaneMagazynu - ZAKOŃCZONE.");
-
-    } catch (error) {
-        // ... (obsługa błędów - bez zmian) ...
-        console.error("[IMPORT_HTML_X4] BŁĄD OGÓLNY w bloku try:", error);
-        showNotification(`Nieoczekiwany błąd podczas importu (${nazwaZrodla}): ${error.message}`, 4000, 'error');
-    }
-    console.log("[IMPORT_HTML_9] Funkcja importujMagazynZBazyDomyslnejHTML - KONIEC");
-}
-
-function zmienIloscCzesci(idCzesci, zmiana) {
-    console.log(`[ZMIEN_ILOSC_1] Start zmiany ilości dla ID: ${idCzesci}, zmiana: ${zmiana}`);
-    const magazyn = getMagazyn();
-    const indexCzesci = magazyn.findIndex(c => c && c.id === idCzesci);
-
-    if (indexCzesci === -1) {
-        showNotification("Błąd: Nie znaleziono części do aktualizacji ilości.", 3000, 'error');
-        console.error(`[ZMIEN_ILOSC_X1] Nie znaleziono części o ID: ${idCzesci}`);
-        return;
-    }
-
-    const czesc = magazyn[indexCzesci];
-    let nowaIlosc = (parseInt(czesc.ilosc, 10) || 0) + zmiana;
-
-    // Zapobiegnij ujemnej ilości
-    if (nowaIlosc < 0) {
-        nowaIlosc = 0;
-    }
-
-    console.log(`[ZMIEN_ILOSC_2] Stara ilość: ${czesc.ilosc}, Nowa obliczona ilość: ${nowaIlosc} dla "${czesc.nazwa}"`);
-
-    // Jeśli ilość się nie zmieniła (np. próba zmniejszenia z 0), nie rób nic więcej
-    if (czesc.ilosc === nowaIlosc && zmiana !== 0) { // zmiana !== 0 aby uniknąć braku odświeżenia, gdyby ktoś wywołał z 0
-        console.log(`[ZMIEN_ILOSC_3] Ilość bez zmian (prawdopodobnie próba zmniejszenia z 0).`);
-        // Można dodać notyfikację, jeśli chcemy
-        // showNotification(`Ilość "${czesc.nazwa}" jest już minimalna.`, 2000, 'info');
-        return;
-    }
-    
-    czesc.ilosc = nowaIlosc;
-    magazyn[indexCzesci] = czesc; // Zaktualizuj obiekt w tablicy
-    setMagazyn(magazyn); // Zapisz cały magazyn
-
-    //showNotification(`Zaktualizowano ilość dla "${czesc.nazwa}" na ${nowaIlosc}.`, 1500, 'success'); // Krótsza notyfikacja
-
-    // Odśwież widok magazynu, aby zmiany były widoczne natychmiast
-    // Sprawdź, czy jesteśmy na stronie magazynu, aby uniknąć niepotrzebnego renderowania
-    const aktywnaStronaId = document.querySelector('.page.active')?.id;
-    if (aktywnaStronaId === 'magazyn') {
-        wyswietlMagazyn();
-    } else {
-        console.warn("[ZMIEN_ILOSC_4] Zmiana ilości wykonana, ale widok magazynu nie jest aktywny, więc nie został odświeżony.");
-    }
-
-    // Jeśli zmiana ilości części wpływa na Deck Builder (np. część staje się niedostępna),
-    // warto go również odświeżyć, jeśli jest aktywny.
-    if (document.getElementById('deck')?.classList.contains('active')) {
-        console.log("[ZMIEN_ILOSC_5] Odświeżanie Deck Buildera po zmianie ilości...");
-        renderDeckBuilder(currentEditingDeckId ? getSavedDecks().find(d => d.id === currentEditingDeckId) : null);
-    }
-}
-
-
-// =================================
-// Inicjalizacja Aplikacji po Załadowaniu DOM
-// =================================
 document.addEventListener('DOMContentLoaded', function() {
     sidebar = document.getElementById('sidebar');
     appContainer = document.getElementById('app-container');
@@ -3048,42 +1935,33 @@ document.addEventListener('DOMContentLoaded', function() {
     menuIcon = document.getElementById('menu-icon');
     menuBtnText = document.getElementById('menu-btn-text');
     
-    // Inicjalizacja referencji specyficznych dla stron
-    wynikiDivGenerator = document.getElementById('wyniki'); // Dla LOSUJ()
-    placeholderActualImgGenerator = document.getElementById('placeholder-img'); // Dla LOSUJ()
-    deckBuilderContainerDeckPage = document.getElementById("deck-builder"); // Dla renderDeckBuilder()
+    wynikiDivGenerator = document.getElementById('wyniki');
+    placeholderActualImgGenerator = document.getElementById('placeholder-img');
+    deckBuilderContainerDeckPage = document.getElementById("deck-builder");
 
     if (typeof VANTA !== 'undefined' && VANTA.NET && typeof THREE !== 'undefined') {
         try {
-            window.vantaEffect = VANTA.NET({
-                el: "#vanta-background", mouseControls: true, touchControls: true, gyroControls: false,
-                minHeight: 200.00, minWidth: 200.00, scale: 1.00, scaleMobile: 1.00,
-                backgroundColor: 0x101018, color: 0x8a2be2, points: 11.00, 
-                maxDistance: 20.00, spacing: 16.00, showDots: true
-            });
-        } catch (e) {
-            console.error("Błąd inicjalizacji VANTA:", e);
-            showNotification("Nie udało się załadować tła.", 3000, 'warning');
-        }
-    } else { console.warn("Biblioteki VANTA lub Three.js nie są dostępne."); }
+            window.vantaEffect = VANTA.NET({ el: "#vanta-background", mouseControls: true, touchControls: true, gyroControls: false, minHeight: 200.00, minWidth: 200.00, scale: 1.00, scaleMobile: 1.00, backgroundColor: 0x101018, color: 0x8a2be2, points: 11.00, maxDistance: 20.00, spacing: 16.00, showDots: true });
+        } catch (e) { console.error("Błąd VANTA:", e); showNotification("Nie udało się załadować tła.", 3000, 'warning'); }
+    } else console.warn("VANTA lub Three.js niedostępne.");
 
     if (appContainer) appContainer.style.marginLeft = sidebarWidthCollapsed + 'px';
     
     const domyslnyLink = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]'); 
     if (domyslnyLink) navigateTo('generator', domyslnyLink); 
-    else { console.error("Nie znaleziono domyślnego linku nawigacyjnego."); navigateTo('generator', null); }
+    else { console.error("Brak domyślnego linku."); navigateTo('generator', null); }
 
     if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
-    else { console.error("Przycisk menu (#sidebarToggleBtn) nie znaleziony."); }
+    else console.error("#sidebarToggleBtn nie znaleziony.");
 
-    // Inicjalne pokazanie pustego formularza na stronie 'dodaj'
-    // jeśli to jest strona startowa (choć zwykle nie jest)
-    // if (document.getElementById('dodaj')?.classList.contains('active')) {
-    //     pokazFormularz();
-    // }
+    // Inicjalizacja licznika punktów, jeśli jest to strona startowa (mało prawdopodobne, ale dla kompletności)
+    if (document.getElementById('licznikPunktow')?.classList.contains('active')) {
+        loadScoresFromLocalStorage();
+    }
 });
-
 </script>
+
+
 <script id="domyslnaBazaDanychJson" type="application/json">
 [
   {
