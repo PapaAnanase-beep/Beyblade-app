@@ -476,6 +476,22 @@ button, a, select, input, textarea { outline: none; }
 #deck-builder-active-set-slots .deck-set.card {
     margin-top: 0; /* Usuń margines górny, jeśli zakładki są bezpośrednio nad */
 }
+.inline-icon {
+    height: 2em; /* Ustawia wysokość ikonki na równą wysokości bieżącej czcionki */
+    width: auto;  /* Szerokość dostosuje się automatycznie, zachowując proporcje */
+    vertical-align: middle; /* Wyrównuje ikonkę pionowo ze środkiem tekstu */
+    margin: 0 5px; /* Dodaje mały margines po bokach ikonki dla lepszego odstępu */
+    /* Możesz też użyć:
+    vertical-align: text-bottom; lub text-top; w zależności od preferencji */
+}
+#info ul li strong + .inline-icon {
+    margin-left: 6px;  /* Odstęp od tekstu strong */
+    margin-right: 3px; /* Mniejszy odstęp do następnego tekstu */
+}
+#info ul li .inline-icon { /* Ogólne dla wszystkich ikonek w liście */
+    height: 2em; /* Można lekko zwiększyć, jeśli tekst jest duży */
+    vertical-align: -0.6em; /* Delikatne przesunięcie w dół dla lepszego dopasowania wizualnego */
+}
 
 
 </style>
@@ -494,16 +510,53 @@ button, a, select, input, textarea { outline: none; }
         </div>
     </div>
     <div class="sidebar-links">
-        <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="1.png" alt="Generator"><span>Generator</span></a>
-        <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="2.png" alt="Magazyn"><span>Magazyn</span></a>
-        <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="3.png" alt="Licznik"><span>Licznik</span></a> 
-        <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a>
-		<a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a>
-		<a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
-    </div>
+    <a href="#" onclick="navigateTo('info', this)" title="Informacje i Instrukcja"><img src="info.png" alt="Info"><span>Info</span></a>
+    <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="1.png" alt="Generator"><span>Generator</span></a>
+    <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="2.png" alt="Magazyn"><span>Magazyn</span></a>
+    <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="3.png" alt="Licznik"><span>Licznik</span></a> 
+    <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a>
+    <a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a>
+    <a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
+</div>
 </div>
 
 <div id="app-container">
+ <section id="info" class="page">
+        <h2>Witaj w Beyblade App by Ananasek</h2>
+	   <div id="generator-obraz" style="margin-top:20px; margin-bottom: 20px;">
+        <img id="placeholder-img" src="tlo.png" alt="Animowane tło generatora">
+      </div>
+        <div class="card">
+            <h3>Krótka Instrukcja Obsługi</h3>
+            <p style="text-align: left; line-height: 1.8;">
+                Witaj w aplikacji wspomagającej Twoje rozgrywki i zarządzanie kolekcją Beyblade! Oto kilka wskazówek, jak zacząć:
+            </p>
+        <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
+    <li><strong>Generator Zestawów:</strong><img src="1.png" alt="Generator Icon" class="inline-icon">Wybierz serię i ilość, a aplikacja wylosuje dla Ciebie części z Twojego magazynu.</li>
+    <li><strong>Mój Magazyn:</strong><img src="2.png" alt="Magazyn Icon" class="inline-icon"> Tutaj zarządzasz swoją kolekcją części</li>
+    <li><strong>Licznik Punktów:</strong><img src="3.png" alt="Licznik Icon" class="inline-icon"> Prosty licznik do śledzenia wyników podczas rozgrywki</li>
+    <li><strong>Deck Generator:</strong><img src="4.png" alt="Deck Icon" class="inline-icon"> Składaj własne decki w oparciu o zasady turniejowe</li>
+    <li><strong>Moje Decki:</strong><img src="5.png" alt="Galeria Icon" class="inline-icon"> Przeglądaj, edytuj lub usuwaj decki</li>
+    <li><strong>Dane:</strong><img src="6.png" alt="Dane Icon" class="inline-icon"> W tej sekcji możesz importować/eksportować swoje części jak i decki</li>
+</ul>
+
+            <p style="text-align: left; margin-top: 15px;">
+                Pamiętaj, aby regularnie zapisywać swoje dane (magazyn i decki) za pomocą opcji eksportu, aby uniknąć ich utraty!
+            </p>
+            <p style="text-align: center; margin-top: 20px; font-weight: bold;">
+                Miłej zabawy i udanych pojedynków!
+            </p>
+        </div>
+        
+        <div class="card" style="margin-top: 30px;">
+            <h4>Co nowego / Planowane funkcje:</h4>
+            <ul style="text-align: left; margin-left: 20px; line-height: 1.6; font-size: 0.9em;">
+                <li><em>Aktualnie:</em> Dopracowywanie interfejsu i stabilności.</li>
+                <li><em>W planach:</em> Rozbudowa bazy części, być może system turniejowy.</li>
+                <li>Masz sugestie? Daj znać!</li>
+            </ul>
+        </div>
+    </section>
     <section id="licznikPunktow" class="page">
         <h2>Licznik Punktów Rozgrywki</h2>
         <div class="card score-counter-card">
@@ -547,7 +600,12 @@ button, a, select, input, textarea { outline: none; }
         <select id="ilosc" aria-label="Ilość Beybladów do wylosowania">
             <option value="1">1</option><option value="2">2</option><option value="3">3</option>
             <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-        </select>
+			<option value="7">7</option><option value="8">8</option><option value="9">9</option>
+            <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+			<option value="13">13</option><option value="14">14</option><option value="15">15</option>
+            <option value="16">16</option><option value="17">17</option><option value="18">18</option>   
+			<option value="19">19</option><option value="20">20</option><option value="21">21</option>
+            <option value="22">22</option><option value="23">23</option><option value="24">24</option> 			</select>
         <div style="display:flex; gap:10px; margin-top:20px;">
             <button onclick="LOSUJ()">Losuj Zestawy</button>
             <button onclick="wyczyscLosowanie()" class="cancel-btn">Wyczyść Wyniki</button>
@@ -595,7 +653,7 @@ button, a, select, input, textarea { outline: none; }
       <div id="lista-magazyn" style="margin-top:15px;"></div>
     </section>
 
-    <!-- Strona Deck Generatora - ZMODYFIKOWANA pod Drag and Drop -->
+  
 
 <section id="deck" class="page">
     <h2>Deck Generator</h2>
@@ -649,31 +707,46 @@ button, a, select, input, textarea { outline: none; }
       <div id="savedDecksContainer" style="margin-top: 20px;"></div>
     </section>
 
-    <section id="importexport" class="page">
-      <h2>Zarządzanie Danymi Aplikacji</h2>
-      <div class="action-button-container import-export-section">
+ <section id="importexport" class="page">
+    <h2>Zarządzanie Danymi Aplikacji</h2>
+
+    <!-- SEKCJA IMPORTU/EKSPORTU MAGAZYNU - PRZYWRÓCONA -->
+    <div class="action-button-container import-export-section">
         <h4>Importuj lub Eksportuj Dane Magazynu Części</h4>
-        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
+        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
+            Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.
+        </p>
         <button class="button-auto-width" onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn</button>
         <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Dane magazynu JSON..." aria-label="Pole JSON magazynu"></textarea>
         <button class="button-auto-width" onclick="importujDaneZPolaTekstowego()">Importuj Magazyn</button>
-      </div>
-      <div class="action-button-container import-export-section">
+    </div>
+
+    <!-- SEKCJA IMPORTU/EKSPORTU DECKÓW - PRZYWRÓCONA -->
+    <div class="action-button-container import-export-section">
         <h4>Importuj lub Eksportuj Zapisane Decki</h4>
-        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.</p>
+        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
+            Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.
+        </p>
         <button class="button-auto-width" onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki</button>
         <textarea id="poleDanychJsonDecki" rows="8" placeholder="Dane decków JSON..." aria-label="Pole JSON decków"></textarea>
         <button class="button-auto-width" onclick="importujDeckiZPolaTekstowego()">Importuj Decki</button>
-      </div>
-      <div class="action-button-container">
-        <h4>Operacje na Danych</h4>
-        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">Przywróć domyślną bazę części lub usuń wszystkie dane.</p>
-        <button onclick="importujMagazynZBazyDomyslnejHTML()" style="margin-top: 10px; background-color: #3a753c;">Załaduj Domyślną Bazę Części</button>
-        <button class="button-auto-width danger-btn" onclick="wykonajWyczyszczenieDanych()" style="margin-top:10px;">Wyczyść Wszystkie Dane (Nieodwracalne)</button>
-      </div>
-    </section>
+    </div>
 
-</div> <!-- Koniec #app-container -->
+    <!-- ZMODYFIKOWANA SEKCJA OPERACJI NA DANYCH (RESET) - Zostaje jak było -->
+    <div class="action-button-container">
+        <h4>Resetowanie Aplikacji</h4>
+        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
+            Ta operacja <strong>usunie wszystkie Twoje dane</strong> (magazyn części, zapisane decki, wyniki)
+            i przywróci aplikację do stanu początkowego z domyślną bazą części.
+        </p>
+        <button id="resetAppButton" class="button-auto-width danger-btn" onclick="wykonajPelnyResetAplikacji()" style="margin-top:10px;">
+            Resetuj Aplikację (Nieodwracalne)
+        </button>
+    </div>
+</section>
+
+
+</div>
 
 <script>
 // =================================
@@ -692,7 +765,7 @@ let ostatnioWylosowaneZestawyGlobalnie = [];
 const MAGAZYN_KEY = 'beybladeMagazynAnanasCX_v3';
 const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3';
 const SCORES_KEY = 'beybladeScoreCounterAnanas';
-
+const DOMYSLNA_BAZA_ZALADOWANA_KEY = 'ananasAppDomyślnaBazaZaladowana_v1'; // Nowy klucz
 let currentDeckBeingBuilt = {}; // Zostanie zainicjalizowane w DOMContentLoaded lub przy nawigacji
     let currentlyActiveSetIndexInBuilder = 0; // Domyślnie pierwszy zestaw (indeks 0)
 function initializeOrResetCurrentDeck(deckData = null) {
@@ -2324,129 +2397,182 @@ function importujDaneZPolaTekstowego() {
     przetworzIDopiszDaneMagazynu(daneDoImportu, 'Pole Tekstowe JSON', false); // false = nie zeruj ilości
 }
 
-function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false) {
-    if (!Array.isArray(daneDoImportu)) {
-        showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format (oczekiwano tablicy).`, 3000, 'error'); return;
-    }
-    const czesciImportowaneLista = daneDoImportu.map((item, index) => {
-        if (!item || typeof item !== 'object' || typeof item.typ !== 'string') return null;
-        let id = String(item.id || `${zrodloDanychOpis.toLowerCase().replace(/\s/g, '_')}_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`).trim();
-        if (!id) return null;
-        let typ = String(item.typ).trim().toLowerCase();
-        const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
-        if (!dozwoloneTypy.includes(typ)) typ = 'blade'; // Domyślny typ w razie błędu
-        
-        const parsedIlosc = parseInt(item.ilosc, 10);
-        const iloscOdczytanaZPliku = (isNaN(parsedIlosc) || parsedIlosc < 0) ? 0 : parsedIlosc;
-        // Jeśli ustawDomyslnaIloscNaZero jest true (np. przy imporcie z domyślnej bazy), ilość nowej części to 0.
-        // W przeciwnym razie (import z JSON użytkownika), bierzemy ilość z pliku.
-        const poczatkowaIloscDlaNowejCzesci = ustawDomyslnaIloscNaZero ? 0 : iloscOdczytanaZPliku;
+// Zmodyfikuj sygnaturę funkcji:
+    function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false, trybCichy = false) {
+        if (!Array.isArray(daneDoImportu)) {
+            if (!trybCichy) showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format (oczekiwano tablicy).`, 3000, 'error');
+            return false;
+        }
 
-        const czesc = { 
-            id, typ, 
-            nazwa: String(item.nazwa || `Część ${index + 1}`).trim(), 
-            ilosc: poczatkowaIloscDlaNowejCzesci, // Używamy poczatkowaIloscDlaNowejCzesci
-            _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku, // To jest tylko do aktualizacji istniejących
-            img: String(item.img || '').trim(), 
-            ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0, 
-            cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0 
-        };
-        const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
-        const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
-        if (typ==='blade'||typ==='rachet'||typ==='cx-main-blade'||typ==='cx-assist-blade') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); }
-        else if (typ==='bit') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); czesc.DASH=parseFloatOrZero(item.DASH); czesc.BURST_RES=parseFloatOrZero(item.BURST_RES); }
-        else if (typ==='cx-lock-chip') { czesc.waga=parseFloatOrZero(item.waga); czesc.cx_lc_wytrz=parseIntOrZero(item.cx_lc_wytrz); czesc.cx_lc_atk_bonus=parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus=parseFloatOrZero(item.cx_lc_def_bonus); }
-        if (!czesc.nazwa) czesc.nazwa = `Autonazwa ${index + 1}`;
-        return czesc;
-    }).filter(item => item !== null && typeof item.nazwa === 'string' && item.nazwa.trim() !== '' && item.id.trim() !== '');
-
-    if (czesciImportowaneLista.length === 0 && daneDoImportu.length > 0) { showNotification(`Żadna część w '${zrodloDanychOpis}' nie miała prawidłowego formatu.`, 3500, 'warning'); return; }
-    if (czesciImportowaneLista.length === 0 && daneDoImportu.length === 0) { showNotification(`'${zrodloDanychOpis}' nie zawierał części.`, 3000, 'info'); return; }
-
-    let aktualnyMagazyn = getMagazyn();
-    const nowyMagazynFinalny = []; 
-    let dodanoNowychCzesci = 0; let zaktualizowanoDaneCzesci = 0; let zaktualizowanoIloscIstniejacych = 0;
-    const idCzesciJuzDodanychDoNowego = new Set();
-
-    // Przetwarzanie istniejących części i aktualizacja
-    aktualnyMagazyn.forEach((istniejacaCzesc) => {
-        if (!istniejacaCzesc || !istniejacaCzesc.id) return;
-        const idIstniejacej = String(istniejacaCzesc.id).trim();
-        if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) return; 
-        const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
-        
-        if (pasujacaCzescZImportu) {
-            let finalnaIlosc = istniejacaCzesc.ilosc;
-            // Jeśli NIE ustawiamy domyślnej ilości na zero (czyli importujemy z pliku użytkownika),
-            // to aktualizujemy ilość na tę z pliku.
-            if (!ustawDomyslnaIloscNaZero) {
-                const iloscZPliku = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
-                if (finalnaIlosc !== iloscZPliku) zaktualizowanoIloscIstniejacych++;
-                finalnaIlosc = iloscZPliku;
+        const czesciImportowaneLista = daneDoImportu.map((item, index) => {
+            // Dodatkowe sprawdzenie na początku pętli map
+            if (!item || typeof item !== 'object') {
+                console.warn(`[IMPORT WARN] Pomijam nieprawidłowy element (indeks: ${index}) w danych z '${zrodloDanychOpis}':`, item);
+                return null; // Zwróć null, aby filter go usunął
             }
-            // Dla importu z domyślnej bazy (ustawDomyslnaIloscNaZero = true), ilość pozostaje bez zmian (czyli 0, jeśli nowa)
-            // lub taka jaka była (jeśli część już istniała - ale wtedy jej ilość nie jest modyfikowana przez ten import).
 
-            const zaktualizowanaCzesc = { ...pasujacaCzescZImportu, ilosc: finalnaIlosc };
-            delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji; 
-            nowyMagazynFinalny.push(zaktualizowanaCzesc); 
-            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+            // Bezpieczniejsze pobieranie ID i typu
+            let id = String(item.id || '').trim(); // Jeśli item.id jest undefined, da pusty string
+            if (!id) { // Jeśli po trim nadal puste, generuj ID
+                 id = `${zrodloDanychOpis.toLowerCase().replace(/\s/g, '_')}_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`;
+            }
             
-            let daneZmienione = false; // Sprawdzamy czy same dane (poza ilością) się zmieniły
-            for (const key in zaktualizowanaCzesc) {
-                if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) {
-                    daneZmienione = true; break;
-                }
+            let typ = String(item.typ || '').trim().toLowerCase(); // Podobnie dla typu
+            const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
+            if (!dozwoloneTypy.includes(typ)) typ = 'blade';
+
+            const parsedIlosc = parseInt(item.ilosc, 10);
+            const iloscOdczytanaZPliku = (isNaN(parsedIlosc) || parsedIlosc < 0) ? 0 : parsedIlosc;
+            const poczatkowaIloscDlaNowejCzesci = ustawDomyslnaIloscNaZero ? 0 : iloscOdczytanaZPliku;
+
+            // Bezpieczniejsze pobieranie nazwy
+            let nazwaCzesci = String(item.nazwa || '').trim();
+            if (!nazwaCzesci) { // Jeśli item.nazwa jest undefined, null, lub pusty string
+                nazwaCzesci = `Część bez nazwy ${index + 1}`;
+                console.warn(`[IMPORT WARN] Część (indeks: ${index}, ID: ${id}) nie miała nazwy. Użyto domyślnej: "${nazwaCzesci}"`);
             }
-            if (daneZmienione) zaktualizowanoDaneCzesci++;
+
+            const czesc = {
+                id,
+                typ,
+                nazwa: nazwaCzesci,
+                ilosc: poczatkowaIloscDlaNowejCzesci,
+                _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku,
+                img: String(item.img || '').trim(),
+                ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0,
+                cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0
+            };
+            
+            // ... (reszta logiki przypisywania statystyk - upewnij się, że item istnieje przed odwołaniem do item.ATK etc.)
+            const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+            const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
+
+            if (item) { // Upewnij się, że item istnieje przed próbą dostępu do jego właściwości statystyk
+                if (typ==='blade'||typ==='rachet'||typ==='cx-main-blade'||typ==='cx-assist-blade') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); }
+                else if (typ==='bit') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); czesc.DASH=parseFloatOrZero(item.DASH); czesc.BURST_RES=parseFloatOrZero(item.BURST_RES); }
+                else if (typ==='cx-lock-chip') { czesc.waga=parseFloatOrZero(item.waga); czesc.cx_lc_wytrz=parseIntOrZero(item.cx_lc_wytrz); czesc.cx_lc_atk_bonus=parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus=parseFloatOrZero(item.cx_lc_def_bonus); }
+            }
+            return czesc;
+
+        }).filter(item => {
+            // Bardziej odporny filtr
+            if (!item || typeof item !== 'object') return false; // Upewnij się, że item to obiekt
+            if (typeof item.id !== 'string' || !item.id.trim()) return false;
+            if (typeof item.nazwa !== 'string' || !item.nazwa.trim()) return false;
+            return true;
+        });
+
+        // ... reszta funkcji przetworzIDopiszDaneMagazynu ...
+        // (komunikaty, aktualizacja magazynu itp.)
+        // Ta część wydaje się być OK, problem jest wcześniej
+
+        let aktualnyMagazyn = getMagazyn();
+        const nowyMagazynFinalny = []; 
+        let dodanoNowychCzesci = 0; let zaktualizowanoDaneCzesci = 0; let zaktualizowanoIloscIstniejacych = 0;
+        const idCzesciJuzDodanychDoNowego = new Set();
+
+        // Przetwarzanie istniejących części i aktualizacja
+        aktualnyMagazyn.forEach((istniejacaCzesc) => {
+            if (!istniejacaCzesc || !istniejacaCzesc.id) return;
+            const idIstniejacej = String(istniejacaCzesc.id).trim();
+            if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) return; 
+            const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
+            
+            if (pasujacaCzescZImportu) {
+                let finalnaIlosc = istniejacaCzesc.ilosc;
+                if (!ustawDomyslnaIloscNaZero) {
+                    const iloscZPliku = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
+                    if (finalnaIlosc !== iloscZPliku) zaktualizowanoIloscIstniejacych++;
+                    finalnaIlosc = iloscZPliku;
+                }
+                const zaktualizowanaCzesc = { ...pasujacaCzescZImportu, ilosc: finalnaIlosc };
+                delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji; 
+                nowyMagazynFinalny.push(zaktualizowanaCzesc); 
+                idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+                
+                let daneZmienione = false;
+                for (const key in zaktualizowanaCzesc) {
+                    if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) {
+                        daneZmienione = true; break;
+                    }
+                }
+                if (daneZmienione) zaktualizowanoDaneCzesci++;
+            } else {
+                nowyMagazynFinalny.push(istniejacaCzesc); 
+                idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+            }
+        });
+
+        // Dodawanie nowych części
+        czesciImportowaneLista.forEach(czescImportowana => {
+            if (!czescImportowana || !czescImportowana.id) return;
+            const idImportowany = String(czescImportowana.id).trim();
+            if (!idCzesciJuzDodanychDoNowego.has(idImportowany)) {
+                const czescDoDodania = { ...czescImportowana }; 
+                delete czescDoDodania._iloscZPlikuDoAktualizacji;
+                nowyMagazynFinalny.push(czescDoDodania); 
+                idCzesciJuzDodanychDoNowego.add(idImportowany); 
+                dodanoNowychCzesci++;
+            }
+        });
+
+        setMagazyn(nowyMagazynFinalny);
+        let msg = '';
+        if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
+        if (zaktualizowanoDaneCzesci > 0) msg += `Zakt. dane dla ${zaktualizowanoDaneCzesci} istn. części. `;
+        if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscNaZero) msg += `Zakt. ilość dla ${zaktualizowanoIloscIstniejacych} istn. części. `;
+        
+        if (!trybCichy) {
+            if (msg) showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
+            else showNotification(`Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
         } else {
-            nowyMagazynFinalny.push(istniejacaCzesc); 
-            idCzesciJuzDodanychDoNowego.add(idIstniejacej);
+            if (msg) console.log(`[TRYB CICHY] Import z '${zrodloDanychOpis}': ${msg.trim()}`);
+            else console.log(`[TRYB CICHY] Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`);
         }
-    });
+        
+        const aktywnaStronaId = document.querySelector('.page.active')?.id;
+        if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+        if (aktywnaStronaId === 'deck') renderDeckBuilderAndParts();
 
-    // Dodawanie nowych części, które nie istniały w magazynie
-    czesciImportowaneLista.forEach(czescImportowana => {
-        if (!czescImportowana || !czescImportowana.id) return;
-        const idImportowany = String(czescImportowana.id).trim();
-        if (!idCzesciJuzDodanychDoNowego.has(idImportowany)) {
-            const czescDoDodania = { ...czescImportowana }; 
-            // Ilość dla nowej części jest już ustawiona poprawnie (poczatkowaIloscDlaNowejCzesci)
-            delete czescDoDodania._iloscZPlikuDoAktualizacji;
-            nowyMagazynFinalny.push(czescDoDodania); 
-            idCzesciJuzDodanychDoNowego.add(idImportowany); 
-            dodanoNowychCzesci++;
-        }
-    });
-
-    setMagazyn(nowyMagazynFinalny);
-    let msg = '';
-    if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
-    if (zaktualizowanoDaneCzesci > 0) msg += `Zakt. dane dla ${zaktualizowanoDaneCzesci} istn. części. `;
-    if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscNaZero) msg += `Zakt. ilość dla ${zaktualizowanoIloscIstniejacych} istn. części. `;
+        return (dodanoNowychCzesci > 0 || zaktualizowanoDaneCzesci > 0 || zaktualizowanoIloscIstniejacych > 0);
+    }
     
-    if (msg) showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
-    else showNotification(`Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
-    
-    const aktywnaStronaId = document.querySelector('.page.active')?.id;
-    if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-    if (aktywnaStronaId === 'deck') renderDeckBuilderAndParts(); // Odśwież listę dostępnych części
-}
 
-function importujMagazynZBazyDomyslnejHTML() {
+// Zmodyfikuj sygnaturę funkcji:
+function importujMagazynZBazyDomyslnejHTML(trybCichy = false) {
     const nazwaZrodla = 'Domyślna Baza (z HTML)';
     try {
         const scriptTag = document.getElementById('domyslnaBazaDanychJson');
-        if (!scriptTag) { showNotification("Błąd: Brak źródła danych domyślnych (#domyslnaBazaDanychJson).", 4000, 'error'); return; }
+        if (!scriptTag) { 
+            if (!trybCichy) showNotification("Błąd: Brak źródła danych domyślnych (#domyslnaBazaDanychJson).", 4000, 'error');
+            return false; // Dodano zwracanie wartości
+        }
+        // ... (reszta kodu pobierania JSONa - bez zmian) ...
         const jsonString = scriptTag.textContent;
-        if (!jsonString || jsonString.trim() === '') { showNotification("Błąd: Domyślna baza danych w HTML jest pusta.", 4000, 'error'); return; }
+        if (!jsonString || jsonString.trim() === '') {
+            if (!trybCichy) showNotification("Błąd: Domyślna baza danych w HTML jest pusta.", 4000, 'error');
+            return false;
+        }
         let daneDoImportu;
         try { daneDoImportu = JSON.parse(jsonString); } 
-        catch (parseError) { showNotification("Błąd: Nieprawidłowy JSON w domyślnej bazie danych.", 5000, 'error'); console.error("Błąd parsowania JSON (baza domyślna):", parseError); return; }
+        catch (parseError) { 
+            if (!trybCichy) showNotification("Błąd: Nieprawidłowy JSON w domyślnej bazie danych.", 5000, 'error');
+            console.error("Błąd parsowania JSON (baza domyślna):", parseError); 
+            return false; 
+        }
+        
         // true = ustaw ilość na 0 dla nowych części, nie nadpisuj ilości istniejących na te z bazy (bo tam jest 0)
-        przetworzIDopiszDaneMagazynu(daneDoImportu, nazwaZrodla, true); 
-    } catch (error) { showNotification(`Krytyczny błąd importu z domyślnej bazy: ${error.message}`, 4000, 'error'); console.error(error); }
+        // przekazujemy trybCichy do przetworzIDopiszDaneMagazynu
+        const wynikPrzetwarzania = przetworzIDopiszDaneMagazynu(daneDoImportu, nazwaZrodla, true, trybCichy); 
+        return wynikPrzetwarzania; // Zwróć wynik z przetworzIDopiszDaneMagazynu
+
+    } catch (error) { 
+        if (!trybCichy) showNotification(`Krytyczny błąd importu z domyślnej bazy: ${error.message}`, 4000, 'error');
+        console.error(error); 
+        return false;
+    }
 }
+
 
 // =================================
 // Import/Eksport Decków
@@ -2596,72 +2722,181 @@ function importujDeckiZPolaTekstowego() {
 // =================================
 // Czyszczenie Danych i Inicjalizacja
 // =================================
-    function wykonajWyczyszczenieDanych() {
-        // Logika czyszczenia wykonywana jest teraz bezpośrednio:
-        setMagazyn([]); 
-        setSavedDecks([]); 
-        localStorage.removeItem(SCORES_KEY); 
-        scores = { player1: 0, player2: 0 }; 
-        playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
+ function wykonajWyczyszczenieDanych() {
+    console.log("Czyszczenie wszystkich danych aplikacji...");
+    setMagazyn([]); 
+    setSavedDecks([]); 
+    localStorage.removeItem(SCORES_KEY); 
+    scores = { player1: 0, player2: 0 }; 
+    playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
 
-        showNotification('Wszystkie dane aplikacji (magazyn, decki, wyniki) zostały wyczyszczone!', 3000, 'success');
-        
-        const aktywnaStronaId = document.querySelector('.page.active')?.id;
-        if (aktywnaStronaId) {
-            if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-            if (aktywnaStronaId === 'generator') wyczyscLosowanie();
-            if (aktywnaStronaId === 'deck') {
-                clearCurrentDeckForBuilder(); 
-            }
-            if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
-            if (aktywnaStronaId === 'licznikPunktow') { 
-                displayScores();
-                displayPlayerNames();
-            }
+    // WAŻNE: Usuń flagę załadowania domyślnej bazy
+    localStorage.removeItem(DOMYSLNA_BAZA_ZALADOWANA_KEY); 
+    console.log("Usunięto flagę DOMYSLNA_BAZA_ZALADOWANA_KEY.");
+
+    // Nie pokazujemy tu powiadomienia, jeśli ta funkcja jest częścią większego procesu resetu
+    // Powiadomienie będzie w wykonajPelnyResetAplikacji.
+    // Jeśli jednak ta funkcja byłaby wywoływana samodzielnie (co teraz nie będzie miało miejsca z UI),
+    // można by dodać warunkowe powiadomienie.
+
+    // Logika odświeżania widoków (może być potrzebna, jeśli funkcja jest wołana z różnych miejsc)
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId) {
+        if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+        if (aktywnaStronaId === 'generator') wyczyscLosowanie();
+        if (aktywnaStronaId === 'deck') {
+            clearCurrentDeckForBuilder(); 
         }
-        const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
-        const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
-        if (aktywnaStronaId === 'importexport') {
-             if(poleJsonMagazyn) poleJsonMagazyn.value = '';
-             if(poleJsonDecki) poleJsonDecki.value = '';
+        if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
+        if (aktywnaStronaId === 'licznikPunktow') { 
+            displayScores();
+            displayPlayerNames();
         }
     }
+    const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
+    const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
+    if (aktywnaStronaId === 'importexport') {
+         if(poleJsonMagazyn) poleJsonMagazyn.value = '';
+         if(poleJsonDecki) poleJsonDecki.value = '';
+    }
+    console.log("Czyszczenie danych zakończone.");
+}
+
+
+   function wykonajPelnyResetAplikacji() {
+    // Krok 1: Wykonaj czyszczenie wszystkich danych
+    // (Ta funkcja powinna już istnieć i czyścić magazyn, decki, wyniki, i flagę)
+    console.log("Rozpoczynanie pełnego resetu aplikacji...");
     
+    // Upewnij się, że wykonajWyczyszczenieDanych czyści też flagę DOMYSLNA_BAZA_ZALADOWANA_KEY
+    // Jeśli jeszcze tego nie robi, dodaj to do niej:
+    // localStorage.removeItem(DOMYSLNA_BAZA_ZALADOWANA_KEY); 
+    wykonajWyczyszczenieDanych(); // Wywołujemy istniejącą funkcję czyszczącą
+
+    // Krok 2: Załaduj domyślną bazę danych
+    // Wywołujemy ją bez trybu cichego, aby użytkownik widział powiadomienia
+    console.log("Próba załadowania domyślnej bazy danych po resecie...");
+    const czyZaladowanoPomyslnie = importujMagazynZBazyDomyslnejHTML(false); 
+
+    if (czyZaladowanoPomyslnie) {
+        // Po pomyślnym załadowaniu, ustaw flagę (nawet jeśli importujMagazynZBazyDomyslnejHTML
+        // robi to samo w niektórych przypadkach, tutaj mamy pewność)
+        localStorage.setItem(DOMYSLNA_BAZA_ZALADOWANA_KEY, 'true');
+        showNotification("Aplikacja została zresetowana i załadowano domyślną bazę części.", 4000, 'success');
+        console.log("Pełny reset aplikacji zakończony pomyślnie.");
+    } else {
+        // To może się zdarzyć, jeśli był błąd w samym JSONie domyślnej bazy
+        // lub funkcja importu zwróciła false z innego powodu.
+        showNotification("Dane zostały wyczyszczone, ale wystąpił błąd podczas ładowania domyślnej bazy części.", 5000, 'error');
+        console.error("Błąd podczas ładowania domyślnej bazy danych po pełnym resecie.");
+    }
+
+    // Odśwież widoki, które mogły być aktywne
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+    else if (aktywnaStronaId === 'deck') renderDeckBuilderAndParts(); // Odświeży też dostępne części
+    else if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
+    // Jeśli strona 'importexport' była aktywna, pola tekstowe zostaną wyczyszczone przez wykonajWyczyszczenieDanych
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicjalizacja podstawowych elementów DOM
     sidebar = document.getElementById('sidebar');
+    // ... (reszta inicjalizacji zmiennych globalnych DOM)
     appContainer = document.getElementById('app-container');
     sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
     menuIcon = document.getElementById('menu-icon');
     menuBtnText = document.getElementById('menu-btn-text');
-    
     wynikiDivGenerator = document.getElementById('wyniki');
     placeholderActualImgGenerator = document.getElementById('placeholder-img');
-    // deckBuilderContainerDeckPage - nie jest już potrzebny jako globalna zmienna,
-    // kontenery dla D&D są pobierane wewnątrz funkcji renderujących
 
-    initializeOrResetCurrentDeck(); // Inicjalizujemy pusty deck builder na starcie
+    // Inicjalizacja danych aplikacji (np. pusty deck builder)
+    initializeOrResetCurrentDeck(); 
 
+    // ---- AUTOMATYCZNA SYNCHRONIZACJA BAZY DANYCH PRZY KAŻDYM STARCIE ----
+    try {
+        console.log("Rozpoczynanie automatycznej synchronizacji magazynu z domyślną bazą...");
+        // Wywołujemy z trybemCichy=true, aby uniknąć powiadomień, jeśli nic się nie zmieniło.
+        // ustawDomyslnaIloscNaZero=true jest domyślne dla importu z HTML i oznacza,
+        // że NOWE części dostaną ilość 0, a ilości ISTNIEJĄCYCH nie będą zerowane.
+        const czyCosSieZmienilo = importujMagazynZBazyDomyslnejHTML(true); 
+
+        if (czyCosSieZmienilo) {
+            console.log("Magazyn został zsynchronizowany z domyślną bazą (dodano nowe/zaktualizowano istniejące części).");
+            // Można tu rozważyć dyskretne powiadomienie, jeśli coś faktycznie się zmieniło, np.
+            // showNotification("Baza części została zaktualizowana.", 2000, 'info');
+            // Ale tylko jeśli `czyCosSieZmienilo` jest `true` i funkcja `przetworz...` zwraca
+            // precyzyjnie, czy były zmiany w dodanych/zaktualizowanych danych (nie tylko ilości).
+            // Obecnie `przetworzIDopiszDaneMagazynu` zwraca true jeśli cokolwiek z dodanych/zakt.danych/zakt.ilości się zmieniło.
+        } else {
+            console.log("Magazyn jest aktualny względem domyślnej bazy lub nie dokonano zmian.");
+        }
+    } catch (e) {
+        console.error("Błąd podczas automatycznej synchronizacji magazynu:", e);
+        showNotification("Wystąpił błąd przy aktualizacji bazy części.", 3000, 'error');
+    }
+    // ---- KONIEC AUTOMATYCZNEJ SYNCHRONIZACJI ---
+    // ---- INICJALIZACJA TŁA VANTA ----
+    // Upewnij się, że Vanta i Three.js są dostępne
     if (typeof VANTA !== 'undefined' && VANTA.NET && typeof THREE !== 'undefined') {
-        try {
-            window.vantaEffect = VANTA.NET({ el: "#vanta-background", mouseControls: true, touchControls: true, gyroControls: false, minHeight: 200.00, minWidth: 200.00, scale: 1.00, scaleMobile: 1.00, backgroundColor: 0x101018, color: 0x8a2be2, points: 11.00, maxDistance: 20.00, spacing: 16.00, showDots: true });
-        } catch (e) { console.error("Błąd VANTA:", e); showNotification("Nie udało się załadować tła.", 3000, 'warning'); }
-    } else console.warn("VANTA lub Three.js niedostępne.");
+        const vantaContainer = document.getElementById('vanta-background');
+        if (vantaContainer) { // Sprawdź, czy kontener istnieje
+            try {
+                window.vantaEffect = VANTA.NET({ 
+                    el: "#vanta-background", // lub vantaContainer
+                    mouseControls: true, 
+                    touchControls: true, 
+                    gyroControls: false, 
+                    minHeight: 200.00, 
+                    minWidth: 200.00, 
+                    scale: 1.00, 
+                    scaleMobile: 1.00, 
+                    backgroundColor: 0x101018, // Upewnij się, że to jest poprawny format koloru (hex numeryczny)
+                    color: 0x8a2be2,          // Poprawny format hex numeryczny
+                    points: 11.00, 
+                    maxDistance: 20.00, 
+                    spacing: 16.00, 
+                    showDots: true 
+                });
+                console.log("Vanta.NET zainicjalizowana pomyślnie.");
+            } catch (e) { 
+                console.error("Błąd podczas inicjalizacji VANTA:", e); 
+                showNotification("Nie udało się załadować animowanego tła.", 3000, 'warning'); 
+            }
+        } else {
+            console.warn("Element #vanta-background nie znaleziony w DOM. Vanta nie zostanie zainicjalizowana.");
+        }
+    } else {
+        console.warn("VANTA lub Three.js niedostępne. Tło nie zostanie załadowane.");
+    }
+    // ---- KONIEC INICJALIZACJI TŁA VANTA ----
 
-    if (appContainer) appContainer.style.marginLeft = sidebarWidthCollapsed + 'px';
+    // Ustawienie marginesu kontenera aplikacji
+    if (appContainer) {
+        appContainer.style.marginLeft = sidebarWidthCollapsed + 'px';
+    }
     
-    const domyslnyLink = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]'); 
-    if (domyslnyLink) navigateTo('generator', domyslnyLink); 
-    else { 
-        console.error("Brak domyślnego linku nawigacyjnego. Ustawiam 'generator' jako domyślny."); 
-        navigateTo('generator', null); 
+    // Domyślna nawigacja
+    const domyslnyLink = document.querySelector('.sidebar a[onclick*="navigateTo(\'info"]'); 
+    if (domyslnyLink) {
+        navigateTo('info', domyslnyLink); 
+    } else { 
+        console.error("Brak linku nawigacyjnego do strony 'Info'. Ustawiam 'info' jako domyślny, ale link w sidebarze może nie być podświetlony."); 
+        navigateTo('info', null); 
+        const infoLinkFallback = Array.from(document.querySelectorAll('.sidebar a')).find(a => a.getAttribute('onclick')?.includes("navigateTo('info'"));
+        if(infoLinkFallback) infoLinkFallback.classList.add('active-link');
     }
 
-    if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleSidebar);
-    else console.error("#sidebarToggleBtn nie znaleziony.");
-
-    // Inicjalizacja licznika punktów, jeśli jest to strona startowa (mało prawdopodobne, ale dla kompletności)
-    // lub gdy nawigujemy do niej - obsłużone w navigateTo
+    // Listener dla przycisku sidebar
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', toggleSidebar);
+    } else {
+        console.error("#sidebarToggleBtn nie znaleziony.");
+    }
+	
 });
+
+
 </script>
 
 <!-- Domyślna Baza Danych JSON -->
