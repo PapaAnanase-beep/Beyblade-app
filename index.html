@@ -493,6 +493,48 @@ button, a, select, input, textarea { outline: none; }
     vertical-align: -0.6em; /* Delikatne przesunięcie w dół dla lepszego dopasowania wizualnego */
 }
 
+.player-section {
+    background-color: rgba(25, 25, 35, 0.6);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 450px;
+    box-sizing: border-box;
+    text-align: center;
+    position: relative; /* Może być przydatne, ale nie jest już kluczowe dla tła */
+}
+
+/* NOWE Style dla pełnoekranowej nakładki Finishu */
+    .fullscreen-finish-overlay { /* POPRAWKA */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 1);
+        display: none; /* Początkowo ukryty */
+        justify-content: center;
+        align-items: center;
+        z-index: 9000;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .fullscreen-finish-overlay.visible { /* POPRAWKA */
+        display: flex;
+        opacity: 1;
+    }
+
+    .fullscreen-finish-overlay img { /* POPRAWKA */
+        max-width: 80vw;
+        max-height: 80vh;
+        object-fit: contain;
+        animation: zoomInFinishImage 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+
+
 
 </style>
 </head>
@@ -510,36 +552,40 @@ button, a, select, input, textarea { outline: none; }
         </div>
     </div>
     <div class="sidebar-links">
-    <a href="#" onclick="navigateTo('info', this)" title="Informacje i Instrukcja"><img src="info.png" alt="Info"><span>Info</span></a>
-    <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="1.png" alt="Generator"><span>Generator</span></a>
-    <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="2.png" alt="Magazyn"><span>Magazyn</span></a>
-    <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="3.png" alt="Licznik"><span>Licznik</span></a> 
-    <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a>
-    <a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a>
-    <a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
+        <a href="#" onclick="navigateTo('info', this)" title="Informacje i Instrukcja"><img src="info.png" alt="Info"><span>Info</span></a>
+        <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="1.png" alt="Generator"><span>Generator</span></a>
+        <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="2.png" alt="Magazyn"><span>Magazyn</span></a>
+        <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="3.png" alt="Licznik"><span>Licznik</span></a>
+        <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a>
+        <a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a>
+        <a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
+    </div>
 </div>
+
+<!-- NOWY ELEMENT DLA PEŁNOEKRANOWEGO OBRAZKA FINISHU -->
+<div id="fullscreenFinishOverlay" class="fullscreen-finish-overlay">
+    <img id="fullscreenFinishImage" src="#" alt="Finish Effect">
 </div>
 
 <div id="app-container">
- <section id="info" class="page">
+    <section id="info" class="page">
         <h2>Witaj w Beyblade App by Ananasek</h2>
-	   <div id="generator-obraz" style="margin-top:20px; margin-bottom: 20px;">
-        <img id="placeholder-img" src="tlo.png" alt="Animowane tło generatora">
-      </div>
+        <div id="generator-obraz" style="margin-top:20px; margin-bottom: 20px;">
+            <img id="placeholder-img" src="tlo.png" alt="Animowane tło generatora">
+        </div>
         <div class="card">
             <h3>Krótka Instrukcja Obsługi</h3>
             <p style="text-align: left; line-height: 1.8;">
                 Witaj w aplikacji wspomagającej Twoje rozgrywki i zarządzanie kolekcją Beyblade! Oto kilka wskazówek, jak zacząć:
             </p>
-        <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
-    <li><strong>Generator Zestawów:</strong><img src="1.png" alt="Generator Icon" class="inline-icon">Wybierz serię i ilość, a aplikacja wylosuje dla Ciebie części z Twojego magazynu.</li>
-    <li><strong>Mój Magazyn:</strong><img src="2.png" alt="Magazyn Icon" class="inline-icon"> Tutaj zarządzasz swoją kolekcją części</li>
-    <li><strong>Licznik Punktów:</strong><img src="3.png" alt="Licznik Icon" class="inline-icon"> Prosty licznik do śledzenia wyników podczas rozgrywki</li>
-    <li><strong>Deck Generator:</strong><img src="4.png" alt="Deck Icon" class="inline-icon"> Składaj własne decki w oparciu o zasady turniejowe</li>
-    <li><strong>Moje Decki:</strong><img src="5.png" alt="Galeria Icon" class="inline-icon"> Przeglądaj, edytuj lub usuwaj decki</li>
-    <li><strong>Dane:</strong><img src="6.png" alt="Dane Icon" class="inline-icon"> W tej sekcji możesz importować/eksportować swoje części jak i decki</li>
-</ul>
-
+            <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
+                <li><strong>Generator Zestawów:</strong><img src="1.png" alt="Generator Icon" class="inline-icon">Wybierz serię i ilość, a aplikacja wylosuje dla Ciebie części z Twojego magazynu.</li>
+                <li><strong>Mój Magazyn:</strong><img src="2.png" alt="Magazyn Icon" class="inline-icon"> Tutaj zarządzasz swoją kolekcją części</li>
+                <li><strong>Licznik Punktów:</strong><img src="3.png" alt="Licznik Icon" class="inline-icon"> Prosty licznik do śledzenia wyników podczas rozgrywki</li>
+                <li><strong>Deck Generator:</strong><img src="4.png" alt="Deck Icon" class="inline-icon"> Składaj własne decki w oparciu o zasady turniejowe</li>
+                <li><strong>Moje Decki:</strong><img src="5.png" alt="Galeria Icon" class="inline-icon"> Przeglądaj, edytuj lub usuwaj decki</li>
+                <li><strong>Dane:</strong><img src="6.png" alt="Dane Icon" class="inline-icon"> W tej sekcji możesz importować/eksportować swoje części jak i decki</li>
+            </ul>
             <p style="text-align: left; margin-top: 15px;">
                 Pamiętaj, aby regularnie zapisywać swoje dane (magazyn i decki) za pomocą opcji eksportu, aby uniknąć ich utraty!
             </p>
@@ -547,7 +593,6 @@ button, a, select, input, textarea { outline: none; }
                 Miłej zabawy i udanych pojedynków!
             </p>
         </div>
-        
         <div class="card" style="margin-top: 30px;">
             <h4>Co nowego / Planowane funkcje:</h4>
             <ul style="text-align: left; margin-left: 20px; line-height: 1.6; font-size: 0.9em;">
@@ -557,191 +602,194 @@ button, a, select, input, textarea { outline: none; }
             </ul>
         </div>
     </section>
+
     <section id="licznikPunktow" class="page">
         <h2>Licznik Punktów Rozgrywki</h2>
         <div class="card score-counter-card">
-            <div class="player-section">
+            <div class="player-section" data-player-id="player1">
                 <h3 id="playerName1">Gracz 1</h3>
+                <!-- Obrazek finishu jest teraz globalny, usuwamy stąd lokalne kontenery -->
                 <div class="score-display" id="scorePlayer1">0</div>
                 <div class="score-buttons">
-                    <button onclick="updateScore('player1', 1)">+1</button>
-                    <button onclick="updateScore('player1', 2)">+2</button>
-                    <button onclick="updateScore('player1', 3)">+3</button>
+                    <button onclick="updateScore('player1', 1, 'spin_finish')">Spin Finish</button>
+                    <button onclick="updateScore('player1', 2, 'over_finish')">Over Finish</button>
+                    <button onclick="updateScore('player1', 2, 'burst_finish')">Burst Finish</button>
+                    <button onclick="updateScore('player1', 3, 'xtreme_finish')">Xtreme Finish</button>
                     <button class="danger-btn" onclick="updateScore('player1', -1)" style="margin-left: 10px;">-1</button>
                 </div>
-                 <input type="text" id="inputPlayerName1" placeholder="Wpisz imię Gracza 1" onchange="updatePlayerName('player1')">
+                <input type="text" id="inputPlayerName1" placeholder="Wpisz imię Gracza 1" onchange="updatePlayerName('player1')">
             </div>
-            <div class="player-section">
+
+            <div class="player-section" data-player-id="player2">
                 <h3 id="playerName2">Gracz 2</h3>
+                 <!-- Obrazek finishu jest teraz globalny, usuwamy stąd lokalne kontenery -->
                 <div class="score-display" id="scorePlayer2">0</div>
                 <div class="score-buttons">
-                    <button onclick="updateScore('player2', 1)">+1</button>
-                    <button onclick="updateScore('player2', 2)">+2</button>
-                    <button onclick="updateScore('player2', 3)">+3</button>
+                    <button onclick="updateScore('player2', 1, 'spin_finish')">Spin Finish</button>
+                    <button onclick="updateScore('player2', 2, 'over_finish')">Over Finish</button>
+                    <button onclick="updateScore('player2', 2, 'burst_finish')">Burst Finish</button>
+                    <button onclick="updateScore('player2', 3, 'xtreme_finish')">Xtreme Finish</button>
                     <button class="danger-btn" onclick="updateScore('player2', -1)" style="margin-left: 10px;">-1</button>
                 </div>
                 <input type="text" id="inputPlayerName2" placeholder="Wpisz imię Gracza 2" onchange="updatePlayerName('player2')">
             </div>
             <div class="game-controls">
-                <button onclick="resetScores()" class="cancel-btn" style="width: auto; padding: 12px 25px;">Resetuj Wyniki</button>
+                <button onclick="resetScoresAndImages()">Resetuj Wyniki</button>
             </div>
         </div>
     </section>
 
     <section id="generator" class="page">
-      <h2>Generator Zestawów</h2>
-      <div class="card">
-        <label for="seriaLosowania">Wybierz Serię do Losowania:</label>
-        <select id="seriaLosowania" aria-label="Seria Beybladów do losowania">
-            <option value="bx_ux">BX / UX (Blade, Ratchet, Bit)</option>
-            <option value="cx">CX (LockChip, Main, Assist, Ratchet, Bit)</option>
-        </select>
-        <label for="ilosc" style="margin-top:15px;">Wybierz ilość Beybladów do wylosowania:</label>
-        <select id="ilosc" aria-label="Ilość Beybladów do wylosowania">
-            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-			<option value="7">7</option><option value="8">8</option><option value="9">9</option>
-            <option value="10">10</option><option value="11">11</option><option value="12">12</option>
-			<option value="13">13</option><option value="14">14</option><option value="15">15</option>
-            <option value="16">16</option><option value="17">17</option><option value="18">18</option>   
-			<option value="19">19</option><option value="20">20</option><option value="21">21</option>
-            <option value="22">22</option><option value="23">23</option><option value="24">24</option> 			</select>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button onclick="LOSUJ()">Losuj Zestawy</button>
-            <button onclick="wyczyscLosowanie()" class="cancel-btn">Wyczyść Wyniki</button>
+        <h2>Generator Zestawów</h2>
+        <div class="card">
+            <label for="seriaLosowania">Wybierz Serię do Losowania:</label>
+            <select id="seriaLosowania" aria-label="Seria Beybladów do losowania">
+                <option value="bx_ux">BX / UX (Blade, Ratchet, Bit)</option>
+                <option value="cx">CX (LockChip, Main, Assist, Ratchet, Bit)</option>
+            </select>
+            <label for="ilosc" style="margin-top:15px;">Wybierz ilość Beybladów do wylosowania:</label>
+            <select id="ilosc" aria-label="Ilość Beybladów do wylosowania">
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                <option value="13">13</option><option value="14">14</option><option value="15">15</option>
+                <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+                <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+                <option value="22">22</option><option value="23">23</option><option value="24">24</option>
+            </select>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button onclick="LOSUJ()">Losuj Zestawy</button>
+                <button onclick="wyczyscLosowanie()" class="cancel-btn">Wyczyść Wyniki</button>
+            </div>
         </div>
-        
-      </div>
-    
-      <div id="wyniki" style="margin-top:20px;"></div>
-    </section>
-<section id="magazyn" class="page">
-      <h2>Mój Magazyn Części</h2>
-      <div class="card" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;"> 
-        <div style="flex-grow: 1; min-width: 200px;">
-          <label for="filterKategoria">Filtruj według kategorii:</label>
-          <select id="filterKategoria" onchange="wyswietlMagazyn()" aria-label="Filtr kategorii części">
-              <option value="all">Wszystkie Kategorie</option>
-              <optgroup label="Seria BX / UX">
-                  <option value="blade">Blade (BX/UX)</option>
-              </optgroup>
-              <optgroup label="Seria CX">
-                  <option value="cx-lock-chip">CX Lock Chip</option>
-                  <option value="cx-main-blade">CX Main Blade</option>
-                  <option value="cx-assist-blade">CX Assist Blade</option>
-              </optgroup>
-              <optgroup label="Komponenty Wspólne">
-                  <option value="rachet">Ratchet</option>
-                  <option value="bit">Bit</option>
-              </optgroup>
-          </select>
+        <div id="wyniki" style="margin-top:20px;"></div>
+        <!-- Dodany kontener dla przycisków zapisu wylosowanego zestawu -->
+        <div id="zapisz-glowny-zestaw-controls" class="card action-button-container" style="display: none; margin-top: 20px;">
+            <h4>Zapisz Wylosowany Zestaw jako Deck</h4>
+            <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
+                Jeśli chcesz zapisać pierwszy wylosowany zestaw jako nowy deck (z jednym zestawem), nadaj mu nazwę poniżej.
+            </p>
+            <label for="nazwa-glownego-decku" style="display:block; text-align:left; margin-bottom:5px;">Nazwa dla nowego Decku:</label>
+            <input type="text" id="nazwa-glownego-decku" placeholder="Np. Mój Szybki Wylosowany Deck" style="margin-bottom:12px;">
+            <button onclick="saveCurrentGeneratedDeck()" class="button-auto-width">Zapisz Ten Wylosowany Zestaw</button>
         </div>
-        <div style="flex-grow: 1; min-width: 200px;">
-          <label for="filterPosiadane">Pokaż części:</label>
-          <select id="filterPosiadane" onchange="wyswietlMagazyn()" aria-label="Filtr posiadanych części">
-              <option value="posiadane">Posiadane</option>
-              <option value="nieposiadane">Nieposiadane</option>
-              <option value="wszystkie_w_bazie">Wszystkie</option> 
-          </select>
-        </div>
-      </div>
-      <div id="lista-magazyn" style="margin-top:15px;"></div>
     </section>
 
-  
-
-<section id="deck" class="page">
-    <h2>Deck Generator</h2>
-    <p style="text-align: center;">Przeciągnij części z panelu do odpowiednich slotów aktywnego zestawu.</p>
-    
-    <div class="card" style="margin-bottom: 20px;">
-        <h3>Zarządzanie Deckiem</h3>
-        <div>
-            <label for="deckName" style="display: block; margin-bottom: 5px;">Nazwa Decku:</label>
-            <input type="text" id="deckName" placeholder="Np. Mój Deck Turniejowy" style="margin-bottom: 10px;">
-        </div>
-        <button id="saveDeckButton" onclick="saveCurrentDeck()">Zapisz Aktualny Deck</button>
-
-    </div>
-
-    <div class="deck-builder-container">
-        <div class="available-parts-panel" id="available-parts-panel">
-            <h4>Dostępne Części</h4>
-            <div class="filter-parts-dnd" style="margin-bottom:15px;">
-                <label for="dndPartTypeFilter">Filtruj części:</label>
-                <select id="dndPartTypeFilter" onchange="renderAvailablePartsList()">
-                    <option value="blade">Blade (BX/UX)</option>
-                    <option value="cx-lock-chip">CX Lock Chip</option>
-                    <option value="cx-main-blade">CX Main Blade</option>
-                    <option value="cx-assist-blade">CX Assist Blade</option>
-                    <option value="rachet">Ratchet</option>
-                    <option value="bit">Bit</option>
+    <section id="magazyn" class="page">
+        <h2>Mój Magazyn Części</h2>
+        <div class="card" style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end;">
+            <div style="flex-grow: 1; min-width: 200px;">
+                <label for="filterKategoria">Filtruj według kategorii:</label>
+                <select id="filterKategoria" onchange="wyswietlMagazyn()" aria-label="Filtr kategorii części">
+                    <option value="all">Wszystkie Kategorie</option>
+                    <optgroup label="Seria BX / UX">
+                        <option value="blade">Blade (BX/UX)</option>
+                    </optgroup>
+                    <optgroup label="Seria CX">
+                        <option value="cx-lock-chip">CX Lock Chip</option>
+                        <option value="cx-main-blade">CX Main Blade</option>
+                        <option value="cx-assist-blade">CX Assist Blade</option>
+                    </optgroup>
+                    <optgroup label="Komponenty Wspólne">
+                        <option value="rachet">Ratchet</option>
+                        <option value="bit">Bit</option>
+                    </optgroup>
                 </select>
             </div>
-            <div id="parts-list-for-dnd">
-                <!-- Lista części do przeciągania -->
+            <div style="flex-grow: 1; min-width: 200px;">
+                <label for="filterPosiadane">Pokaż części:</label>
+                <select id="filterPosiadane" onchange="wyswietlMagazyn()" aria-label="Filtr posiadanych części">
+                    <option value="posiadane">Posiadane</option>
+                    <option value="nieposiadane">Nieposiadane</option>
+                    <option value="wszystkie_w_bazie">Wszystkie</option>
+                </select>
             </div>
         </div>
-
-        <div class="deck-set-slots-container">
-            <!-- NOWE GUZIKI ZAKŁADEK -->
-            <div id="deck-set-tabs-container" class="tabs-container">
-                <!-- Guziki będą generowane przez JS -->
-            </div>
-            <!-- Kontener na sloty TYLKO AKTYWNEGO ZESTAWU -->
-            <div id="deck-builder-active-set-slots">
-                <!-- Slotów na aktywny zestaw będą renderowane tutaj przez JS -->
-            </div>
-        </div>
-    </div>
-</section>
-
-    <section id="galeriaDeckow" class="page">
-      <h2>Moje Zapisane Decki</h2>
-      <p style="text-align: center;">Tutaj znajdziesz wszystkie swoje zapisane konfiguracje decków.</p>
-      <div id="savedDecksContainer" style="margin-top: 20px;"></div>
+        <div id="lista-magazyn" style="margin-top:15px;"></div>
     </section>
 
- <section id="importexport" class="page">
-    <h2>Zarządzanie Danymi Aplikacji</h2>
+    <section id="deck" class="page">
+        <h2>Deck Generator</h2>
+        <p style="text-align: center;">Przeciągnij części z panelu do odpowiednich slotów aktywnego zestawu.</p>
+        <div class="card" style="margin-bottom: 20px;">
+            <h3>Zarządzanie Deckiem</h3>
+            <div>
+                <label for="deckName" style="display: block; margin-bottom: 5px;">Nazwa Decku:</label>
+                <input type="text" id="deckName" placeholder="Np. Mój Deck Turniejowy" style="margin-bottom: 10px;">
+            </div>
+            <button id="saveDeckButton" onclick="saveCurrentDeck()">Zapisz Aktualny Deck</button>
+             <button onclick="clearCurrentDeckForBuilder()" class="cancel-btn" style="margin-left:10px;">Wyczyść Builder</button>
+        </div>
+        <div class="deck-builder-container">
+            <div class="available-parts-panel" id="available-parts-panel">
+                <h4>Dostępne Części</h4>
+                <div class="filter-parts-dnd" style="margin-bottom:15px;">
+                    <label for="dndPartTypeFilter">Filtruj części:</label>
+                    <select id="dndPartTypeFilter" onchange="renderAvailablePartsList()">
+                        <option value="blade">Blade (BX/UX)</option>
+                        <option value="cx-lock-chip">CX Lock Chip</option>
+                        <option value="cx-main-blade">CX Main Blade</option>
+                        <option value="cx-assist-blade">CX Assist Blade</option>
+                        <option value="rachet">Ratchet</option>
+                        <option value="bit">Bit</option>
+                    </select>
+                </div>
+                <div id="parts-list-for-dnd">
+                    <!-- Lista części do przeciągania -->
+                </div>
+            </div>
+            <div class="deck-set-slots-container">
+                <div id="deck-set-tabs-container" class="tabs-container">
+                    <!-- Guziki zakładek będą generowane przez JS -->
+                </div>
+                <div id="deck-builder-active-set-slots">
+                    <!-- Slotów na aktywny zestaw będą renderowane tutaj przez JS -->
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- SEKCJA IMPORTU/EKSPORTU MAGAZYNU - PRZYWRÓCONA -->
-    <div class="action-button-container import-export-section">
-        <h4>Importuj lub Eksportuj Dane Magazynu Części</h4>
-        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
-            Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.
-        </p>
-        <button class="button-auto-width" onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn</button>
-        <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Dane magazynu JSON..." aria-label="Pole JSON magazynu"></textarea>
-        <button class="button-auto-width" onclick="importujDaneZPolaTekstowego()">Importuj Magazyn</button>
-    </div>
+    <section id="galeriaDeckow" class="page">
+        <h2>Moje Zapisane Decki</h2>
+        <p style="text-align: center;">Tutaj znajdziesz wszystkie swoje zapisane konfiguracje decków.</p>
+        <div id="savedDecksContainer" style="margin-top: 20px;"></div>
+    </section>
 
-    <!-- SEKCJA IMPORTU/EKSPORTU DECKÓW - PRZYWRÓCONA -->
-    <div class="action-button-container import-export-section">
-        <h4>Importuj lub Eksportuj Zapisane Decki</h4>
-        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
-            Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.
-        </p>
-        <button class="button-auto-width" onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki</button>
-        <textarea id="poleDanychJsonDecki" rows="8" placeholder="Dane decków JSON..." aria-label="Pole JSON decków"></textarea>
-        <button class="button-auto-width" onclick="importujDeckiZPolaTekstowego()">Importuj Decki</button>
-    </div>
-
-    <!-- ZMODYFIKOWANA SEKCJA OPERACJI NA DANYCH (RESET) - Zostaje jak było -->
-    <div class="action-button-container">
-        <h4>Resetowanie Aplikacji</h4>
-        <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
-            Ta operacja <strong>usunie wszystkie Twoje dane</strong> (magazyn części, zapisane decki, wyniki)
-            i przywróci aplikację do stanu początkowego z domyślną bazą części.
-        </p>
-        <button id="resetAppButton" class="button-auto-width danger-btn" onclick="wykonajPelnyResetAplikacji()" style="margin-top:10px;">
-            Resetuj Aplikację (Nieodwracalne)
-        </button>
-    </div>
-</section>
-
-
+    <section id="importexport" class="page">
+        <h2>Zarządzanie Danymi Aplikacji</h2>
+        <div class="action-button-container import-export-section">
+            <h4>Importuj lub Eksportuj Dane Magazynu Części</h4>
+            <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
+                Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.
+            </p>
+            <button class="button-auto-width" onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn</button>
+            <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Dane magazynu JSON..." aria-label="Pole JSON magazynu"></textarea>
+            <button class="button-auto-width" onclick="importujDaneZPolaTekstowego()">Importuj Magazyn</button>
+        </div>
+        <div class="action-button-container import-export-section">
+            <h4>Importuj lub Eksportuj Zapisane Decki</h4>
+            <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
+                Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.
+            </p>
+            <button class="button-auto-width" onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki</button>
+            <textarea id="poleDanychJsonDecki" rows="8" placeholder="Dane decków JSON..." aria-label="Pole JSON decków"></textarea>
+            <button class="button-auto-width" onclick="importujDeckiZPolaTekstowego()">Importuj Decki</button>
+        </div>
+        <div class="action-button-container">
+            <h4>Resetowanie Aplikacji</h4>
+            <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
+                Ta operacja <strong>usunie wszystkie Twoje dane</strong> (magazyn części, zapisane decki, wyniki)
+                i przywróci aplikację do stanu początkowego z domyślną bazą części.
+            </p>
+            <button id="resetAppButton" class="button-auto-width danger-btn" onclick="wykonajPelnyResetAplikacji()" style="margin-top:10px;">
+                Resetuj Aplikację (Nieodwracalne)
+            </button>
+        </div>
+    </section>
 </div>
+
+
 
 <script>
 // =================================
@@ -763,6 +811,8 @@ const SCORES_KEY = 'beybladeScoreCounterAnanas';
 const DOMYSLNA_BAZA_ZALADOWANA_KEY = 'ananasAppDomyślnaBazaZaladowana_v1'; // Nowy klucz
 let currentDeckBeingBuilt = {}; // Zostanie zainicjalizowane w DOMContentLoaded lub przy nawigacji
     let currentlyActiveSetIndexInBuilder = 0; // Domyślnie pierwszy zestaw (indeks 0)
+	let imageHideTimeouts = { player1: null, player2: null };
+	let fullscreenOverlayHideTimeout = null;
 function initializeOrResetCurrentDeck(deckData = null) {
     const defaultSetStructure = () => ({
         seria: 'bx_ux', bladeId: null, ratchetId: null, bitId: null,
@@ -881,13 +931,92 @@ function displayPlayerNames() {
     if (nameP1Input) nameP1Input.value = playerNames.player1 === "Gracz 1" ? "" : playerNames.player1;
     if (nameP2Input) nameP2Input.value = playerNames.player2 === "Gracz 2" ? "" : playerNames.player2;
 }
-function updateScore(player, points) {
-    if (scores.hasOwnProperty(player)) {
-        scores[player] += points;
-        displayScores();
-        saveScoresToLocalStorage();
+let backgroundResetTimeouts = { player1: null, player2: null };
+const finishBackgroundClasses = ['has-background-spin_finish', 'has-background-over_finish', 'has-background-burst_finish', 'has-background-xtreme_finish']; // Pomocnicza tablica klas
+
+function updateScore(player, points, finishType = null) {
+    console.log("updateScore called for:", player, "points:", points, "finishType:", finishType);
+
+    if (!scores || !scores.hasOwnProperty(player)) {
+        console.error("Błąd: Obiekt 'scores' lub właściwość dla gracza nie istnieje.", player);
+        return;
+    }
+
+    scores[player] += points;
+    if (typeof displayScores === 'function') displayScores();
+    if (typeof saveScoresToLocalStorage === 'function') saveScoresToLocalStorage();
+
+    const overlayElement = document.getElementById('fullscreenFinishOverlay');
+    const imageElement = document.getElementById('fullscreenFinishImage');
+
+    if (overlayElement && imageElement) {
+        // Wyczyść poprzedni timeout ukrywania nakładki, jeśli istnieje
+        if (fullscreenOverlayHideTimeout) {
+            clearTimeout(fullscreenOverlayHideTimeout);
+            fullscreenOverlayHideTimeout = null;
+        }
+
+        if (finishType && points > 0) {
+            const imagePath = `img/${finishType}.png`;
+            console.log("Setting fullscreen image path to:", imagePath);
+            imageElement.src = imagePath;
+            imageElement.alt = finishType.replace('_', ' ') + " Finish";
+
+            overlayElement.classList.add('visible'); // Pokaż nakładkę z przejściem
+
+            // Timeout do ukrycia nakładki
+            fullscreenOverlayHideTimeout = setTimeout(() => {
+                console.log("Timeout: Hiding fullscreen overlay");
+                overlayElement.classList.remove('visible');
+                // Można dodać opóźnienie na wyczyszczenie src, aby uniknąć "mignięcia"
+                setTimeout(() => {
+                    if (!overlayElement.classList.contains('visible')) { // Sprawdź, czy nadal jest ukryta
+                        imageElement.src = '#';
+                    }
+                }, 300); // Czas trwania przejścia opacity
+                fullscreenOverlayHideTimeout = null;
+            }, 1000); // Nakładka zniknie po 2.8 sekundach (dostosuj)
+
+        } else {
+            // Jeśli punkty są odejmowane lub brak finishType, upewnij się, że nakładka jest ukryta
+            // (chociaż normalnie powinna być już ukryta po timeout'cie)
+            if (overlayElement.classList.contains('visible')) {
+                 overlayElement.classList.remove('visible');
+                 setTimeout(() => { imageElement.src = '#'; }, 300);
+            }
+        }
+    } else {
+        console.warn(`Nie znaleziono elementu nakładki (#fullscreenFinishOverlay) lub obrazka (#fullscreenFinishImage)`);
     }
 }
+
+function resetScoresAndImages() {
+    scores.player1 = 0;
+    scores.player2 = 0;
+    if (typeof displayScores === 'function') displayScores();
+    if (typeof saveScoresToLocalStorage === 'function') saveScoresToLocalStorage();
+
+    const overlayElement = document.getElementById('fullscreenFinishOverlay');
+    const imageElement = document.getElementById('fullscreenFinishImage');
+
+    if (overlayElement && imageElement) {
+        if (overlayElement.classList.contains('visible')) {
+            overlayElement.classList.remove('visible');
+            setTimeout(() => { imageElement.src = '#'; }, 300); // Dopasuj do czasu przejścia opacity
+        }
+    }
+
+    if (fullscreenOverlayHideTimeout) {
+        clearTimeout(fullscreenOverlayHideTimeout);
+        fullscreenOverlayHideTimeout = null;
+    }
+
+    if (typeof showNotification === 'function') {
+        showNotification("Wyniki zostały zresetowane.", 2000, 'info');
+    }
+}
+
+
 function updatePlayerName(player) {
     const inputElement = document.getElementById(`inputPlayerName${player === 'player1' ? '1' : '2'}`);
     if (inputElement && playerNames.hasOwnProperty(player)) {
@@ -897,11 +1026,8 @@ function updatePlayerName(player) {
         saveScoresToLocalStorage();
     }
 }
-function resetScores() {
-    scores.player1 = 0; scores.player2 = 0;
-    displayScores(); saveScoresToLocalStorage();
-    showNotification("Wyniki zostały zresetowane.", 2000, 'info');
-}
+
+
 function saveScoresToLocalStorage() {
     try {
         localStorage.setItem(SCORES_KEY, JSON.stringify({ scores, playerNames }));
@@ -2717,47 +2843,49 @@ function importujDeckiZPolaTekstowego() {
 // =================================
 // Czyszczenie Danych i Inicjalizacja
 // =================================
- function wykonajWyczyszczenieDanych() {
-    console.log("Czyszczenie wszystkich danych aplikacji...");
-    setMagazyn([]); 
-    setSavedDecks([]); 
-    localStorage.removeItem(SCORES_KEY); 
-    scores = { player1: 0, player2: 0 }; 
+function wykonajWyczyszczenieDanych() {
+    // ... (Twoje obecne czyszczenie magazynu, decków, localStorage.removeItem(SCORES_KEY) itp.) ...
+    localStorage.removeItem(SCORES_KEY);
+    scores = { player1: 0, player2: 0 };
     playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
 
-    // WAŻNE: Usuń flagę załadowania domyślnej bazy
-    localStorage.removeItem(DOMYSLNA_BAZA_ZALADOWANA_KEY); 
-    console.log("Usunięto flagę DOMYSLNA_BAZA_ZALADOWANA_KEY.");
+    const licznikPage = document.getElementById('licznikPunktow');
+    if (licznikPage && licznikPage.classList.contains('active')) {
+        if (typeof displayScores === 'function') displayScores();
+        if (typeof displayPlayerNames === 'function') displayPlayerNames();
+    }
+    
+    // Ukryj pełnoekranową nakładkę
+    const overlayElement = document.getElementById('fullscreenFinishOverlay');
+    const imageElement = document.getElementById('fullscreenFinishImage');
+    if (overlayElement && imageElement && overlayElement.classList.contains('visible')) {
+        overlayElement.classList.remove('visible');
+        setTimeout(() => { imageElement.src = '#'; }, 300);
+    }
+    if (fullscreenOverlayHideTimeout) {
+        clearTimeout(fullscreenOverlayHideTimeout);
+        fullscreenOverlayHideTimeout = null;
+    }
 
-    // Nie pokazujemy tu powiadomienia, jeśli ta funkcja jest częścią większego procesu resetu
-    // Powiadomienie będzie w wykonajPelnyResetAplikacji.
-    // Jeśli jednak ta funkcja byłaby wywoływana samodzielnie (co teraz nie będzie miało miejsca z UI),
-    // można by dodać warunkowe powiadomienie.
-
-    // Logika odświeżania widoków (może być potrzebna, jeśli funkcja jest wołana z różnych miejsc)
+    // ... (reszta czyszczenia innych stron i pól tekstowych) ...
     const aktywnaStronaId = document.querySelector('.page.active')?.id;
     if (aktywnaStronaId) {
-        if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-        if (aktywnaStronaId === 'generator') wyczyscLosowanie();
-        if (aktywnaStronaId === 'deck') {
-            clearCurrentDeckForBuilder(); 
+        if (aktywnaStronaId === 'magazyn' && typeof wyswietlMagazyn === 'function') wyswietlMagazyn();
+        if (aktywnaStronaId === 'generator' && typeof wyczyscLosowanie === 'function') wyczyscLosowanie();
+        if (aktywnaStronaId === 'deck' && typeof clearCurrentDeckForBuilder === 'function') {
+            clearCurrentDeckForBuilder();
         }
-        if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
-        if (aktywnaStronaId === 'licznikPunktow') { 
-            displayScores();
-            displayPlayerNames();
-        }
+        if (aktywnaStronaId === 'galeriaDeckow' && typeof displaySavedDecks === 'function') displaySavedDecks();
     }
-    const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
-    const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
-    if (aktywnaStronaId === 'importexport') {
-         if(poleJsonMagazyn) poleJsonMagazyn.value = '';
-         if(poleJsonDecki) poleJsonDecki.value = '';
+     const importExportPage = document.getElementById('importexport');
+    if (importExportPage && importExportPage.classList.contains('active')) {
+        const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
+        const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
+        if(poleJsonMagazyn) poleJsonMagazyn.value = '';
+        if(poleJsonDecki) poleJsonDecki.value = '';
     }
-    console.log("Czyszczenie danych zakończone.");
+    console.log("Pełne czyszczenie danych aplikacji zakończone (z wyjątkiem flagi domyślnej bazy).");
 }
-
-
    function wykonajPelnyResetAplikacji() {
     // Krok 1: Wykonaj czyszczenie wszystkich danych
     // (Ta funkcja powinna już istnieć i czyścić magazyn, decki, wyniki, i flagę)
