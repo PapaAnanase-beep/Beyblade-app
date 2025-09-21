@@ -290,8 +290,14 @@ button, a, select, input, textarea { outline: none; }
     color: red; font-size: 0.8em; margin-left: 6px; font-weight: bold;
 }
 .score-counter-card {
-    display: flex; flex-direction: column; gap: 30px; 
-    padding: 25px; align-items: center;
+    display: flex; /* Włącz Flexbox */
+    flex-direction: row; /* Domyślnie elementy będą w rzędzie */
+    flex-wrap: wrap; /* Pozwól na zawijanie na mniejszych ekranach */
+    justify-content: space-around; /* Rozkłada przestrzeń wokół elementów */
+    gap: 20px; /* Odstęp między sekcjami graczy */
+    padding: 25px;
+    align-items: flex-start; /* Wyrównaj elementy do góry, jeśli mają różne wysokości */
+}dding: 25px; align-items: center;
 }
 .player-section {
     background-color: rgba(25, 25, 35, 0.6); padding: 20px; border-radius: 12px;
