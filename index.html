@@ -297,7 +297,7 @@ button, a, select, input, textarea { outline: none; }
     gap: 20px; /* Odstęp między sekcjami graczy */
     padding: 25px;
     align-items: flex-start; /* Wyrównaj elementy do góry, jeśli mają różne wysokości */
-}dding: 25px; align-items: center;
+}
 }
 .player-section {
     background-color: rgba(25, 25, 35, 0.6); padding: 20px; border-radius: 12px;
@@ -2517,145 +2517,193 @@ function importujDaneZPolaTekstowego() {
 }
 
 // Zmodyfikuj sygnaturę funkcji:
-    function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscNaZero = false, trybCichy = false) {
-        if (!Array.isArray(daneDoImportu)) {
-            if (!trybCichy) showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format (oczekiwano tablicy).`, 3000, 'error');
-            return false;
-        }
-
-        const czesciImportowaneLista = daneDoImportu.map((item, index) => {
-            // Dodatkowe sprawdzenie na początku pętli map
-            if (!item || typeof item !== 'object') {
-                console.warn(`[IMPORT WARN] Pomijam nieprawidłowy element (indeks: ${index}) w danych z '${zrodloDanychOpis}':`, item);
-                return null; // Zwróć null, aby filter go usunął
-            }
-
-            // Bezpieczniejsze pobieranie ID i typu
-            let id = String(item.id || '').trim(); // Jeśli item.id jest undefined, da pusty string
-            if (!id) { // Jeśli po trim nadal puste, generuj ID
-                 id = `${zrodloDanychOpis.toLowerCase().replace(/\s/g, '_')}_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`;
-            }
-            
-            let typ = String(item.typ || '').trim().toLowerCase(); // Podobnie dla typu
-            const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
-            if (!dozwoloneTypy.includes(typ)) typ = 'blade';
-
-            const parsedIlosc = parseInt(item.ilosc, 10);
-            const iloscOdczytanaZPliku = (isNaN(parsedIlosc) || parsedIlosc < 0) ? 0 : parsedIlosc;
-            const poczatkowaIloscDlaNowejCzesci = ustawDomyslnaIloscNaZero ? 0 : iloscOdczytanaZPliku;
-
-            // Bezpieczniejsze pobieranie nazwy
-            let nazwaCzesci = String(item.nazwa || '').trim();
-            if (!nazwaCzesci) { // Jeśli item.nazwa jest undefined, null, lub pusty string
-                nazwaCzesci = `Część bez nazwy ${index + 1}`;
-                console.warn(`[IMPORT WARN] Część (indeks: ${index}, ID: ${id}) nie miała nazwy. Użyto domyślnej: "${nazwaCzesci}"`);
-            }
-
-            const czesc = {
-                id,
-                typ,
-                nazwa: nazwaCzesci,
-                ilosc: poczatkowaIloscDlaNowejCzesci,
-                _iloscZPlikuDoAktualizacji: iloscOdczytanaZPliku,
-                img: String(item.img || '').trim(),
-                ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0,
-                cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0
-            };
-            
-            // ... (reszta logiki przypisywania statystyk - upewnij się, że item istnieje przed odwołaniem do item.ATK etc.)
-            const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
-            const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
-
-            if (item) { // Upewnij się, że item istnieje przed próbą dostępu do jego właściwości statystyk
-                if (typ==='blade'||typ==='rachet'||typ==='cx-main-blade'||typ==='cx-assist-blade') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); }
-                else if (typ==='bit') { czesc.ATK=parseFloatOrZero(item.ATK); czesc.DEF=parseFloatOrZero(item.DEF); czesc.STM=parseFloatOrZero(item.STM); czesc.waga=parseFloatOrZero(item.waga); czesc.DASH=parseFloatOrZero(item.DASH); czesc.BURST_RES=parseFloatOrZero(item.BURST_RES); }
-                else if (typ==='cx-lock-chip') { czesc.waga=parseFloatOrZero(item.waga); czesc.cx_lc_wytrz=parseIntOrZero(item.cx_lc_wytrz); czesc.cx_lc_atk_bonus=parseFloatOrZero(item.cx_lc_atk_bonus); czesc.cx_lc_def_bonus=parseFloatOrZero(item.cx_lc_def_bonus); }
-            }
-            return czesc;
-
-        }).filter(item => {
-            // Bardziej odporny filtr
-            if (!item || typeof item !== 'object') return false; // Upewnij się, że item to obiekt
-            if (typeof item.id !== 'string' || !item.id.trim()) return false;
-            if (typeof item.nazwa !== 'string' || !item.nazwa.trim()) return false;
-            return true;
-        });
-
-        // ... reszta funkcji przetworzIDopiszDaneMagazynu ...
-        // (komunikaty, aktualizacja magazynu itp.)
-        // Ta część wydaje się być OK, problem jest wcześniej
-
-        let aktualnyMagazyn = getMagazyn();
-        const nowyMagazynFinalny = []; 
-        let dodanoNowychCzesci = 0; let zaktualizowanoDaneCzesci = 0; let zaktualizowanoIloscIstniejacych = 0;
-        const idCzesciJuzDodanychDoNowego = new Set();
-
-        // Przetwarzanie istniejących części i aktualizacja
-        aktualnyMagazyn.forEach((istniejacaCzesc) => {
-            if (!istniejacaCzesc || !istniejacaCzesc.id) return;
-            const idIstniejacej = String(istniejacaCzesc.id).trim();
-            if (idCzesciJuzDodanychDoNowego.has(idIstniejacej)) return; 
-            const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
-            
-            if (pasujacaCzescZImportu) {
-                let finalnaIlosc = istniejacaCzesc.ilosc;
-                if (!ustawDomyslnaIloscNaZero) {
-                    const iloscZPliku = pasujacaCzescZImportu._iloscZPlikuDoAktualizacji;
-                    if (finalnaIlosc !== iloscZPliku) zaktualizowanoIloscIstniejacych++;
-                    finalnaIlosc = iloscZPliku;
-                }
-                const zaktualizowanaCzesc = { ...pasujacaCzescZImportu, ilosc: finalnaIlosc };
-                delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacji; 
-                nowyMagazynFinalny.push(zaktualizowanaCzesc); 
-                idCzesciJuzDodanychDoNowego.add(idIstniejacej);
-                
-                let daneZmienione = false;
-                for (const key in zaktualizowanaCzesc) {
-                    if (key !== 'id' && key !== 'ilosc' && istniejacaCzesc[key] !== zaktualizowanaCzesc[key]) {
-                        daneZmienione = true; break;
-                    }
-                }
-                if (daneZmienione) zaktualizowanoDaneCzesci++;
-            } else {
-                nowyMagazynFinalny.push(istniejacaCzesc); 
-                idCzesciJuzDodanychDoNowego.add(idIstniejacej);
-            }
-        });
-
-        // Dodawanie nowych części
-        czesciImportowaneLista.forEach(czescImportowana => {
-            if (!czescImportowana || !czescImportowana.id) return;
-            const idImportowany = String(czescImportowana.id).trim();
-            if (!idCzesciJuzDodanychDoNowego.has(idImportowany)) {
-                const czescDoDodania = { ...czescImportowana }; 
-                delete czescDoDodania._iloscZPlikuDoAktualizacji;
-                nowyMagazynFinalny.push(czescDoDodania); 
-                idCzesciJuzDodanychDoNowego.add(idImportowany); 
-                dodanoNowychCzesci++;
-            }
-        });
-
-        setMagazyn(nowyMagazynFinalny);
-        let msg = '';
-        if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
-        if (zaktualizowanoDaneCzesci > 0) msg += `Zakt. dane dla ${zaktualizowanoDaneCzesci} istn. części. `;
-        if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscNaZero) msg += `Zakt. ilość dla ${zaktualizowanoIloscIstniejacych} istn. części. `;
-        
-        if (!trybCichy) {
-            if (msg) showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
-            else showNotification(`Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
-        } else {
-            if (msg) console.log(`[TRYB CICHY] Import z '${zrodloDanychOpis}': ${msg.trim()}`);
-            else console.log(`[TRYB CICHY] Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`);
-        }
-        
-        const aktywnaStronaId = document.querySelector('.page.active')?.id;
-        if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-        if (aktywnaStronaId === 'deck') renderDeckBuilderAndParts();
-
-        return (dodanoNowychCzesci > 0 || zaktualizowanoDaneCzesci > 0 || zaktualizowanoIloscIstniejacych > 0);
+function przetworzIDopiszDaneMagazynu(daneDoImportu, zrodloDanychOpis, ustawDomyslnaIloscDlaNowychNaZero = false, trybCichy = false) {
+    if (!Array.isArray(daneDoImportu)) {
+        if (!trybCichy) showNotification(`Błąd importu z '${zrodloDanychOpis}': Nieprawidłowy format (oczekiwano tablicy).`, 3000, 'error');
+        console.error(`[IMPORT ERROR] Dane wejściowe z '${zrodloDanychOpis}' nie są tablicą:`, daneDoImportu);
+        return false; // Zwróć false, jeśli dane wejściowe są niepoprawne
     }
-    
+
+    const parseFloatOrZero = (val) => { const num = parseFloat(val); return isNaN(num) ? 0 : num; };
+    const parseIntOrZero = (val) => { const num = parseInt(val, 10); return isNaN(num) ? 0 : num; };
+
+    const czesciImportowaneLista = daneDoImportu.map((item, index) => {
+        if (!item || typeof item !== 'object' || item === null) { // Dodatkowe sprawdzenie na null
+            if (!trybCichy) console.warn(`[IMPORT WARN] Pomijam nieprawidłowy element (indeks: ${index}, wartość: ${JSON.stringify(item)}) w danych z '${zrodloDanychOpis}'.`);
+            return null;
+        }
+
+        let id = String(item.id || '').trim();
+        if (!id) {
+            id = `genid_${zrodloDanychOpis.toLowerCase().replace(/\s/g, '_')}_${Date.now()}_${index}_${Math.random().toString(16).slice(2)}`;
+            if (!trybCichy) console.warn(`[IMPORT WARN] Wygenerowano ID '${id}' dla części (indeks: ${index}) z '${zrodloDanychOpis}' z powodu braku ID.`);
+        }
+
+        let typ = String(item.typ || '').trim().toLowerCase();
+        const dozwoloneTypy = ['blade', 'rachet', 'bit', 'cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
+        if (!dozwoloneTypy.includes(typ)) {
+            if (!trybCichy) console.warn(`[IMPORT WARN] Nieznany typ '${typ}' dla części ID: ${id}. Ustawiono domyślny 'blade'.`);
+            typ = 'blade';
+        }
+
+        let nazwaCzesci = String(item.nazwa || '').trim();
+        if (!nazwaCzesci) {
+            nazwaCzesci = `Część bez nazwy (ID: ${id.slice(0,8)}...)`;
+            if (!trybCichy) console.warn(`[IMPORT WARN] Część ID: ${id} nie miała nazwy. Użyto domyślnej: "${nazwaCzesci}"`);
+        }
+
+        const iloscOdczytanaZPliku = parseIntOrZero(item.ilosc);
+        // poczatkowaIloscDlaNowejCzesci będzie używana TYLKO, gdy część jest dodawana jako nowa do magazynu
+        // Jeśli część już istnieje, jej ilość będzie zarządzana inaczej (albo zachowana, albo zaktualizowana z pliku)
+        const poczatkowaIloscDlaNowejCzesciPrzyDodawaniu = ustawDomyslnaIloscDlaNowychNaZero ? 0 : iloscOdczytanaZPliku;
+
+
+        const czesc = {
+            id,
+            typ,
+            nazwa: nazwaCzesci,
+            ilosc: poczatkowaIloscDlaNowejCzesciPrzyDodawaniu, // Ta wartość będzie użyta, jeśli część jest NOWA
+            _iloscZPlikuDoAktualizacjiDlaIstniejacych: iloscOdczytanaZPliku, // Używane do aktualizacji ilości istniejących
+            img: String(item.img || '').trim(),
+            ATK: 0, DEF: 0, STM: 0, waga: 0, DASH: 0, BURST_RES: 0,
+            cx_lc_wytrz: 0, cx_lc_atk_bonus: 0, cx_lc_def_bonus: 0,
+            integrujeBit: item.integrujeBit === true // Bezpieczne sprawdzenie
+        };
+
+        if (typ === 'blade' || typ === 'rachet' || typ === 'cx-main-blade' || typ === 'cx-assist-blade') {
+            czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF);
+            czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga);
+            if (typ === 'rachet' && czesc.integrujeBit) { // Dodatkowe staty dla Turbo Ratchet
+                czesc.DASH = parseFloatOrZero(item.DASH);
+                czesc.BURST_RES = parseFloatOrZero(item.BURST_RES);
+            }
+        } else if (typ === 'bit') {
+            czesc.ATK = parseFloatOrZero(item.ATK); czesc.DEF = parseFloatOrZero(item.DEF);
+            czesc.STM = parseFloatOrZero(item.STM); czesc.waga = parseFloatOrZero(item.waga);
+            czesc.DASH = parseFloatOrZero(item.DASH); czesc.BURST_RES = parseFloatOrZero(item.BURST_RES);
+        } else if (typ === 'cx-lock-chip') {
+            czesc.waga = parseFloatOrZero(item.waga);
+            czesc.cx_lc_wytrz = parseIntOrZero(item.cx_lc_wytrz);
+            czesc.cx_lc_atk_bonus = parseFloatOrZero(item.cx_lc_atk_bonus);
+            czesc.cx_lc_def_bonus = parseFloatOrZero(item.cx_lc_def_bonus);
+        }
+        return czesc;
+    }).filter(item => item !== null && typeof item.id === 'string' && item.id.trim() !== ''); // Upewnij się, że ID jest stringiem i nie jest puste
+
+    let aktualnyMagazyn = getMagazyn();
+    const nowyMagazynFinalny = [];
+    let dodanoNowychCzesci = 0;
+    let zaktualizowanoDaneCzesci = 0; // Licznik aktualizacji danych (poza ilością)
+    let zaktualizowanoIloscIstniejacych = 0; // Licznik aktualizacji samej ilości
+    const idCzesciJuzPrzetworzonych = new Set();
+
+    // Krok 1: Przejdź przez istniejący magazyn i zaktualizuj części, które są też w imporcie
+    aktualnyMagazyn.forEach((istniejacaCzesc) => {
+        if (!istniejacaCzesc || !istniejacaCzesc.id) return;
+        const idIstniejacej = String(istniejacaCzesc.id).trim();
+        if (idCzesciJuzPrzetworzonych.has(idIstniejacej)) return;
+
+        const pasujacaCzescZImportu = czesciImportowaneLista.find(cImp => String(cImp.id).trim() === idIstniejacej);
+
+        if (pasujacaCzescZImportu) {
+            // Część istnieje w obu miejscach - aktualizujemy
+            let finalnaIlosc = istniejacaCzesc.ilosc;
+            let daneCzesciZmienione = false;
+
+            // Jeśli import NIE MA zerować ilości (np. import z pliku użytkownika),
+            // to bierzemy ilość z importowanego pliku.
+            if (!ustawDomyslnaIloscDlaNowychNaZero) {
+                const iloscZPliku = pasujacaCzescZImportu._iloscZPlikuDoAktualizacjiDlaIstniejacych;
+                if (finalnaIlosc !== iloscZPliku) {
+                    finalnaIlosc = iloscZPliku;
+                    zaktualizowanoIloscIstniejacych++;
+                }
+            }
+            // Jeśli ustawDomyslnaIloscDlaNowychNaZero jest TRUE (np. import z bazy domyślnej po resecie),
+            // to ilość istniejacejCzesci nie jest zmieniana przez ten import. Pozostaje jaka była.
+
+            // Sprawdź, czy inne dane (poza ilością) się zmieniły
+            const czescDoPorownania = { ...pasujacaCzescZImportu }; // Kopia, aby nie modyfikować oryginału
+            delete czescDoPorownania.ilosc; // Ignorujemy ilość przy porównywaniu danych
+            delete czescDoPorownania._iloscZPlikuDoAktualizacjiDlaIstniejacych;
+
+            const istniejacaDoPorownania = { ...istniejacaCzesc };
+            delete istniejacaDoPorownania.ilosc;
+
+
+            // Porównanie pozostałych pól
+            for (const key in czescDoPorownania) {
+                if (czescDoPorownania.hasOwnProperty(key) && istniejacaDoPorownania.hasOwnProperty(key)) {
+                    // Specjalna obsługa dla boolean (integrujeBit)
+                    if (typeof czescDoPorownania[key] === 'boolean') {
+                        if (Boolean(istniejacaDoPorownania[key]) !== czescDoPorownania[key]) {
+                            daneCzesciZmienione = true; break;
+                        }
+                    } else if (String(istniejacaDoPorownania[key]) !== String(czescDoPorownania[key])) {
+                        daneCzesciZmienione = true; break;
+                    }
+                } else if (czescDoPorownania.hasOwnProperty(key) && !istniejacaDoPorownania.hasOwnProperty(key) && czescDoPorownania[key] !== null && czescDoPorownania[key] !== 0 && czescDoPorownania[key] !== false && czescDoPorownania[key] !== '') {
+                    // Jeśli importowana ma nowe pole z wartością, uznajemy za zmianę
+                    daneCzesciZmienione = true; break;
+                }
+            }
+
+
+            if (daneCzesciZmienione) {
+                zaktualizowanoDaneCzesci++;
+            }
+
+            const zaktualizowanaCzesc = { ...pasujacaCzescZImportu, ilosc: finalnaIlosc };
+            delete zaktualizowanaCzesc._iloscZPlikuDoAktualizacjiDlaIstniejacych;
+            nowyMagazynFinalny.push(zaktualizowanaCzesc);
+            idCzesciJuzPrzetworzonych.add(idIstniejacej);
+        } else {
+            // Część istnieje tylko w starym magazynie - zachowujemy ją bez zmian
+            nowyMagazynFinalny.push(istniejacaCzesc);
+            idCzesciJuzPrzetworzonych.add(idIstniejacej);
+        }
+    });
+
+    // Krok 2: Dodaj nowe części z importu, których nie było w starym magazynie
+    czesciImportowaneLista.forEach(czescImportowana => {
+        if (!czescImportowana || !czescImportowana.id) return;
+        const idImportowany = String(czescImportowana.id).trim();
+        if (!idCzesciJuzPrzetworzonych.has(idImportowany)) {
+            // To jest nowa część, jej 'ilosc' została już ustawiona poprawnie
+            // w pętli .map() na podstawie 'ustawDomyslnaIloscDlaNowychNaZero'
+            const czescDoDodania = { ...czescImportowana };
+            delete czescDoDodania._iloscZPlikuDoAktualizacjiDlaIstniejacych;
+            nowyMagazynFinalny.push(czescDoDodania);
+            idCzesciJuzPrzetworzonych.add(idImportowany);
+            dodanoNowychCzesci++;
+        }
+    });
+
+    setMagazyn(nowyMagazynFinalny);
+
+    let msg = '';
+    if (dodanoNowychCzesci > 0) msg += `Dodano ${dodanoNowychCzesci} nowych części. `;
+    if (zaktualizowanoDaneCzesci > 0) msg += `Zaktualizowano dane dla ${zaktualizowanoDaneCzesci} istniejących części. `;
+    // ZaktualizowanoIloscIstniejacych jest relevantne tylko jeśli nie zerowaliśmy ilości (czyli import od użytkownika)
+    if (zaktualizowanoIloscIstniejacych > 0 && !ustawDomyslnaIloscDlaNowychNaZero) {
+        msg += `Zaktualizowano ilość dla ${zaktualizowanoIloscIstniejacych} istniejących części. `;
+    }
+
+    if (!trybCichy) {
+        if (msg) showNotification(`Import z '${zrodloDanychOpis}' zakończony! ${msg.trim()}`, 4500, 'success');
+        else showNotification(`Magazyn jest aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`, 3000, 'info');
+    } else {
+        if (msg) console.log(`[TRYB CICHY] Import z '${zrodloDanychOpis}': ${msg.trim()}`);
+        else console.log(`[TRYB CICHY] Magazyn aktualny lub dane w '${zrodloDanychOpis}' nie wymagały zmian.`);
+    }
+
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+    if (aktywnaStronaId === 'deck') renderDeckBuilderAndParts();
+
+    // Zwróć true, jeśli cokolwiek zostało dodane lub zaktualizowane
+    return (dodanoNowychCzesci > 0 || zaktualizowanoDaneCzesci > 0 || zaktualizowanoIloscIstniejacych > 0);
+}
 
 // Zmodyfikuj sygnaturę funkcji:
 function importujMagazynZBazyDomyslnejHTML(trybCichy = false) {
@@ -2842,84 +2890,155 @@ function importujDeckiZPolaTekstowego() {
 // Czyszczenie Danych i Inicjalizacja
 // =================================
 function wykonajWyczyszczenieDanych() {
-    // ... (Twoje obecne czyszczenie magazynu, decków, localStorage.removeItem(SCORES_KEY) itp.) ...
+    console.log("Rozpoczynanie pełnego czyszczenia danych aplikacji...");
+
+    // Czyszczenie localStorage
+    localStorage.removeItem(MAGAZYN_KEY);
+    localStorage.removeItem(SAVED_DECKS_KEY);
     localStorage.removeItem(SCORES_KEY);
+    localStorage.removeItem(DOMYSLNA_BAZA_ZALADOWANA_KEY); // Upewnij się, że ta flaga też jest usuwana
+
+    console.log("Klucze localStorage usunięte.");
+
+    // Resetowanie zmiennych globalnych przechowujących stan
+    // Magazyn (jeśli jest jakaś zmienna globalna oprócz localStorage)
+    // Jeśli np. masz globalną zmienną `let aktualnyMagazynGlobalny = []`, zresetuj ją:
+    // aktualnyMagazynGlobalny = []; // Przykład
+
+    // Zapisane Decki (jeśli jest zmienna globalna)
+    // np. ostatnioWylosowaneZestawyGlobalnie już jest resetowane w wyczyscLosowanie
+
+    // Wyniki licznika punktów
     scores = { player1: 0, player2: 0 };
     playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
-
-    const licznikPage = document.getElementById('licznikPunktow');
-    if (licznikPage && licznikPage.classList.contains('active')) {
-        if (typeof displayScores === 'function') displayScores();
-        if (typeof displayPlayerNames === 'function') displayPlayerNames();
-    }
-    
-    // Ukryj pełnoekranową nakładkę
-    const overlayElement = document.getElementById('fullscreenFinishOverlay');
-    const imageElement = document.getElementById('fullscreenFinishImage');
-    if (overlayElement && imageElement && overlayElement.classList.contains('visible')) {
-        overlayElement.classList.remove('visible');
-        setTimeout(() => { imageElement.src = '#'; }, 300);
-    }
+    // Wyczyść ewentualne timeouty związane z licznikiem (masz to już dla fullscreenOverlayHideTimeout)
+    if (imageHideTimeouts.player1) clearTimeout(imageHideTimeouts.player1);
+    if (imageHideTimeouts.player2) clearTimeout(imageHideTimeouts.player2);
+    imageHideTimeouts = { player1: null, player2: null };
     if (fullscreenOverlayHideTimeout) {
         clearTimeout(fullscreenOverlayHideTimeout);
         fullscreenOverlayHideTimeout = null;
     }
+    console.log("Zmienne globalne wyników zresetowane.");
 
-    // ... (reszta czyszczenia innych stron i pól tekstowych) ...
-    const aktywnaStronaId = document.querySelector('.page.active')?.id;
-    if (aktywnaStronaId) {
-        if (aktywnaStronaId === 'magazyn' && typeof wyswietlMagazyn === 'function') wyswietlMagazyn();
-        if (aktywnaStronaId === 'generator' && typeof wyczyscLosowanie === 'function') wyczyscLosowanie();
-        if (aktywnaStronaId === 'deck' && typeof clearCurrentDeckForBuilder === 'function') {
-            clearCurrentDeckForBuilder();
-        }
-        if (aktywnaStronaId === 'galeriaDeckow' && typeof displaySavedDecks === 'function') displaySavedDecks();
+    // Stan Deck Buildera
+    initializeOrResetCurrentDeck(); // To powinno resetować currentDeckBeingBuilt do pustego stanu
+    currentEditingDeckId = null;
+    currentlyActiveSetIndexInBuilder = 0;
+    const deckNameInput = document.getElementById('deckName');
+    if (deckNameInput) deckNameInput.value = "";
+    const saveBtn = document.getElementById('saveDeckButton');
+    if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
+    console.log("Stan Deck Buildera zresetowany.");
+
+
+    // Stan Generatora Losowych Zestawów
+    ostatnioWylosowaneZestawyGlobalnie = [];
+    if (wynikiDivGenerator) wynikiDivGenerator.innerHTML = '';
+    if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+    const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
+    if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
+    const nazwaDeckuInputGenerator = document.getElementById('nazwa-glownego-decku');
+    if (nazwaDeckuInputGenerator) nazwaDeckuInputGenerator.value = "";
+    console.log("Stan Generatora Losowych Zestawów zresetowany.");
+
+    // Czyszczenie pól tekstowych na stronie Import/Eksport (jeśli jest aktywna)
+    // Robimy to tutaj, bo odświeżenie widoku może nie nastąpić od razu,
+    // a chcemy, żeby użytkownik widział, że pola są czyste.
+    const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
+    const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
+    if (poleJsonMagazyn) poleJsonMagazyn.value = '';
+    if (poleJsonDecki) poleJsonDecki.value = '';
+    console.log("Pola tekstowe Import/Eksport wyczyszczone.");
+
+
+    // Ukryj pełnoekranową nakładkę licznika, jeśli była widoczna
+    const overlayElement = document.getElementById('fullscreenFinishOverlay');
+    const imageElement = document.getElementById('fullscreenFinishImage');
+    if (overlayElement && imageElement && overlayElement.classList.contains('visible')) {
+        overlayElement.classList.remove('visible');
+        // Opóźnione czyszczenie src, aby uniknąć mignięcia, jeśli przejście trwa
+        setTimeout(() => {
+            if (!overlayElement.classList.contains('visible')) { // Sprawdź ponownie na wszelki wypadek
+                imageElement.src = '#';
+            }
+        }, 300); // Dopasuj do czasu przejścia opacity
+        console.log("Nakładka licznika ukryta.");
     }
-     const importExportPage = document.getElementById('importexport');
-    if (importExportPage && importExportPage.classList.contains('active')) {
-        const poleJsonMagazyn = document.getElementById('poleDanychJsonMagazyn');
-        const poleJsonDecki = document.getElementById('poleDanychJsonDecki');
-        if(poleJsonMagazyn) poleJsonMagazyn.value = '';
-        if(poleJsonDecki) poleJsonDecki.value = '';
-    }
-    console.log("Pełne czyszczenie danych aplikacji zakończone (z wyjątkiem flagi domyślnej bazy).");
+
+
+    console.log("Pełne czyszczenie danych aplikacji (zmiennych i UI powiązanych) zakończone.");
+    // UWAGA: Ta funkcja NIE powinna odświeżać całych widoków (jak wyswietlMagazyn),
+    // to zadanie dla funkcji nadrzędnej po załadowaniu nowej bazy.
+    // Powinna jednak resetować stan UI, który jest bezpośrednio powiązany ze zmiennymi globalnymi,
+    // np. wyświetlacze wyników, inputy.
 }
-   function wykonajPelnyResetAplikacji() {
-    // Krok 1: Wykonaj czyszczenie wszystkich danych
-    // (Ta funkcja powinna już istnieć i czyścić magazyn, decki, wyniki, i flagę)
+
+function wykonajPelnyResetAplikacji() {
     console.log("Rozpoczynanie pełnego resetu aplikacji...");
-    
-    // Upewnij się, że wykonajWyczyszczenieDanych czyści też flagę DOMYSLNA_BAZA_ZALADOWANA_KEY
-    // Jeśli jeszcze tego nie robi, dodaj to do niej:
-    // localStorage.removeItem(DOMYSLNA_BAZA_ZALADOWANA_KEY); 
-    wykonajWyczyszczenieDanych(); // Wywołujemy istniejącą funkcję czyszczącą
+
+    // Krok 1: Wykonaj czyszczenie wszystkich danych
+    wykonajWyczyszczenieDanych(); // Upewnij się, że ta funkcja jest teraz kompletna
+
+    console.log("Pełne czyszczenie danych aplikacji (localStorage i zmienne globalne) zakończone.");
 
     // Krok 2: Załaduj domyślną bazę danych
-    // Wywołujemy ją bez trybu cichego, aby użytkownik widział powiadomienia
     console.log("Próba załadowania domyślnej bazy danych po resecie...");
-    const czyZaladowanoPomyslnie = importujMagazynZBazyDomyslnejHTML(false); 
+    let czyBazaZaladowanaPoprawnieLubNieWymagalaZmian = false;
+    try {
+        // Wywołujemy z trybemCichy=false, aby użytkownik widział ewentualne komunikaty z importu.
+        // `ustawDomyslnaIloscDlaNowychNaZero = true` jest przekazywane wewnątrz importujMagazynZBazyDomyslnejHTML
+        // do przetworzIDopiszDaneMagazynu.
+        const importWynik = importujMagazynZBazyDomyslnejHTML(false); // false = nie tryb cichy
 
-    if (czyZaladowanoPomyslnie) {
-        // Po pomyślnym załadowaniu, ustaw flagę (nawet jeśli importujMagazynZBazyDomyslnejHTML
-        // robi to samo w niektórych przypadkach, tutaj mamy pewność)
-        localStorage.setItem(DOMYSLNA_BAZA_ZALADOWANA_KEY, 'true');
-        showNotification("Aplikacja została zresetowana i załadowano domyślną bazę części.", 4000, 'success');
-        console.log("Pełny reset aplikacji zakończony pomyślnie.");
-    } else {
-        // To może się zdarzyć, jeśli był błąd w samym JSONie domyślnej bazy
-        // lub funkcja importu zwróciła false z innego powodu.
-        showNotification("Dane zostały wyczyszczone, ale wystąpił błąd podczas ładowania domyślnej bazy części.", 5000, 'error');
-        console.error("Błąd podczas ładowania domyślnej bazy danych po pełnym resecie.");
+        // importWynik to true, jeśli były zmiany; false, jeśli nie było zmian lub błąd w danych importu.
+        // Dla resetu uznajemy za sukces, jeśli sama funkcja importu nie rzuciła krytycznego błędu.
+        czyBazaZaladowanaPoprawnieLubNieWymagalaZmian = true; 
+
+        if (importWynik) {
+            console.log("Domyślna baza danych załadowana i dokonano zmian w magazynie.");
+        } else {
+            console.log("Próba załadowania domyślnej bazy danych nie wprowadziła nowych zmian (magazyn mógł być już zgodny lub pusty po czyszczeniu, lub dane bazy były niepoprawne i przetworz... zwróciło false).");
+        }
+        localStorage.setItem(DOMYSLNA_BAZA_ZALADOWANA_KEY, 'true'); // Ustaw flagę po udanej próbie
+        showNotification("Aplikacja została zresetowana. Domyślna baza części załadowana (lub podjęto próbę).", 4000, 'success');
+
+    } catch (error) { // Ten catch łapie błędy rzucone przez importujMagazynZBazyDomyslnejHTML (np. brak skryptu)
+        console.error("Krytyczny błąd podczas próby ładowania domyślnej bazy danych po resecie:", error);
+        showNotification("Dane zostały wyczyszczone, ale wystąpił KRYTYCZNY błąd podczas ładowania domyślnej bazy części. Sprawdź konsolę.", 6000, 'error');
+        // Flaga DOMYSLNA_BAZA_ZALADOWANA_KEY nie jest ustawiana, co jest poprawne.
     }
 
-    // Odśwież widoki, które mogły być aktywne
-    const aktywnaStronaId = document.querySelector('.page.active')?.id;
-    if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-    else if (aktywnaStronaId === 'deck') renderDeckBuilderAndParts(); // Odświeży też dostępne części
-    else if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
-    // Jeśli strona 'importexport' była aktywna, pola tekstowe zostaną wyczyszczone przez wykonajWyczyszczenieDanych
-}
+    console.log("Proces ładowania domyślnej bazy zakończony.");
 
+    // Krok 3: Odśwież widoki, które mogły być aktywne, aby odzwierciedliły nowy, czysty stan
+    // oraz ewentualnie nowo załadowaną bazę.
+    console.log("Odświeżanie aktywnych widoków po resecie...");
+    const aktywnaStronaId = document.querySelector('.page.active')?.id;
+    if (aktywnaStronaId) {
+        console.log(`Aktywna strona to: ${aktywnaStronaId}. Odświeżam...`);
+        if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
+        else if (aktywnaStronaId === 'generator') {
+             // wyczyscLosowanie jest już częścią wykonajWyczyszczenieDanych,
+             // ale można tu upewnić się, że UI jest czyste
+            if (wynikiDivGenerator) wynikiDivGenerator.innerHTML = '';
+            if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        } else if (aktywnaStronaId === 'deck') {
+            // clearCurrentDeckForBuilder jest już w wykonajWyczyszczenieDanych,
+            // ale renderDeckBuilderAndParts odświeży listę dostępnych części z nowej bazy.
+            renderDeckBuilderAndParts();
+        } else if (aktywnaStronaId === 'galeriaDeckow') displaySavedDecks();
+        else if (aktywnaStronaId === 'licznikPunktow') {
+            if (typeof displayScores === 'function') displayScores();
+            if (typeof displayPlayerNames === 'function') displayPlayerNames();
+        }
+        // Strona 'importexport' powinna mieć już wyczyszczone pola przez wykonajWyczyszczenieDanych.
+    } else {
+        console.log("Brak aktywnej strony do odświeżenia.");
+    }
+    console.log("Pełny reset aplikacji zakończony.");
+}
+   
 document.addEventListener('DOMContentLoaded', function() {
     // Inicjalizacja podstawowych elementów DOM
     sidebar = document.getElementById('sidebar');
