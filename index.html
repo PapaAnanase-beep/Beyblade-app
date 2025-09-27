@@ -793,6 +793,7 @@ button, a, select, input, textarea { outline: none; }
 // =================================
 // Konfiguracja i Zmienne Globalne
 // =================================
+const ID_CLOCK_MIRAGE = "206"
 let sidebarExpanded = false;
 const sidebarWidthExpanded = 260;
 const sidebarWidthCollapsed = 50;
@@ -1350,27 +1351,25 @@ function LOSUJ() {
     const iloscZestawowDoWylosowania = parseInt(document.getElementById('ilosc')?.value) || 1;
     const wybranaSeria = document.getElementById('seriaLosowania')?.value;
 
-    if (!wybranaSeria) { 
-        showNotification("Błąd: Nie wybrano serii.", 3000, 'warning'); 
-        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; 
-        return; 
+    if (!wybranaSeria) {
+        showNotification("Błąd: Nie wybrano serii.", 3000, 'warning');
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        return;
     }
 
     const magazyn = getMagazyn();
     if (!magazyn || magazyn.length === 0) {
         wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty! Dodaj części w zakładce "Magazyn".</p></div>';
-        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block'; 
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
         return;
     }
-    
-    // Tworzenie puli dostępnych części z uwzględnieniem ich ilości
+
     const dostepneCzesciDoLosowania = { blade: [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
     magazyn.forEach(czesc => {
         const ilosc = parseInt(czesc.ilosc) || 0;
         if (ilosc > 0 && dostepneCzesciDoLosowania.hasOwnProperty(czesc.typ)) {
-            for (let i = 0; i < ilosc; i++) {
-                // Klonujemy obiekt części, aby każda instancja była unikalna na potrzeby losowania i usuwania z puli
-                dostepneCzesciDoLosowania[czesc.typ].push({ ...czesc, _uniqueDragId: `${czesc.id}_instance_${i}` });
+            for (let j = 0; j < ilosc; j++) { // Zmieniono i na j, aby uniknąć konfliktu z pętlą zewnętrzną
+                dostepneCzesciDoLosowania[czesc.typ].push({ ...czesc, _uniqueDragId: `${czesc.id}_instance_${j}_${Date.now()}_${Math.random()}` });
             }
         }
     });
@@ -1381,27 +1380,34 @@ function LOSUJ() {
         komunikatBrakuCzesci += `${iloscZestawowDoWylosowania} zestawu/ów BX/UX:`;
         if (dostepneCzesciDoLosowania.blade.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Blade,"; }
         if (dostepneCzesciDoLosowania.rachet.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Ratchet,"; }
-        if (dostepneCzesciDoLosowania.bit.length < iloscZestawowDoWylosowania) { // Sprawdzamy bity, ale będziemy ostrożni z Ratchetami Turbo
-            // To sprawdzenie jest uproszczone; dokładniejsze wymagałoby analizy ile jest Ratchetów Turbo
-             let nonTurboRatchetsCount = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
-             let turboRatchetsCount = dostepneCzesciDoLosowania.rachet.length - nonTurboRatchetsCount;
-             // Jeśli potrzebujemy więcej bitów niż mamy zwykłych ratchetów + bitów, a turbo ratchety nie wystarczą
-             if (dostepneCzesciDoLosowania.bit.length < (iloscZestawowDoWylosowania - turboRatchetsCount) && nonTurboRatchetsCount < (iloscZestawowDoWylosowania - turboRatchetsCount)) {
-                //czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Bit (uwzględniając Ratchet Turbo),";
-             }
+        // Uproszczone sprawdzenie bitów, dokładniejsze wymagałoby iteracji po ratchetach
+        // i sprawdzenia, ile z nich jest Turbo, a ile wymaga osobnego bita.
+        let potrzebneBity = 0;
+        let dostepneZwykleRatchety = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
+        if (iloscZestawowDoWylosowania > dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchety) { // jeśli potrzebujemy więcej zestawów niż mamy turbo ratchetów
+            potrzebneBity = Math.min(iloscZestawowDoWylosowania - (dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchety), dostepneZwykleRatchety)
         }
+        if (dostepneCzesciDoLosowania.bit.length < potrzebneBity) {
+             //czyWystarczajacoCzesci = false; // Decyzja, czy to ma blokować - może być mylące dla użytkownika
+             //komunikatBrakuCzesci += " potencjalnie za mało Bit (uwzględniając Ratchet Turbo),";
+        }
+
     } else if (wybranaSeria === 'cx') {
         komunikatBrakuCzesci += `${iloscZestawowDoWylosowania} zestawu/ów CX:`;
         if (dostepneCzesciDoLosowania['cx-lock-chip'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało LockChip,"; }
         if (dostepneCzesciDoLosowania['cx-main-blade'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało MainBlade,"; }
         if (dostepneCzesciDoLosowania['cx-assist-blade'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało AssistBlade,"; }
         if (dostepneCzesciDoLosowania.rachet.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Ratchet,"; }
-        // Podobne uproszczone sprawdzenie dla Bitów w CX
-         let nonTurboRatchetsCountCX = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
-         let turboRatchetsCountCX = dostepneCzesciDoLosowania.rachet.length - nonTurboRatchetsCountCX;
-         if (dostepneCzesciDoLosowania.bit.length < (iloscZestawowDoWylosowania - turboRatchetsCountCX) && nonTurboRatchetsCountCX < (iloscZestawowDoWylosowania - turboRatchetsCountCX) ) {
-            //czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Bit (uwzględniając Ratchet Turbo),";
-         }
+        // Podobne uproszczone sprawdzenie bitów dla CX
+        let potrzebneBityCX = 0;
+        let dostepneZwykleRatchetyCX = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
+         if (iloscZestawowDoWylosowania > dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchetyCX) {
+            potrzebneBityCX = Math.min(iloscZestawowDoWylosowania - (dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchetyCX), dostepneZwykleRatchetyCX)
+        }
+        if (dostepneCzesciDoLosowania.bit.length < potrzebneBityCX) {
+            //czyWystarczajacoCzesci = false;
+            //komunikatBrakuCzesci += " potencjalnie za mało Bit (uwzględniając Ratchet Turbo),";
+        }
     }
     if (!czyWystarczajacoCzesci) {
         showNotification(komunikatBrakuCzesci.slice(0, -1) + ".", 4000, 'warning');
@@ -1411,32 +1417,64 @@ function LOSUJ() {
 
     const wylosowaneZestawyFragment = document.createDocumentFragment();
     for (let i = 0; i < iloscZestawowDoWylosowania; i++) {
-        let wylosowanyZestawCzesci = {}; let czyZestawKompletny = true; let wylosowanoSpecjalnyRatchet = false;
-        
-        const losujCzescZPulli = (typCzesci) => {
-            if (dostepneCzesciDoLosowania[typCzesci] && dostepneCzesciDoLosowania[typCzesci].length > 0) {
-                const randomIndex = Math.floor(Math.random() * dostepneCzesciDoLosowania[typCzesci].length);
-                const wylosowanaCzesc = dostepneCzesciDoLosowania[typCzesci].splice(randomIndex, 1)[0]; // Usuwamy wylosowaną część z puli
-                return wylosowanaCzesc;
+        let wylosowanyZestawCzesci = {};
+        let czyZestawKompletny = true;
+        let wylosowanoSpecjalnyRatchet = false;
+
+        const losujCzescZPulli = (typCzesci, filtrKompatybilnosci = null) => {
+            let pulaFiltrwana = [...dostepneCzesciDoLosowania[typCzesci]]; // Pracuj na kopii do filtrowania
+            if (filtrKompatybilnosci) {
+                pulaFiltrwana = pulaFiltrwana.filter(filtrKompatybilnosci);
             }
-            return null; 
+
+            if (pulaFiltrwana && pulaFiltrwana.length > 0) {
+                const randomIndex = Math.floor(Math.random() * pulaFiltrwana.length);
+                const wylosowanaCzescZKopii = pulaFiltrwana[randomIndex]; // Pobieramy z kopii
+
+                // Znajdź i usuń z *oryginalnej* puli na podstawie _uniqueDragId
+                const indexWOryginalnejPuli = dostepneCzesciDoLosowania[typCzesci].findIndex(c => c._uniqueDragId === wylosowanaCzescZKopii._uniqueDragId);
+                if (indexWOryginalnejPuli > -1) {
+                    const finalnieWylosowanaCzesc = dostepneCzesciDoLosowania[typCzesci].splice(indexWOryginalnejPuli, 1)[0];
+                    return finalnieWylosowanaCzesc;
+                } else {
+                    console.warn(`[LOSUJ_WARN] Nie znaleziono części z _uniqueDragId ${wylosowanaCzescZKopii._uniqueDragId} w oryginalnej puli ${typCzesci}. To nie powinno się zdarzyć.`);
+                    return null; // Lub spróbuj wylosować ponownie, ale to może prowadzić do pętli
+                }
+            }
+            console.log(`[LOSUJ_INFO] Brak części typu ${typCzesci} po filtracji lub pula pusta.`);
+            return null;
         };
 
         if (wybranaSeria === 'bx_ux') {
             wylosowanyZestawCzesci.blade = losujCzescZPulli('blade');
-            wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
+
+            if (wylosowanyZestawCzesci.blade && String(wylosowanyZestawCzesci.blade.id) === ID_CLOCK_MIRAGE) {
+                wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet', czesc =>
+                    typeof czesc.nazwa === 'string' && (czesc.nazwa.match(/-\d*5$/) || czesc.nazwa.match(/^M-\d*5$/))
+                );
+                if (!wylosowanyZestawCzesci.rachet) {
+                     console.warn(`Nie udało się wylosować kompatybilnego Ratchet typu "-X5" dla Clock Mirage. Zestaw #${i+1} może być niekompletny.`);
+                     czyZestawKompletny = false; // Traktujemy jako niekompletny
+                }
+            } else if (wylosowanyZestawCzesci.blade) { // Jeśli to inny Blade
+                wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
+            } else { // Nie udało się wylosować Blade'a
+                czyZestawKompletny = false;
+            }
+
             if (wylosowanyZestawCzesci.rachet) {
                 if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
-                    wylosowanoSpecjalnyRatchet = true; 
-                    wylosowanyZestawCzesci.bit = null; // Bit jest zintegrowany
+                    wylosowanoSpecjalnyRatchet = true;
+                    wylosowanyZestawCzesci.bit = null;
                 } else {
                     wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
                 }
-            } else { // Nie udało się wylosować Ratcheta
-                wylosowanyZestawCzesci.bit = null; 
+            } else if (czyZestawKompletny) { // Jeśli zestaw był kompletny do tego momentu, a nie wylosowano ratcheta
                 czyZestawKompletny = false;
+                wylosowanyZestawCzesci.bit = null;
             }
-            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet /* Jeśli nie turbo i nie ma bita, a jest ratchet*/ )) {
+
+            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) {
                 czyZestawKompletny = false;
             }
         } else if (wybranaSeria === 'cx') {
@@ -1461,10 +1499,9 @@ function LOSUJ() {
         }
 
         if (czyZestawKompletny) {
-            // Usuwamy _uniqueDragId przed przekazaniem do obliczeń i zapisu
             const czesciDoStatystyk = {};
-            for(const key in wylosowanyZestawCzesci){
-                if(wylosowanyZestawCzesci[key]){
+            for (const key in wylosowanyZestawCzesci) {
+                if (wylosowanyZestawCzesci[key]) {
                     const { _uniqueDragId, ...resztaCzesci } = wylosowanyZestawCzesci[key];
                     czesciDoStatystyk[key] = resztaCzesci;
                 } else {
@@ -1480,8 +1517,7 @@ function LOSUJ() {
             const tempDiv = document.createElement('div'); tempDiv.innerHTML = kartaHTML.trim();
             wylosowaneZestawyFragment.appendChild(tempDiv.firstChild);
         } else {
-            showNotification(`Nie udało się wylosować kompletu dla zestawu #${i + 1} z powodu braku części.`, 3000, 'warning');
-            // Nie przerywamy pętli, próbujemy wylosować pozostałe
+            showNotification(`Nie udało się wylosować kompletu dla zestawu #${i + 1} (możliwy brak kompatybilnych części lub ogólny brak).`, 3500, 'warning');
         }
     }
 
@@ -1490,8 +1526,8 @@ function LOSUJ() {
         showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów)!`, 2500, 'success');
         const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
         if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'block';
-    } else if (iloscZestawowDoWylosowania > 0) { // Jeśli próbowaliśmy coś wylosować, ale nic się nie udało
-        wynikiDivGenerator.innerHTML = '<div class="card"><p>Nie udało się wylosować żadnego kompletnego zestawu. Sprawdź dostępność części w magazynie.</p></div>';
+    } else if (iloscZestawowDoWylosowania > 0) {
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Nie udało się wylosować żadnego kompletnego zestawu. Sprawdź dostępność i kompatybilność części w magazynie.</p></div>';
         if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
         const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
         if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
@@ -2019,16 +2055,14 @@ function handleDrop(event) {
 
     const dropZone = event.currentTarget;
     const setArrayIndex = parseInt(dropZone.dataset.setIndex);
-    const slotType = dropZone.dataset.slotType;
-    
-    // Sprawdzenie, czy slot nie jest wyłączony (np. slot Bit przy Turbo Ratchet)
+    const slotType = dropZone.dataset.slotType; // np. 'blade', 'rachet'
+
     if (dropZone.classList.contains('slot-disabled-integrated')) {
         showNotification("Ten slot jest nieaktywny z powodu zintegrowanej części.", 3000, 'warning');
         draggedItemData = null;
         return;
     }
 
-    // ... (reszta walidacji: isNaN(setArrayIndex), currentDeckBeingBuilt.sets, isValidPlacement, isAlreadyInDeck - bez zmian) ...
     if (isNaN(setArrayIndex) || !currentDeckBeingBuilt.sets[setArrayIndex]) {
         showNotification("Błąd: Nieprawidłowy cel upuszczenia.", 3000, 'error');
         draggedItemData = null;
@@ -2064,12 +2098,12 @@ function handleDrop(event) {
     }
 
     let isAlreadyInDeck = false;
-    const magazynForName = getMagazyn(); 
+    const magazyn = getMagazyn(); // Potrzebne do sprawdzenia nazw części
     currentDeckBeingBuilt.sets.forEach((s, currentSetIdx) => {
         if (!s) return;
         Object.keys(s).forEach(key => {
             if (key.endsWith('Id') && s[key] === draggedItemData.id) {
-                if (!(currentSetIdx === setArrayIndex && key === getPartIdKeyForSlot(slotType, expectedSeria)) ) {
+                if (!(currentSetIdx === setArrayIndex && key === getPartIdKeyForSlot(slotType, expectedSeria))) {
                      isAlreadyInDeck = true;
                 }
             }
@@ -2077,12 +2111,45 @@ function handleDrop(event) {
     });
 
     if (isAlreadyInDeck) {
-        const partDetails = magazynForName.find(p => p.id === draggedItemData.id);
+        const partDetails = magazyn.find(p => p.id === draggedItemData.id);
         showNotification(`Część "${partDetails ? partDetails.nazwa : draggedItemData.id}" jest już użyta w tym decku. Wybierz inną.`, 3500, 'warning');
         draggedItemData = null;
         return;
     }
-    // Koniec walidacji
+
+    // === NOWA WALIDACJA KOMPATYBILNOŚCI CLOCK MIRAGE ===
+    if (expectedSeria === 'bx_ux') {
+        let przyszlyBladeIdWObecnymZestawie = targetSet.bladeId;
+        let przyszlyRatchetIdWObecnymZestawie = targetSet.ratchetId;
+
+        if (slotType === 'blade') {
+            przyszlyBladeIdWObecnymZestawie = draggedItemData.id;
+        } else if (slotType === 'rachet') {
+            przyszlyRatchetIdWObecnymZestawie = draggedItemData.id;
+        }
+
+        // 1. Sprawdź, czy Clock Mirage jest łączony z niekompatybilnym Ratchetem
+        if (przyszlyBladeIdWObecnymZestawie === ID_CLOCK_MIRAGE && przyszlyRatchetIdWObecnymZestawie) {
+            const ratchetDetails = magazyn.find(p => p.id === przyszlyRatchetIdWObecnymZestawie && p.typ === 'rachet');
+            if (ratchetDetails && !(typeof ratchetDetails.nazwa === 'string' &&
+                                   (ratchetDetails.nazwa.match(/-\d*5$/) || ratchetDetails.nazwa.match(/^M-\d*5$/)))) {
+                showNotification(`Clock Mirage (Blade) jest kompatybilny tylko z Ratchetami typu "-X5" (np. 3-85, M-85). "${ratchetDetails.nazwa}" nie pasuje.`, 5000, 'warning');
+                draggedItemData = null;
+                return;
+            }
+        }
+        // 2. Sprawdź, czy niekompatybilny Ratchet jest łączony z już istniejącym Clock Mirage
+        else if (targetSet.bladeId === ID_CLOCK_MIRAGE && slotType === 'rachet') { // Jeśli w slocie Blade jest CM, a upuszczamy Ratchet
+             const upuszczanyRatchetDetails = magazyn.find(p => p.id === draggedItemData.id && p.typ === 'rachet');
+             if (upuszczanyRatchetDetails && !(typeof upuszczanyRatchetDetails.nazwa === 'string' &&
+                                   (upuszczanyRatchetDetails.nazwa.match(/-\d*5$/) || upuszczanyRatchetDetails.nazwa.match(/^M-\d*5$/)) ) ) {
+                showNotification(`Clock Mirage (w slocie Blade) wymaga Ratcheta typu "-X5". "${upuszczanyRatchetDetails.nazwa}" nie pasuje.`, 5000, 'warning');
+                draggedItemData = null;
+                return;
+            }
+        }
+    }
+    // === KONIEC NOWEJ WALIDACJI ===
 
     const partIdKey = getPartIdKeyForSlot(slotType, expectedSeria);
     if (partIdKey) {
@@ -2093,15 +2160,10 @@ function handleDrop(event) {
         return;
     }
 
-    // Jeśli upuszczono Ratchet, odświeżamy cały aktywny zestaw,
-    // aby poprawnie obsłużyć logikę włączania/wyłączania slotu Bit i czyszczenia bitId.
-    // renderActiveDeckSetSlots samo zaktualizuje UI i wywoła updateDeckStatsForSetInBuilder.
-    if (slotType === 'rachet') {
-        console.log("Upuszczono Ratchet. Odświeżam sloty aktywnego zestawu.");
-        renderActiveDeckSetSlots(); 
+    if (slotType === 'rachet' || slotType === 'blade') {
+        console.log("Upuszczono Ratchet lub Blade. Odświeżam sloty aktywnego zestawu.");
+        renderActiveDeckSetSlots(); // To odświeży UI i wywoła updateDeckStatsForSetInBuilder
     } else {
-        // Dla innych typów slotów (Blade, Bit, CX części) tylko aktualizujemy UI tego konkretnego slotu
-        // i przeliczamy statystyki.
         let droppedPartImageHTML;
         if (draggedItemData.img && draggedItemData.img.trim() !== "") {
             droppedPartImageHTML = `<img src="${draggedItemData.img}" alt="${draggedItemData.nazwa}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px;">`;
@@ -2118,10 +2180,9 @@ function handleDrop(event) {
         dropZone.classList.add('filled');
         dropZone.dataset.currentPartId = draggedItemData.id;
         dropZone.querySelector('.remove-part-btn').addEventListener('click', () => removePartFromSlot(setArrayIndex, slotType));
-        
-        updateDeckStatsForSetInBuilder(setArrayIndex + 1); // displaySetNumber
+        updateDeckStatsForSetInBuilder(setArrayIndex + 1);
     }
-    
+
     console.log(`Zaktualizowano zestaw ${setArrayIndex + 1} po dropie:`, JSON.parse(JSON.stringify(targetSet)));
     draggedItemData = null;
 }
@@ -2231,13 +2292,12 @@ function saveCurrentDeck() {
     const deckNameInput = document.getElementById('deckName');
     const deckName = deckNameInput ? deckNameInput.value.trim() : (currentDeckBeingBuilt.name || '');
 
-    if (!deckName && !currentEditingDeckId) { // Tylko jeśli to nowy deck, wymagaj nazwy
+    if (!deckName && !currentEditingDeckId) {
         showNotification("Wpisz nazwę dla nowego decku.", 3000, 'warning');
         deckNameInput?.focus();
         return;
     }
-    
-    // Filtrujemy tylko te zestawy, które mają przynajmniej jedną część wybraną
+
     const nonEmptySets = currentDeckBeingBuilt.sets.filter(set => {
         if (!set) return false;
         return set.bladeId || set.ratchetId || set.bitId || set.cx_lock_chipId || set.cx_main_bladeId || set.cx_assist_bladeId;
@@ -2247,14 +2307,29 @@ function saveCurrentDeck() {
         showNotification("Nie skonfigurowano żadnych części w żadnym zestawie.", 3000, 'warning');
         return;
     }
-    // Walidacja unikalności części w obrębie decku (już częściowo obsłużona w handleDrop, ale dla pewności)
+
+    const magazyn = getMagazyn(); // Potrzebne do sprawdzania nazw
+
+    // === DODATKOWA WALIDACJA KOMPATYBILNOŚCI CLOCK MIRAGE PRZED ZAPISEM ===
+    for (const set of nonEmptySets) { // Iteruj po nonEmptySets
+        const setIndexForMessage = currentDeckBeingBuilt.sets.indexOf(set); // Aby uzyskać prawidłowy indeks dla komunikatu
+        if (set.seria === 'bx_ux' && set.bladeId === ID_CLOCK_MIRAGE && set.ratchetId) {
+            const ratchetDetails = magazyn.find(p => p.id === set.ratchetId && p.typ === 'rachet');
+            if (ratchetDetails && !(typeof ratchetDetails.nazwa === 'string' &&
+                                   (ratchetDetails.nazwa.match(/-\d*5$/) || ratchetDetails.nazwa.match(/^M-\d*5$/)))) {
+                showNotification(`Błąd w Zestawie ${setIndexForMessage + 1}: Clock Mirage jest połączony z niekompatybilnym Ratchetem "${ratchetDetails.nazwa}". Popraw konfigurację przed zapisem.`, 6000, 'error');
+                return; // Przerwij zapis
+            }
+        }
+    }
+    // === KONIEC DODATKOWEJ WALIDACJI ===
+
     const allPartIdsInDeck = new Set();
     let duplicateFound = false;
     let duplicatePartName = "";
-    const magazyn = getMagazyn();
 
     for (const set of nonEmptySets) {
-        const partIdsInSet = [set.bladeId, set.ratchetId, set.bitId, set.cx_lock_chipId, set.cx_main_bladeId, set.cx_assist_bladeId].filter(id => id !== null);
+        const partIdsInSet = [set.bladeId, set.ratchetId, set.bitId, set.cx_lock_chipId, set.cx_main_bladeId, set.cx_assist_bladeId].filter(id => id !== null && id !== undefined && String(id).trim() !== "");
         for (const partId of partIdsInSet) {
             if (allPartIdsInDeck.has(partId)) {
                 duplicateFound = true;
@@ -2272,19 +2347,23 @@ function saveCurrentDeck() {
         return;
     }
 
-
     let savedDecks = getSavedDecks();
     let wiadomosc = '';
     const finalDeckName = deckName || (currentEditingDeckId ? savedDecks.find(d => d.id === currentEditingDeckId)?.name : `Deck ${new Date().toLocaleTimeString('pl-PL')}`);
 
     const deckToSave = {
-        id: currentEditingDeckId || currentDeckBeingBuilt.id || `deck_${Date.now()}_${Math.random().toString(36).substring(2,7)}`, // Użyj ID z currentDeck, jeśli istnieje
+        id: currentEditingDeckId || currentDeckBeingBuilt.id || `deck_${Date.now()}_${Math.random().toString(36).substring(2,7)}`,
         name: finalDeckName,
-        sets: nonEmptySets, // Zapisujemy tylko niepuste zestawy
+        sets: nonEmptySets.map(s => { // Upewnijmy się, że statystyki są aktualne w zapisywanym decku
+            const { statystykiObliczone, ...resztaZestawu } = s; // Usuń stare, jeśli były
+            return {
+                ...resztaZestawu,
+                statystykiObliczone: updateDeckStatsForSetInBuilder(currentDeckBeingBuilt.sets.indexOf(s) + 1) // Przelicz i zapisz świeże
+            };
+        }),
         timestamp: currentEditingDeckId ? (savedDecks.find(d => d.id === currentEditingDeckId)?.timestamp || Date.now()) : Date.now(),
         lastModified: Date.now()
     };
-
 
     if (currentEditingDeckId) {
         const deckIndex = savedDecks.findIndex(d => d.id === currentEditingDeckId);
@@ -2292,21 +2371,18 @@ function saveCurrentDeck() {
             savedDecks[deckIndex] = deckToSave;
             wiadomosc = `Deck "${finalDeckName}" zaktualizowany!`;
         } else {
-            // To nie powinno się zdarzyć, jeśli currentEditingDeckId jest poprawnie zarządzane
-            savedDecks.push(deckToSave); // Dodaj jako nowy, jeśli jakimś cudem nie znaleziono
+            savedDecks.push(deckToSave);
             wiadomosc = `Deck "${finalDeckName}" zapisany (jako nowy, błąd edycji)!`;
-            currentEditingDeckId = null; // Zresetuj, bo zapisano jako nowy
+            currentEditingDeckId = null;
         }
     } else {
         savedDecks.push(deckToSave);
         wiadomosc = `Deck "${finalDeckName}" zapisany!`;
     }
-    
+
     setSavedDecks(savedDecks);
     showNotification(wiadomosc, 3000, 'success');
-
-    // Reset buildera do stanu początkowego po zapisie
-    clearCurrentDeckForBuilder(); // To także zresetuje currentEditingDeckId
+    clearCurrentDeckForBuilder();
 }
 
 
@@ -4058,8 +4134,13 @@ document.addEventListener('DOMContentLoaded', function() {
     "DASH": 10,
     "BURST_RES": 30,
     "integrujeBit": true
- }
+ },
+  {
+  "id": "206", "typ": "blade", "nazwa": "ClockMirage", "ilosc": 0, "img": "img/BladeClockMirage.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0}
+  
 ]
+
+
 
 
 </script>
