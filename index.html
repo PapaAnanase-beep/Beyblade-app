@@ -678,7 +678,7 @@ button, a, select, input, textarea { outline: none; }
     <div class="card info-panel">
         <h4>Co nowego / W planach:</h4>
         <ul class="info-list">
-            <li><strong>Aktualnie:</strong> Rozbudowa bazy części, aktualizacja brakujących danych.</li>
+            <li><strong>Aktualnie:</strong> Rozbudowa bazy części, aktualizacja brakujących statystyk.</li>
             <li><strong>W planach:</strong> Optymalizacja obecnych oraz dodawanie nowych funkcji.</li>
             <li style="margin-top: 10px;"><em>Masz sugestie? Daj znać!</em></li>
         </ul>
@@ -687,6 +687,7 @@ button, a, select, input, textarea { outline: none; }
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
+		<li><strong>v2.1.3:</strong> Dodano część brakujących statystyk</li>
 		<li><strong>v2.1.2:</strong> Dodano Patch Note</li>
 		<li><strong>v2.1.1:</strong> Dodano <em>ClockMirage</em> wraz z zasadami dopasowania do niego</li>
         <li><strong>v2.1.0:</strong> Nowa Strona główna Info</li>
@@ -3377,7 +3378,7 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "30", "typ": "blade", "nazwa": "RhinoHorn", "ilosc": 0, "img": "img/BladeRhinoHorn.webp", "ATK": 20, "DEF": 50, "STM": 30, "waga": 32.7},
   {
-  "id": "31", "typ": "blade", "nazwa": "SamuraiCalibur", "ilosc": 0, "img": "img/BladeSamuraiCalibur.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga":36},
+  "id": "31", "typ": "blade", "nazwa": "SamuraiCalibur", "ilosc": 0, "img": "img/BladeSamuraiCalibur.webp", "ATK": 40, "DEF": 30, "STM": 30, "waga":36},
   {
   "id": "32", "typ": "blade", "nazwa": "SharkEdge", "ilosc": 0, "img": "img/BladeSharkEdge.webp", "ATK": 60, "DEF": 25, "STM": 15, "waga": 34.5},
   {
@@ -3459,7 +3460,7 @@ document.addEventListener('DOMContentLoaded', function() {
    {
   "id": "66", "typ": "blade", "nazwa": "T.Rex", "ilosc": 0, "img": "img/T._Rex_1-80GB.webp", "ATK": 65, "DEF": 30, "STM": 5, "waga": 37},
    {
-  "id": "67", "typ": "blade", "nazwa": "Captain America", "ilosc": 0, "img": "img/CaptainAmerica.png", "ATK": 0, "DEF": 0, "STM": 0, "waga": 32.3},
+  "id": "67", "typ": "blade", "nazwa": "Captain America", "ilosc": 0, "img": "img/CaptainAmerica.png", "ATK": 55, "DEF": 28, "STM": 17, "waga": 32.3},
    {
   "id": "68", "typ": "blade", "nazwa": "Green Goblin", "ilosc": 0, "img": "img/Green_Goblin_9-80HT-removebg-preview.png", "ATK": 17, "DEF": 28, "STM": 55, "waga": 31.7},
    {
@@ -3475,23 +3476,23 @@ document.addEventListener('DOMContentLoaded', function() {
    {
   "id": "74", "typ": "blade", "nazwa": "Venom", "ilosc": 0, "img": "img/Venom_3-80N-removebg-preview.png", "ATK": 55, "DEF": 22, "STM": 23, "waga": 34.3},
    {
-  "id": "75", "typ": "blade", "nazwa": "Chewbacca", "ilosc": 0, "img": "img/Chewbacca_4-80LF-removebg-preview.png", "ATK": 0, "DEF": 0, "STM": 10, "waga": 31.8},
+  "id": "75", "typ": "blade", "nazwa": "Chewbacca", "ilosc": 0, "img": "img/Chewbacca_4-80LF-removebg-preview.png", "ATK": 22, "DEF": 23, "STM": 55, "waga": 31.8},
    {
   "id": "76", "typ": "blade", "nazwa": "Darth Vader", "ilosc": 0, "img": "img/Darth_Vader_4-60P-removebg-preview.png", "ATK": 28, "DEF": 60, "STM": 12, "waga": 30.7},
    {
-  "id": "77", "typ": "blade", "nazwa": "General Grievous", "ilosc": 0, "img": "img/General_Grievous_3-80HN-removebg-preview.png", "ATK": 0, "DEF": 0, "STM": 0, "waga": 31},
+  "id": "77", "typ": "blade", "nazwa": "General Grievous", "ilosc": 0, "img": "img/General_Grievous_3-80HN-removebg-preview.png", "ATK": 22, "DEF": 55, "STM": 28, "waga": 31},
    {
   "id": "78", "typ": "blade", "nazwa": "Luke Skywalker", "ilosc": 0, "img": "img/Luke_Skywalker_4-80B-removebg-preview.png", "ATK": 23, "DEF": 55, "STM": 22, "waga": 31.5},
    {
   "id": "79", "typ": "blade", "nazwa": "Moff Gideon", "ilosc": 0, "img": "img/Moff_Gideon_3-80N-removebg-preview.png", "ATK": 32, "DEF": 35, "STM": 33, "waga": 30.5},
    {
-  "id": "80", "typ": "blade", "nazwa": "Obi-Wan Kenobi", "ilosc": 0, "img": "img/Obi-Wan_Kenobi_4-60P-removebg-preview.png", "ATK": 0, "DEF": 0, "STM": 0, "waga": 30.6},
+  "id": "80", "typ": "blade", "nazwa": "Obi-Wan Kenobi", "ilosc": 0, "img": "img/Obi-Wan_Kenobi_4-60P-removebg-preview.png", "ATK": 23, "DEF": 60, "STM": 17, "waga": 30.6},
    {
-  "id": "81", "typ": "blade", "nazwa": "Stormtrooper", "ilosc": 0, "img": "img/Stormtrooper_5-70B-removebg-preview.png", "ATK": 0, "DEF": 0, "STM": 0, "waga": 33.6},
+  "id": "81", "typ": "blade", "nazwa": "Stormtrooper", "ilosc": 0, "img": "img/Stormtrooper_5-70B-removebg-preview.png", "ATK": 18, "DEF": 50, "STM": 32, "waga": 33.6},
   {
   "id": "82", "typ": "blade", "nazwa": "Mandalorian", "ilosc": 0, "img": "img/The_Mandalorian_3-60F-removebg-preview.png", "ATK": 30.3, "DEF": 40, "STM": 43, "waga": 17},
     {
-  "id": "83", "typ": "blade", "nazwa": "Bumblebee", "ilosc": 0, "img": "img/Bumblebee_3-60GP-removebg-preview.png", "ATK": 21, "DEF": 55, "STM": 24, "waga": 0},
+  "id": "83", "typ": "blade", "nazwa": "Bumblebee", "ilosc": 0, "img": "img/Bumblebee_3-60GP-removebg-preview.png", "ATK": 21, "DEF": 55, "STM": 24, "waga": 34.8},
    {
   "id": "84", "typ": "blade", "nazwa": "Megatron", "ilosc": 0, "img": "img/Megatron_4-80B-removebg-preview.png", "ATK": 27, "DEF": 35, "STM": 38, "waga": 31.1},
  {
@@ -3499,7 +3500,7 @@ document.addEventListener('DOMContentLoaded', function() {
      {
   "id": "86", "typ": "blade", "nazwa": "Optimus Prime", "ilosc": 0, "img": "img/Optimus_Prime_4-60P-removebg-preview.png", "ATK": 22, "DEF": 55, "STM": 23, "waga": 33.3},
    {
-  "id": "87", "typ": "blade", "nazwa": "Shockwave", "ilosc": 0, "img": "img/Shockwave_5-80O-removebg-preview.png", "ATK": 32, "DEF": 18, "STM": 50, "waga": 0},
+  "id": "87", "typ": "blade", "nazwa": "Shockwave", "ilosc": 0, "img": "img/Shockwave_5-80O-removebg-preview.png", "ATK": 32, "DEF": 18, "STM": 50, "waga": 34.7},
    {
   "id": "88", "typ": "blade", "nazwa": "Starscream", "ilosc": 0, "img": "img/Starscream_3-80N-removebg-preview.png", "ATK": 18, "DEF": 27, "STM": 55, "waga": 29.5},
   
@@ -3524,7 +3525,7 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "105", "typ": "rachet", "nazwa": "5-80", "ilosc": 0, "img": "img/Ratchet5-80.webp", "ATK": 12, "DEF": 8, "STM": 10, "waga": 7.3},
   {
-  "id": "106", "typ": "rachet", "nazwa": "6-70", "ilosc": 0, "img": "img/Ratchet6-70.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 7.3},
+  "id": "106", "typ": "rachet", "nazwa": "6-70", "ilosc": 0, "img": "img/Ratchet6-70.webp", "ATK": 14, "DEF": 7, "STM": 9, "waga": 7.3},
   {
   "id": "107", "typ": "rachet", "nazwa": "7-80", "ilosc": 0, "img": "img/Ratchet7-80.webp", "ATK": 7, "DEF": 14, "STM": 9, "waga": 7.8},
   {
@@ -3548,7 +3549,7 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "117", "typ": "rachet", "nazwa": "3-85", "ilosc": 0, "img": "img/Ratchet3-85.webp", "ATK": 5, "DEF": 15, "STM": 10, "waga": 4.7},
   {
-  "id": "118", "typ": "rachet", "nazwa": "4-50", "ilosc": 0, "img": "img/Ratchet4-50.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 5.9},
+  "id": "118", "typ": "rachet", "nazwa": "4-50", "ilosc": 0, "img": "img/Ratchet4-50.webp", "ATK": 12, "DEF": 13, "STM": 5, "waga": 5.9},
   {
   "id": "119", "typ": "rachet", "nazwa": "5-70", "ilosc": 0, "img": "img/Ratchet5-70.webp", "ATK": 12, "DEF": 8, "STM": 10, "waga": 6.7},
   {
@@ -3588,7 +3589,7 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "137", "typ": "bit", "nazwa": "Low Flat", "ilosc": 0, "img": "img/BitLowFlat.webp", "ATK": 45, "DEF": 5, "STM": 10, "waga": 2.1, "DASH": 40, "BURST_RES": 80},
   {
-  "id": "138", "typ": "bit", "nazwa": "Merge", "ilosc": 0, "img": "img/BitMerge.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 3.4, "DASH": 0, "BURST_RES": 0},
+  "id": "138", "typ": "bit", "nazwa": "Merge", "ilosc": 0, "img": "img/BitMerge.webp", "ATK": 50, "DEF": 20, "STM": 10, "waga": 3.4, "DASH": 20, "BURST_RES": 80},
   {
   "id": "139", "typ": "bit", "nazwa": "Needle", "ilosc": 0, "img": "img/BitNeedle.webp", "ATK": 10, "DEF": 50, "STM": 30, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
   {
@@ -3604,7 +3605,7 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "145", "typ": "bit", "nazwa": "Taper", "ilosc": 0, "img": "img/BitTaper.webp", "ATK": 35, "DEF": 20, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "146", "typ": "bit", "nazwa": "Trans Point", "ilosc": 0, "img": "img/BitTransPoint.webp", "ATK": 35, "DEF": 25, "STM": 25, "waga": 0, "DASH": 15, "BURST_RES": 80},
+  "id": "146", "typ": "bit", "nazwa": "Trans Point", "ilosc": 0, "img": "img/BitTransPoint.webp", "ATK": 35, "DEF": 25, "STM": 25, "waga": 2.4, "DASH": 15, "BURST_RES": 80},
   {
   "id": "147", "typ": "bit", "nazwa": "Unite", "ilosc": 0, "img": "img/BitUnite.webp", "ATK": 25, "DEF": 25, "STM": 30, "waga": 2.1, "DASH": 25, "BURST_RES": 80},
   {
@@ -4003,12 +4004,12 @@ document.addEventListener('DOMContentLoaded', function() {
     "nazwa": "Kick",
     "ilosc": 0,
     "img": "img/BitKick.webp",
-    "ATK": 0,
-    "DEF": 0,
-    "STM": 0,
+    "ATK": 35,
+    "DEF": 25,
+    "STM": 15,
     "waga": 2.2,
-    "DASH": 0,
-    "BURST_RES": 0
+    "DASH": 25,
+    "BURST_RES": 80
   },
   {
     "id": "190",
@@ -4019,7 +4020,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "ATK": 5,
     "DEF": 25,
     "STM": 55,
-    "waga": 0,
+    "waga": 1.85,
     "DASH": 15,
     "BURST_RES": 30
   },
@@ -4029,12 +4030,12 @@ document.addEventListener('DOMContentLoaded', function() {
     "nazwa": "Trans Kick",
     "ilosc": 0,
     "img": "img/BitTransKick.webp",
-    "ATK": 0,
-    "DEF": 0,
-    "STM": 0,
-    "waga": 0,
-    "DASH": 0,
-    "BURST_RES": 0
+    "ATK": 35,
+    "DEF": 30,
+    "STM": 20,
+    "waga": 2.3,
+    "DASH": 15,
+    "BURST_RES": 80
   },
   {
     "id": "192",
@@ -4176,8 +4177,8 @@ document.addEventListener('DOMContentLoaded', function() {
     "DEF": 17,
     "STM": 3,
     "waga": 3.1,
-    "DASH": 0,
-    "BURST_RES": 0
+    "DASH": 20,
+    "BURST_RES": 80
   },
   {
     "id": "202",
@@ -4185,12 +4186,12 @@ document.addEventListener('DOMContentLoaded', function() {
     "nazwa": "Under Flat",
     "ilosc": 0,
     "img": "img/BitUnderFlat.webp",
-    "ATK": 0,
-    "DEF": 0,
-    "STM": 0,
+    "ATK": 55,
+    "DEF": 5,
+    "STM": 5,
     "waga": 2.0,
-    "DASH": 0,
-    "BURST_RES": 0
+    "DASH": 35,
+    "BURST_RES": 80
   },
   {
     "id": "203",
