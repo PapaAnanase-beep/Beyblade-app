@@ -539,7 +539,81 @@ button, a, select, input, textarea { outline: none; }
         animation: zoomInFinishImage 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
+/* --- OSTATECZNE STYLE DLA PANELI INFO (STAŁA WYSOKOŚĆ I SCROLL) --- */
 
+.info-panels-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dwie równe kolumny */
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.info-panel {
+    margin: 0; /* Reset marginesu z domyślnej klasy .card */
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-panel h4 {
+    text-align: center;
+    flex-shrink: 0; /* Nagłówek nie kurczy się */
+}
+
+.info-list {
+    /* KLUCZOWE USTAWIENIA: Ograniczenie wysokości i scroll */
+    max-height: calc(1.6em * 6 + 10px * 5); /* Oblicza wysokość dla ~6 linii */
+    overflow-y: auto; /* Pokaż pasek przewijania, gdy treść jest za długa */
+    
+    /* Reszta stylów dla wyglądu */
+    list-style-position: inside;
+    margin: 10px 0 0 20px;
+    padding: 0 10px 0 0; /* Padding po prawej, by tekst nie dotykał paska przewijania */
+    line-height: 1.6;
+    font-size: 0.9em;
+}
+
+.info-list li {
+    margin-bottom: 10px;
+}
+
+/* Responsywność dla mniejszych ekranów */
+@media (max-width: 768px) {
+    .info-panels-container {
+        grid-template-columns: 1fr; /* Przełącz na jedną kolumnę */
+    }
+}
+/*
+ *  NOWE STYLE - Niestandardowy wygląd paska przewijania
+ */
+
+/* --- Dla przeglądarek opartych na WebKit (Chrome, Safari, Edge, Opera) --- */
+::-webkit-scrollbar {
+    width: 10px; /* Szerokość paska przewijania */
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2); /* Kolor tła "toru" paska */
+    border-radius: 10px; /* Zaokrąglenie toru */
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(138, 43, 226, 0.5); /* Główny kolor paska (fioletowy z Twojego motywu) */
+    border-radius: 10px; /* Zaokrąglenie samego paska */
+    border: 2px solid transparent; /* Tworzy wewnętrzny odstęp */
+    background-clip: content-box; /* Sprawia, że border jest przezroczysty */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(138, 43, 226, 0.8); /* Jaśniejszy kolor paska po najechaniu */
+}
+
+/* --- Dla przeglądarki Firefox --- */
+/* Firefox używa nowszej, standardowej specyfikacji */
+* {
+    scrollbar-width: thin; /* Można użyć 'auto', 'thin' lub 'none' */
+    scrollbar-color: rgba(138, 43, 226, 0.7) rgba(0, 0, 0, 0.2); /* Kolor paska i kolor tła toru */
+}
 
 
 </style>
@@ -599,14 +673,37 @@ button, a, select, input, textarea { outline: none; }
                 Miłej zabawy i udanych pojedynków!
             </p>
         </div>
-        <div class="card" style="margin-top: 30px;">
-            <h4>Co nowego / Planowane funkcje:</h4>
-            <ul style="text-align: left; margin-left: 20px; line-height: 1.6; font-size: 0.9em;">
-                <li><em>Aktualnie:</em> Dopracowywanie interfejsu i stabilności.</li>
-                <li><em>W planach:</em> Rozbudowa bazy części</li>
-                <li>Masz sugestie? Daj znać!</li>
-            </ul>
-        </div>
+    <div class="info-panels-container">
+
+    <div class="card info-panel">
+        <h4>Co nowego / W planach:</h4>
+        <ul class="info-list">
+            <li><strong>Aktualnie:</strong> Rozbudowa bazy części, aktualizacja brakujących danych.</li>
+            <li><strong>W planach:</strong> Optymalizacja obecnych oraz dodawanie nowych funkcji.</li>
+            <li style="margin-top: 10px;"><em>Masz sugestie? Daj znać!</em></li>
+        </ul>
+    </div>
+
+    <div class="card info-panel">
+        <h4>Patch Notes:</h4>
+        <ul class="info-list">
+		<li><strong>v2.1.2:</strong> Dodano Patch Note</li>
+		<li><strong>v2.1.1:</strong> Dodano <em>ClockMirage</em> wraz z zasadami dopasowania do niego</li>
+        <li><strong>v2.1.0:</strong> Nowa Strona główna Info</li>
+		<li><strong>v2.0.3:</strong> Poprawki Graficnze licznika punktów</li>
+		<li><strong>v2.0.2:</strong> Dodane Automatyczny update Bazy Dysków</li>
+		<li><strong>v2.0.1:</strong> Bugfixy, zwiększony cap losowań</li>
+        <li><strong>v2.0.0:</strong> Deck Builder 2.0 Zmiany graficzne</li>
+		<li><strong>v1.2.0:</strong> Dodano licznik punków</li>
+        <li><strong>v1.1.2:</strong> Poprawa deck buildera</li>
+		<li><strong>v1.1.1:</strong> Poprawa zasad dla <em>Turbo</em></li>
+        <li><strong>v1.1.0:</strong> Dodano import export dla decków i magazynu</li>
+        <li><strong>v1.0.1:</strong> Dodano deck builder oraz status beta części w magazynie oraz obsługe cx</li>
+        <li><strong>v1.0.0:</strong> Dodano generator zestawów losowych wraz z ręcznym dodawaniem części</li>
+        </ul>
+    </div>
+
+</div>
     </section>
 
     <section id="licznikPunktow" class="page">
