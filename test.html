@@ -244,9 +244,7 @@ button, a, select, input, textarea { outline: none; }
     gap: 15px;
 }
 .saved-deck-card { text-align: left; }
-.deck-card-set-preview { 
-    margin-bottom: 10px; padding-bottom: 10px; 
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+
 }
 .deck-card-set-preview:last-child {
     border-bottom: none;
@@ -636,6 +634,78 @@ button, a, select, input, textarea { outline: none; }
     font-weight: normal;
 }
 
+/* --- Style dla nowych ikon w karcie zapisanego decku --- */
+.set-header-container {
+    display: flex;
+    justify-content: space-between;
+    
+align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.set-header-container strong {
+    font-size: 1.1em;
+    color: 
+#e0e0e0;
+}
+
+.set-icons-container {
+    display: flex;
+    gap: 8px;
+}
+
+.set-icons-container .set-icon {
+    height: 28px;
+    width: 28px;
+    object-fit: contain;
+    background-color: rgba
+(0,0,0,0.2);
+    border-radius: 5px;
+    padding: 2px;
+}
+/* --- NOWE STYLE DLA TŁA ZESTAWU W GALERII --- */
+
+.deck-card-set-preview {
+    position: relative; /* Kluczowe, aby pozycjonować tło względem tego kontenera */
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.15); /* Lekkie tło dla całego bloku */
+    padding: 15px;
+    margin-bottom: 15px;
+    overflow: hidden; /* Zapobiega "wylewaniu się" tła poza zaokrąglone rogi */
+    border-bottom: none; /* Usuwamy stary border, jeśli jeszcze gdzieś jest */
+}
+
+.deck-card-set-preview:last-child {
+    margin-bottom: 0; /* Usuwamy margines dla ostatniego zestawu */
+}
+
+/* Pseudoelement, który będzie naszym tłem */
+.deck-card-set-preview:before {
+    content: ''; /* Musi być, aby pseudoelement się wyświetlił */
+    position: absolute; /* Pozycjonowanie względem .deck-card-set-preview */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Wycentrowanie obrazka */
+    width: 180px;  /* Rozmiar symbolu tła */
+    height: 180px; /* Rozmiar symbolu tła */
+    
+    background-image: var(--bg-symbol-url); /* Używamy zmiennej CSS, którą ustawimy w JS */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+
+    opacity: 0.15; /* Bardzo niska przezroczystość, aby nie przeszkadzać */
+    z-index: 0; /* Umieszczamy tło pod treścią */
+}
+
+/* Kontener na treść, aby była ona NAD tłem */
+.set-content-wrapper {
+    position: relative; /* Ustawiamy z-index, aby treść była na wierzchu */
+    z-index: 1;
+}
+
 
 </style>
 </head>
@@ -708,7 +778,8 @@ button, a, select, input, textarea { outline: none; }
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
-		<li><strong>v2.2.0:</strong> dodanie systemu trybów na elementach np.<em>Eclipse</em> i <em>Dual</em> </li>
+		<li><strong>v2.2.1:</strong> Możliwość zapisu decku jako png</li>
+		<li><strong>v2.2.0:</strong> Dodanie systemu trybów na elementach np.<em>Eclipse</em> i <em>Dual</em> </li>
 		<li><strong>v2.1.4:</strong> Rozdzielenie <em>Eclipse</em> na upper i smash mode </li>
 		<li><strong>v2.1.3:</strong> Dodano część brakujących statystyk</li>
 		<li><strong>v2.1.2:</strong> Dodano Patch Note</li>
@@ -801,10 +872,14 @@ button, a, select, input, textarea { outline: none; }
             <div style="flex-grow: 1; min-width: 200px;">
                 <label for="filterKategoria">Filtruj według kategorii:</label>
                 <select id="filterKategoria" onchange="wyswietlMagazyn()" aria-label="Filtr kategorii części">
-                    <option value="all">Wszystkie Kategorie</option>
-                    <optgroup label="Seria BX / UX">
-                        <option value="blade">Blade (BX/UX)</option>
-                    </optgroup>
+    <option value="all">Wszystkie Kategorie</option>
+    <optgroup label="Seria BX">
+        <option value="blade">Blade (BX)</option>
+    </optgroup>
+    <optgroup label="Seria UX">
+        <option value="ux-blade">Blade (UX)</option>
+    </optgroup>
+  
                     <optgroup label="Seria CX">
                         <option value="cx-lock-chip">CX Lock Chip</option>
                         <option value="cx-main-blade">CX Main Blade</option>
@@ -846,7 +921,8 @@ button, a, select, input, textarea { outline: none; }
                 <div class="filter-parts-dnd" style="margin-bottom:15px;">
                     <label for="dndPartTypeFilter">Filtruj części:</label>
                     <select id="dndPartTypeFilter" onchange="renderAvailablePartsList()">
-                        <option value="blade">Blade (BX/UX)</option>
+                        <option value="blade">BX Blade</option>
+						<option value="ux-blade">UX Blade</option>
                         <option value="cx-lock-chip">CX Lock Chip</option>
                         <option value="cx-main-blade">CX Main Blade</option>
                         <option value="cx-assist-blade">CX Assist Blade</option>
@@ -1298,21 +1374,32 @@ function wyswietlMagazyn() {
         
         let statyString = '';
         let isBeta = false;
-        let buttonHTML = '';
         
+        // --- PRZYWRÓCONA LOGIKA: Sprawdzanie trybów i generowanie przycisku ---
+        let buttonHTML = '';
         const aktywnyIndex = czesc.aktywnyTrybIndex || 0;
         const aktywnyTryb = (czesc.maTryby && Array.isArray(czesc.tryby)) ? czesc.tryby[aktywnyIndex] : null;
 
+        if (czesc.maTryby && czesc.tryby && czesc.tryby.length > 1 && aktywnyTryb) {
+            buttonHTML = `
+                <div style="margin-top: 10px;">
+                    <button class="mode-switch-btn" onclick="przelaczTrybMagazynu('${czesc.id}')" title="Zmień tryb: ${aktywnyTryb.nazwaTrybu}">
+                        ${aktywnyTryb.nazwaTrybu} 🔄
+                    </button>
+                </div>
+            `;
+        }
+        // --- KONIEC PRZYWRÓCONEJ LOGIKI ---
+        
         const obrazekDoWyswietlenia = aktywnyTryb?.img || czesc.img;
         const nazwaDoWyswietlenia = aktywnyTryb ? `${czesc.nazwa} <span style="color:#a25ff0;">(${aktywnyTryb.nazwaTrybu})</span>` : czesc.nazwa;
         
-        // Pobieramy dane do statystyk z aktywnego trybu lub z głównego obiektu
         const daneStatystyk = aktywnyTryb || czesc;
         const maStat = (statName) => typeof daneStatystyk[statName] === 'number';
         const jestZeroLubBrak = (statName) => !maStat(statName) || daneStatystyk[statName] === 0;
 
-        // === LOGIKA STATYSTYK ZOSTAŁA UJEDNOLICONA ===
-        if (czesc.typ === 'blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
+        // Ta sekcja pozostaje bez zmian, jest poprawna
+        if (czesc.typ === 'blade' || czesc.typ === 'ux-blade' || czesc.typ === 'rachet' || czesc.typ === 'cx-main-blade' || czesc.typ === 'cx-assist-blade') {
             if (jestZeroLubBrak('ATK') || jestZeroLubBrak('DEF') || jestZeroLubBrak('STM') || jestZeroLubBrak('waga')) isBeta = true;
             statyString = `ATK:${maStat('ATK') ? daneStatystyk.ATK : 'N/A'}, DEF:${maStat('DEF') ? daneStatystyk.DEF : 'N/A'}, STM:${maStat('STM') ? daneStatystyk.STM : 'N/A'}, Waga:${maStat('waga') ? daneStatystyk.waga : 'N/A'}g`;
         } else if (czesc.typ === 'bit') {
@@ -1326,18 +1413,8 @@ function wyswietlMagazyn() {
             if (maStat('cx_lc_def_bonus')) statyString += `, DEF+:${daneStatystyk.cx_lc_def_bonus}`;
         }
         statyString = `<p style="font-size:0.85em; line-height:1.4;">${statyString}</p>`;
-
-        // Logika przycisku (bez zmian)
-        if (czesc.maTryby && czesc.tryby && czesc.tryby.length > 1 && aktywnyTryb) {
-            buttonHTML = `
-                <div style="margin-top: 10px;">
-                    <button class="mode-switch-btn" onclick="przelaczTrybMagazynu('${czesc.id}')" title="Zmień tryb: ${aktywnyTryb.nazwaTrybu}">
-                        ${aktywnyTryb.nazwaTrybu} 🔄
-                    </button>
-                </div>
-            `;
-        }
         
+        // --- Pozostała część generowania HTML pozostaje bez zmian ---
         const imgHTML = obrazekDoWyswietlenia ? `<img class="part-img" src="${obrazekDoWyswietlenia}" alt="${czesc.nazwa}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="part-img-placeholder" style="display:none;">Brak<br>obr.</div>` : `<div class="part-img-placeholder">Brak<br>obr.</div>`;
         const cardDiv = document.createElement('div');
         cardDiv.className = 'card';
@@ -1351,6 +1428,7 @@ function wyswietlMagazyn() {
                 <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', 1)" title="Zwiększ ilość ${czesc.nazwa}">+</button>
             </div>`;
         
+        // --- PRZYWRÓCONA LOGIKA: Dodajemy `buttonHTML` do finalnego HTML-a ---
         cardDiv.innerHTML = `${imgHTML}<h3>${nazwaDoWyswietlenia}${isBeta ? '<span class="beta-label">BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>${statyString}${buttonHTML}${quantityControlsHTML}`;
         lista.appendChild(cardDiv);
     });
@@ -1507,7 +1585,8 @@ function LOSUJ() {
         return;
     }
 
-    const dostepneCzesciDoLosowania = { blade: [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
+    // === ZMIANA TUTAJ: Dodano 'ux-blade' do obiektu ===
+    const dostepneCzesciDoLosowania = { blade: [], 'ux-blade': [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
     magazyn.forEach(czesc => {
         const ilosc = parseInt(czesc.ilosc) || 0;
         if (ilosc > 0 && dostepneCzesciDoLosowania.hasOwnProperty(czesc.typ)) {
@@ -1521,7 +1600,10 @@ function LOSUJ() {
     let komunikatBrakuCzesci = "Niewystarczająca ilość części w magazynie do wylosowania ";
     if (wybranaSeria === 'bx_ux') {
         komunikatBrakuCzesci += `${iloscZestawowDoWylosowania} zestawu/ów BX/UX:`;
-        if (dostepneCzesciDoLosowania.blade.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Blade,"; }
+        // === ZMIANA TUTAJ: Sprawdzamy sumę części blade i ux-blade ===
+        if ((dostepneCzesciDoLosowania.blade.length + dostepneCzesciDoLosowania['ux-blade'].length) < iloscZestawowDoWylosowania) {
+             czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Blade (BX/UX),";
+        }
         if (dostepneCzesciDoLosowania.rachet.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Ratchet,"; }
         let potrzebneBity = 0;
         let dostepneZwykleRatchety = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
@@ -1554,7 +1636,6 @@ function LOSUJ() {
         let czyZestawKompletny = true;
         let wylosowanoSpecjalnyRatchet = false;
 		
-		// --- POCZĄTEK NOWEJ LOGIKI ---
         const losujCzescZPulli = (typCzesci, filtrKompatybilnosci = null) => {
             let pulaFiltrwana = [...dostepneCzesciDoLosowania[typCzesci]];
             if (filtrKompatybilnosci) {
@@ -1569,35 +1650,42 @@ function LOSUJ() {
                 if (indexWOryginalnejPuli > -1) {
                     const finalnieWylosowanaCzesc = dostepneCzesciDoLosowania[typCzesci].splice(indexWOryginalnejPuli, 1)[0];
 					
-					// NOWY KROK: Obsługa trybów
 					if (finalnieWylosowanaCzesc.maTryby && Array.isArray(finalnieWylosowanaCzesc.tryby) && finalnieWylosowanaCzesc.tryby.length > 0) {
 						const wylosowanyTrybIndex = Math.floor(Math.random() * finalnieWylosowanaCzesc.tryby.length);
 						const wylosowanyTryb = finalnieWylosowanaCzesc.tryby[wylosowanyTrybIndex];
 						
-						// Tworzymy nowy obiekt części, który jest "spłaszczony" - zawiera dane z wylosowanego trybu
 						const czescZTrybem = { ...finalnieWylosowanaCzesc };
-						delete czescZTrybem.tryby; // Usuwamy tablicę trybów, bo już wybraliśmy jeden
+						delete czescZTrybem.tryby;
 						
-						// Nadpisujemy właściwości części bazowej właściwościami z trybu
 						Object.assign(czescZTrybem, wylosowanyTryb);
 						
-						// Zapisujemy, który tryb został wylosowany (przydatne przy zapisie)
 						czescZTrybem.aktywnyTrybIndex = wylosowanyTrybIndex;
 						czescZTrybem.nazwa = `${finalnieWylosowanaCzesc.nazwa} (${wylosowanyTryb.nazwaTrybu})`;
 
 						return czescZTrybem;
 					}
-                    return finalnieWylosowanaCzesc; // Zwróć część bez trybów
+                    return finalnieWylosowanaCzesc;
                 } else {
                     return null;
                 }
             }
             return null;
         };
-		// --- KONIEC NOWEJ LOGIKI ---
 
         if (wybranaSeria === 'bx_ux') {
-            wylosowanyZestawCzesci.blade = losujCzescZPulli('blade');
+            // === ZMIANA TUTAJ: Logika losowania z dwóch puli 'blade' i 'ux-blade' ===
+            const dostepneBX = dostepneCzesciDoLosowania.blade;
+            const dostepneUX = dostepneCzesciDoLosowania['ux-blade'];
+            let pulaDoLosowaniaBlade = [];
+            if (dostepneBX.length > 0) pulaDoLosowaniaBlade.push('blade');
+            if (dostepneUX.length > 0) pulaDoLosowaniaBlade.push('ux-blade');
+
+            if (pulaDoLosowaniaBlade.length > 0) {
+                const losowyTypBlade = pulaDoLosowaniaBlade[Math.floor(Math.random() * pulaDoLosowaniaBlade.length)];
+                wylosowanyZestawCzesci.blade = losujCzescZPulli(losowyTypBlade);
+            } else {
+                wylosowanyZestawCzesci.blade = null;
+            }
 
             if (wylosowanyZestawCzesci.blade && String(wylosowanyZestawCzesci.blade.id) === ID_CLOCK_MIRAGE) {
                 wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet', czesc => typeof czesc.nazwa === 'string' && (czesc.nazwa.match(/-\d*5$/) || czesc.nazwa.match(/^M-\d*5$/)));
@@ -1953,12 +2041,15 @@ function renderAvailablePartsList() {
         return;
     }
 
+    // --- KLUCZOWA POPRAWKA LOGIKI FILTROWANIA ---
+    // Używamy prostego i niezawodnego porównania 'czesc.typ === filterValue'
     const czesciDoWyswietlenia = magazyn
-        .filter(czesc => czesc.ilosc > 0 && czesc.typ === filterValue)
+        .filter(czesc => czesc && czesc.ilosc > 0 && czesc.typ === filterValue)
         .sort((a, b) => a.nazwa.localeCompare(b.nazwa));
+    // --- KONIEC POPRAWKI ---
 
     if (czesciDoWyswietlenia.length === 0) {
-        partsListContainer.innerHTML = `<p style="font-size:0.9em; color:#999; text-align:center;">Brak części tego typu.</p>`;
+        partsListContainer.innerHTML = `<p style="font-size:0.9em; color:#999; text-align:center;">Brak posiadanych części tego typu.</p>`;
         return;
     }
 
@@ -1972,13 +2063,12 @@ function renderAvailablePartsList() {
         const partItem = document.createElement('div');
         partItem.className = 'available-part-item';
         partItem.draggable = true;
-        // Ważne: Przekazujemy dane aktywnego trybu, jeśli istnieje
         partItem.dataset.partData = JSON.stringify({
             id: czesc.id,
             typ: czesc.typ,
             nazwa: nazwa,
             img: obrazek,
-            aktywnyTrybIndex: aktywnyIndex // Przekazujemy indeks trybu
+            aktywnyTrybIndex: aktywnyIndex
         });
 
         let modeSwitcherHTML = '';
@@ -2103,20 +2193,23 @@ function renderDeckSlots() {
 function getPartTypesForSeria(seria) {
     if (seria === 'cx') {
         return [
-            { type: 'cx_lock_chip', label: 'Lock Chip' },
-            { type: 'cx_main_blade', label: 'Main Blade' },
-            { type: 'cx_assist_blade', label: 'Assist Blade' },
-            { type: 'rachet', label: 'Ratchet (CX)' },
-            { type: 'bit', label: 'Bit (CX)' }
+            { type: 'cx-lock-chip', label: 'Lock Chip' },
+            { type: 'cx-main-blade', label: 'Main Blade' },
+            { type: 'cx-assist-blade', label: 'Assist Blade' },
+            { type: 'rachet', label: 'Ratchet' },
+            { type: 'bit', label: 'Bit' }
         ];
     }
     // Domyślnie BX/UX
+    // Zwracamy teraz ogólną strukturę dla obu tych serii,
+    // ponieważ używają tych samych slotów.
     return [
-        { type: 'blade', label: 'Blade' },
-        { type: 'rachet', label: 'Ratchet (BX/UX)' },
-        { type: 'bit', label: 'Bit (BX/UX)' }
+        { type: 'blade', label: 'Blade' }, // Etykieta może być ogólna
+        { type: 'rachet', label: 'Ratchet' },
+        { type: 'bit', label: 'Bit' }
     ];
 }
+
 
 function handleSeriaChangeForSet(event) {
         const setIndex = parseInt(event.target.dataset.setIndex); // To jest indeks 0-3
@@ -2253,7 +2346,7 @@ function handleDrop(event) {
 
     const dropZone = event.currentTarget;
     const setArrayIndex = parseInt(dropZone.dataset.setIndex);
-    const slotType = dropZone.dataset.slotType; // np. 'cx_main_blade' (z podkreślnikiem)
+    const slotType = dropZone.dataset.slotType; 
     
     if (isNaN(setArrayIndex) || !currentDeckBeingBuilt.sets[setArrayIndex]) {
         draggedItemData = null;
@@ -2261,30 +2354,48 @@ function handleDrop(event) {
     }
 
     const targetSet = currentDeckBeingBuilt.sets[setArrayIndex];
-    const partActualType = draggedItemData.typ; // np. 'cx-main-blade' (z myślnikiem)
+    const partActualType = draggedItemData.typ; 
 
-    // "Tłumacz", który ujednolica zapis z `_` i `-`
     const normalizedSlotType = slotType.replace(/_/g, '-');
+    
+    let isTypeValid = false;
+    // Sprawdzamy, czy upuszczamy część 'blade' LUB 'ux-blade' na slot 'blade'
+    if (normalizedSlotType === 'blade' && (partActualType === 'blade' || partActualType === 'ux-blade')) {
+        isTypeValid = true;
+    } else if (normalizedSlotType === partActualType) {
+        // Dla wszystkich innych typów (ratchet, bit, cx-*) reguła pozostaje bez zmian
+        isTypeValid = true;
+    }
 
-    // 1. Walidacja typu:
-    if (normalizedSlotType !== partActualType) {
-        showNotification(`Nie można umieścić części typu "${partActualType}" w slocie na "${slotType}".`, 4000, 'warning');
+    if (!isTypeValid) {
+        const slotLabelElement = dropZone.querySelector('span');
+        const slotLabel = slotLabelElement ? slotLabelElement.textContent.replace('Upuść ', '').replace(' tutaj', '') : slotType;
+        showNotification(`Nie można umieścić części typu "${partActualType}" w slocie na "${slotLabel}".`, 4000, 'warning');
         draggedItemData = null;
         return;
     }
-
-    // --- POCZĄTEK OSTATECZNEJ POPRAWKI ---
-    // Używamy ZNORMALIZOWANEGO slotType (z myślnikiem), aby poprawnie odwołać się do funkcji.
-    const partIdKey = getPartIdKeyForSlot(normalizedSlotType, targetSet.seria);
+    
+    // --- OSTATECZNA POPRAWKA LOGIKI KLUCZA ID ---
+    // Definiujemy mapę kluczy bezpośrednio tutaj, dla maksymalnej jasności.
+    const keyMap = {
+        'blade': 'bladeId',
+        'ux-blade': 'bladeId', // Najważniejsza linijka: 'ux-blade' również mapuje na 'bladeId'
+        'rachet': 'ratchetId',
+        'bit': 'bitId',
+        'cx-lock-chip': 'cx_lock_chipId',
+        'cx-main-blade': 'cx_main_bladeId',
+        'cx-assist-blade': 'cx_assist_bladeId'
+    };
+    const partIdKey = keyMap[partActualType];
     // --- KONIEC OSTATECZNEJ POPRAWKI ---
-
+    
     if (!partIdKey) {
-        console.error(`Błąd krytyczny: Nie znaleziono klucza ID dla znormalizowanego slotu "${normalizedSlotType}"`);
+        // Ten błąd już się nie powinien pojawić po powyższej poprawce.
+        console.error(`Błąd krytyczny: Nie znaleziono klucza ID dla typu "${partActualType}"`);
         draggedItemData = null;
         return;
     }
 
-    // 2. Walidacja duplikatów
     const newPartId = draggedItemData.id;
     let isAlreadyInDeck = false;
     currentDeckBeingBuilt.sets.forEach((set, idx) => {
@@ -2303,8 +2414,8 @@ function handleDrop(event) {
         return;
     }
     
-    // 3. ZAPIS DANYCH
     targetSet[partIdKey] = draggedItemData.id;
+
     const trybIndexKey = partIdKey.replace('Id', 'AktywnyTrybIndex');
     if (targetSet.hasOwnProperty(trybIndexKey)) {
         targetSet[trybIndexKey] = draggedItemData.aktywnyTrybIndex || 0;
@@ -2312,7 +2423,6 @@ function handleDrop(event) {
 
     console.log(`Zaktualizowano zestaw ${setArrayIndex + 1} po dropie:`, JSON.parse(JSON.stringify(targetSet)));
 
-    // 4. Odświeżenie widoku
     renderActiveDeckSetSlots();
     
     draggedItemData = null;
@@ -2541,6 +2651,18 @@ function displaySavedDecks() {
     savedDecks.sort((a, b) => (b.lastModified || b.timestamp || 0) - (a.lastModified || a.timestamp || 0));
     const magazynCzesci = getMagazyn();
 
+    const iconMap = {
+        seria: { 'bx_ux': 'img/bx.webp', 'cx': 'img/cx.webp' },
+        rodzaj: { 'atak': 'img/attack.webp', 'obrona': 'img/defence.webp', 'wytrzymalosc': 'img/stamina.webp', 'balans': 'img/balance.webp' },
+        kierunek: { 'prawy': 'img/prawo.png', 'lewy': 'img/lewo.png', 'oba': 'img/dual.png' }
+    };
+    
+    const backgroundSymbolMap = {
+        'bx': 'img/bx.webp',
+        'ux': 'img/ux.webp',
+        'cx': 'img/cx.webp'
+    };
+
     savedDecks.forEach(deck => {
         if (!deck || !deck.id || !Array.isArray(deck.sets)) { return; }
         const deckCard = document.createElement('div');
@@ -2550,48 +2672,51 @@ function displaySavedDecks() {
 
         deck.sets.forEach((set, index) => {
             if (!set) { setsHTML += `<div class="deck-card-set-preview"><p style="color:red;">Błąd danych zestawu ${index + 1}</p></div>`; return; }
+            
             const seriaZestawu = set.seria || 'bx_ux';
-            let setImagesHTML = '';
-            let setNameParts = [];
-            let currentSetStats = set.statystykiObliczone;
+            let setContentForWrapper = '';
+            
+            let bgSymbolUrl = '';
+            const blade = set.bladeId ? magazynCzesci.find(p => p.id === set.bladeId) : null;
+            if (seriaZestawu === 'bx_ux') {
+                 bgSymbolUrl = (blade && blade.typ === 'ux-blade') ? backgroundSymbolMap['ux'] : backgroundSymbolMap['bx'];
+            } else if (seriaZestawu === 'cx') {
+                 bgSymbolUrl = backgroundSymbolMap['cx'];
+            }
+            
+            let ikonaSeriiHTML = '', ikonaSeriiUX_HTML = '', ikonaRodzajuHTML = '', ikonaKierunkuHTML = '';
+            if (seriaZestawu === 'bx_ux') {
+                if (blade && blade.typ === 'ux-blade') ikonaSeriiUX_HTML = `<img src="img/ux.webp" class="set-icon seria-icon" title="Seria: UX">`;
+                else ikonaSeriiHTML = `<img src="${iconMap.seria['bx_ux']}" class="set-icon seria-icon" title="Seria: BX">`;
+            } else if (seriaZestawu === 'cx') ikonaSeriiHTML = `<img src="${iconMap.seria['cx']}" class="set-icon seria-icon" title="Seria: CX">`;
+            const ratchet = set.ratchetId ? magazynCzesci.find(p => p.id === set.ratchetId) : null;
+            const bit = set.bitId ? magazynCzesci.find(p => p.id === set.bitId) : null;
+            let partWithRodzaj = (ratchet && ratchet.integrujeBit === true) ? ratchet : bit;
+            if (partWithRodzaj && partWithRodzaj.rodzaj) ikonaRodzajuHTML = `<img src="${iconMap.rodzaj[partWithRodzaj.rodzaj] || ''}" class="set-icon rodzaj-icon" title="Typ: ${partWithRodzaj.rodzaj}">`;
+            let ostrze = (seriaZestawu === 'cx') ? (set.cx_main_bladeId ? magazynCzesci.find(p => p.id === set.cx_main_bladeId) : null) : blade;
+            if (ostrze && ostrze.kierunek) ikonaKierunkuHTML = `<img src="${iconMap.kierunek[ostrze.kierunek] || ''}" class="set-icon kierunek-icon" title="Obroty: ${ostrze.kierunek}">`;
+            const ikonyZestawuHTML = `<div class="set-icons-container">${ikonaSeriiHTML}${ikonaSeriiUX_HTML}${ikonaRodzajuHTML}${ikonaKierunkuHTML}</div>`;
 
-            // --- CZYSTA WERSJA FUNKCJI POMOCNICZEJ (BEZ ALERTÓW) ---
             const getPartDetailsAndHTML = (partId, partType, partTypeDefaultName) => {
                 const part = partId ? magazynCzesci.find(p => String(p.id) == String(partId)) : null;
-
-                let obrazekDoWyswietlenia = part?.img;
-                let nazwaDoWyswietlenia = part?.nazwa;
-
+                let obrazekDoWyswietlenia = part?.img, nazwaDoWyswietlenia = part?.nazwa;
                 if (part && part.maTryby && Array.isArray(part.tryby)) {
-                    const partIdKey = getPartIdKeyForSlot(partType, seriaZestawu);
-                    const trybIndexKey = partIdKey ? partIdKey.replace('Id', 'AktywnyTrybIndex') : null;
-                    const zapisanyIndex = (trybIndexKey && set[trybIndexKey] !== undefined) ? set[trybIndexKey] : 0;
-                    const aktywnyTryb = part.tryby[zapisanyIndex];
-
-                    if (aktywnyTryb) {
-                        obrazekDoWyswietlenia = aktywnyTryb.img || part.img;
-                        nazwaDoWyswietlenia = `${part.nazwa} (${aktywnyTryb.nazwaTrybu})`;
-                    }
+                    const partIdKey = getPartIdKeyForSlot(partType, seriaZestawu), trybIndexKey = partIdKey ? partIdKey.replace('Id', 'AktywnyTrybIndex') : null;
+                    const zapisanyIndex = (trybIndexKey && set[trybIndexKey] !== undefined) ? set[trybIndexKey] : 0, aktywnyTryb = part.tryby[zapisanyIndex];
+                    if (aktywnyTryb) { obrazekDoWyswietlenia = aktywnyTryb.img || part.img; nazwaDoWyswietlenia = `${part.nazwa} (${aktywnyTryb.nazwaTrybu})`; }
                 }
-
-                const imgHTML = obrazekDoWyswietlenia ?
-                    `<img src="${obrazekDoWyswietlenia}" alt="${part?.nazwa || partTypeDefaultName}" class="deck-part-img">` :
-                    `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`;
+                const imgHTML = obrazekDoWyswietlenia ? `<img src="${obrazekDoWyswietlenia}" alt="${part?.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`;
                 const nameText = part ? (nazwaDoWyswietlenia || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`;
-
                 return { html: imgHTML, name: nameText, partObj: part };
             };
-            // --- KONIEC CZYSTEJ WERSJI ---
-
-            const ratchetWDecku = set.ratchetId ? magazynCzesci.find(p => String(p.id) == String(set.ratchetId)) : null;
+            
+            const ratchetWDecku = ratchet;
             const czySpecjalnyRatchetWDecku = ratchetWDecku && (String(ratchetWDecku.id) === "205" || ratchetWDecku.integrujeBit === true);
-
+            let setImagesHTML = '', setNameParts = [];
             if (seriaZestawu === 'bx_ux') {
                 const bladeInfo = getPartDetailsAndHTML(set.bladeId, 'blade', 'Blade');
                 const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet');
-                let bitInfo = czySpecjalnyRatchetWDecku && ratchetInfo.partObj ?
-                    { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` } :
-                    getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                let bitInfo = czySpecjalnyRatchetWDecku && ratchetInfo.partObj ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` } : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
                 setImagesHTML = `<div class="wynik-zestaw-obrazki">${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}</div>`;
                 setNameParts = [bladeInfo.name, ratchetInfo.name, bitInfo.name];
             } else if (seriaZestawu === 'cx') {
@@ -2599,43 +2724,47 @@ function displaySavedDecks() {
                 const mainBladeInfo = getPartDetailsAndHTML(set.cx_main_bladeId, 'cx-main-blade', 'MainBlade');
                 const assistBladeInfo = getPartDetailsAndHTML(set.cx_assist_bladeId, 'cx-assist-blade', 'AssistBlade');
                 const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet');
-                let bitInfo = czySpecjalnyRatchetWDecku && ratchetInfo.partObj ?
-                    { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` } :
-                    getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                let bitInfo = czySpecjalnyRatchetWDecku && ratchetInfo.partObj ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` } : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
                 setImagesHTML = `<div class="cx-images-container"><div class="cx-blade-row wynik-zestaw-obrazki">${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}</div><div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetInfo.html} ${bitInfo.html}</div></div>`;
                 setNameParts = [lockChipInfo.name, mainBladeInfo.name, assistBladeInfo.name, ratchetInfo.name, bitInfo.name];
             }
 
             let setNameHTML = setNameParts.map(name => (name || "").replace(/<\/?i>/g, '').replace(/\s\([^)]+\)/, '')).filter(name => name && !name.startsWith('(Bit zint.)')).join(' | ');
             let setStatsSummaryHTML = '<div class="stat-grid">';
+            let currentSetStats = set.statystykiObliczone;
             if (currentSetStats) {
-                setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span>`;
-                setStatsSummaryHTML += `<span>DEF: ${currentSetStats.DEF || 0}</span>`;
-                setStatsSummaryHTML += `<span>STM: ${currentSetStats.STM || 0}</span>`;
-                setStatsSummaryHTML += `<span>Waga: ${(currentSetStats.WAGA || 0)}g</span>`;
+                setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span>`; setStatsSummaryHTML += `<span>DEF: ${currentSetStats.DEF || 0}</span>`;
+                setStatsSummaryHTML += `<span>STM: ${currentSetStats.STM || 0}</span>`; setStatsSummaryHTML += `<span>Waga: ${(currentSetStats.WAGA || 0)}g</span>`;
                 if ((currentSetStats.DASH || 0) !== 0) setStatsSummaryHTML += `<span>DASH: ${currentSetStats.DASH || 0}</span>`;
                 if ((currentSetStats.B_RES || 0) !== 0) setStatsSummaryHTML += `<span>B-RES: ${currentSetStats.B_RES || 0}</span>`;
-                if (seriaZestawu === 'cx' && (currentSetStats.CX_LC_WYTRZ || 0) !== 0) {
-                    setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`;
-                }
-            } else {
-                setStatsSummaryHTML += '<span>Brak danych statystyk</span>';
-            }
+                if (seriaZestawu === 'cx' && (currentSetStats.CX_LC_WYTRZ || 0) !== 0) { setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`; }
+            } else { setStatsSummaryHTML += '<span>Brak danych statystyk</span>'; }
             setStatsSummaryHTML += `</div>`;
-            setsHTML += `<div class="deck-card-set-preview"><strong style="text-transform: capitalize; display: block; text-align: center; margin-bottom: 8px;">Zestaw ${index + 1} (${seriaZestawu.toUpperCase().replace('_', '/')})</strong>${setImagesHTML}<div style="font-size:0.8em; color:#ddd; margin-top: 8px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">${setNameHTML}</div>${setStatsSummaryHTML}</div>`;
-        });
-       const actionsHTML = `
-    <div class="item-actions" style="margin-top: 15px; padding-top: 15px;">
-        <button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}'">Edytuj</button>
-        <button class="button-auto-width" onclick="eksportujDeckDoPNG('${deck.id}')" title="Zapisz jako obraz PNG">Eksportuj PNG</button>
-        <button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button>
-    </div>
-`;
 
-		deckCard.innerHTML = `<h4 style="text-align:center; color:#e0e0e0; margin-bottom: 5px;">${deck.name || 'Deck bez nazwy'}</h4><p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')} ${new Date(deck.lastModified).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}` : `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')} ${new Date(deck.timestamp || Date.now()).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}`}</p>${setsHTML}${actionsHTML}`;
+            setContentForWrapper = `
+                <div class="set-header-container">
+                    <strong style="text-transform: capitalize;">Zestaw ${index + 1}</strong>
+                    ${ikonyZestawuHTML}
+                </div>
+                ${setImagesHTML}
+                <div style="font-size:0.8em; color:#ddd; margin-top: 8px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">${setNameHTML}</div>
+                ${setStatsSummaryHTML}
+            `;
+
+            setsHTML += `
+                <div class="deck-card-set-preview" style="--bg-symbol-url: url('${bgSymbolUrl}');">
+                    <div class="set-content-wrapper">
+                        ${setContentForWrapper}
+                    </div>
+                </div>`;
+        });
+        
+        const actionsHTML = `<div class="item-actions" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.08);"><button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}'">Edytuj</button><button class="button-auto-width" onclick="eksportujDeckDoPNG('${deck.id}')" title="Zapisz jako obraz PNG">Eksportuj PNG</button><button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button></div>`;
+        deckCard.innerHTML = `<h4 style="text-align:center; color:#e0e0e0; margin-bottom: 5px;">${deck.name || 'Deck bez nazwy'}</h4><p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')} ${new Date(deck.lastModified).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}` : `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')} ${new Date(deck.timestamp || Date.now()).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}`}</p>${setsHTML}${actionsHTML}`;
         container.appendChild(deckCard);
     });
 }
+
 function eksportujDeckDoPNG(deckId) {
     const kartaDecku = document.querySelector(`.saved-deck-card[data-deck-id="${deckId}"]`);
     if (!kartaDecku) {
@@ -3317,91 +3446,91 @@ document.addEventListener('DOMContentLoaded', function() {
 <script id="domyslnaBazaDanychJson" type="application/json">
 [
   {
-  "id": "1", "typ": "blade", "nazwa": "AeroPegasus", "ilosc": 0, "img":"img/BladeAeroPegasus.webp", "ATK": 70, "DEF": 30, "STM": 35, "waga": 38.3},
+  "id": "1", "typ": "ux-blade","kierunek": "prawy", "nazwa": "AeroPegasus", "ilosc": 0, "img":"img/BladeAeroPegasus.webp", "ATK": 70, "DEF": 30, "STM": 35, "waga": 38.3},
   {
-  "id": "2", "typ": "blade", "nazwa": "DranBuster", "ilosc": 0, "img": "img/BladeDranBuster.webp", "ATK": 70, "DEF": 20, "STM": 10, "waga": 36.5},
+  "id": "2", "typ": "ux-blade","kierunek": "prawy", "nazwa": "DranBuster", "ilosc": 0, "img": "img/BladeDranBuster.webp", "ATK": 70, "DEF": 20, "STM": 10, "waga": 36.5},
   {
-  "id": "3", "typ": "blade", "nazwa": "GhostCircle", "ilosc": 0, "img": "img/BladeGhostCircle.webp", "ATK": 5, "DEF": 40, "STM": 55, "waga": 26.7},
+  "id": "3", "typ": "ux-blade","kierunek": "prawy", "nazwa": "GhostCircle", "ilosc": 0, "img": "img/BladeGhostCircle.webp", "ATK": 5, "DEF": 40, "STM": 55, "waga": 26.7},
   {
-  "id": "4", "typ": "blade", "nazwa": "GolemRock", "ilosc": 0, "img": "img/BladeGolemRock.webp", "ATK": 30, "DEF": 60, "STM": 10, "waga": 34},
+  "id": "4", "typ": "ux-blade","kierunek": "prawy", "nazwa": "GolemRock", "ilosc": 0, "img": "img/BladeGolemRock.webp", "ATK": 30, "DEF": 60, "STM": 10, "waga": 34},
   {
-  "id": "5", "typ": "blade", "nazwa": "HellsHammer", "ilosc": 0, "img": "img/BladeHellsHammer.webp", "ATK": 50, "DEF": 25, "STM": 25, "waga": 33},
+  "id": "5", "typ": "ux-blade","kierunek": "prawy", "nazwa": "HellsHammer", "ilosc": 0, "img": "img/BladeHellsHammer.webp", "ATK": 50, "DEF": 25, "STM": 25, "waga": 33},
   {
-  "id": "6", "typ": "blade", "nazwa": "ImpactDrake", "ilosc": 0, "img": "img/BladeImpactDrake.webp", "ATK": 75, "DEF": 25, "STM":10, "waga": 39},
+  "id": "6", "typ": "ux-blade","kierunek": "prawy", "nazwa": "ImpactDrake", "ilosc": 0, "img": "img/BladeImpactDrake.webp", "ATK": 75, "DEF": 25, "STM":10, "waga": 39},
   {
-  "id": "7", "typ": "blade", "nazwa": "KnightMail", "ilosc": 0, "img": "img/BladeKnightMail.webp", "ATK": 10, "DEF": 65, "STM": 35, "waga": 36.7},
+  "id": "7", "typ": "ux-blade","kierunek": "prawy", "nazwa": "KnightMail", "ilosc": 0, "img": "img/BladeKnightMail.webp", "ATK": 10, "DEF": 65, "STM": 35, "waga": 36.7},
   {
-  "id": "8", "typ": "blade", "nazwa": "LeonCrest", "ilosc": 0, "img": "img/BladeLeonCrest.webp", "ATK": 15, "DEF": 70, "STM": 15, "waga": 35},
+  "id": "8", "typ": "ux-blade","kierunek": "prawy", "nazwa": "LeonCrest", "ilosc": 0, "img": "img/BladeLeonCrest.webp", "ATK": 15, "DEF": 70, "STM": 15, "waga": 35},
   {
-  "id": "9", "typ": "blade", "nazwa": "PhoenixRudder", "ilosc": 0, "img": "img/BladePhoenixRudder.webp", "ATK": 10, "DEF": 35, "STM": 55, "waga": 34.5},
+  "id": "9", "typ": "ux-blade","kierunek": "prawy", "nazwa": "PhoenixRudder", "ilosc": 0, "img": "img/BladePhoenixRudder.webp", "ATK": 10, "DEF": 35, "STM": 55, "waga": 34.5},
   {
-  "id": "10", "typ": "blade", "nazwa": "SamuraiSaber", "ilosc": 0, "img": "img/BladeSamuraiSaber.webp", "ATK": 65, "DEF": 20, "STM": 25, "waga": 36.5},
+  "id": "10", "typ": "ux-blade","kierunek": "prawy", "nazwa": "SamuraiSaber", "ilosc": 0, "img": "img/BladeSamuraiSaber.webp", "ATK": 65, "DEF": 20, "STM": 25, "waga": 36.5},
   {
-  "id": "11", "typ": "blade", "nazwa": "ScorpioSpear", "ilosc": 0, "img": "img/BladeScorpioSpear.webp", "ATK": 25, "DEF": 55, "STM": 30, "waga": 39.6},
+  "id": "11", "typ": "ux-blade","kierunek": "prawy", "nazwa": "ScorpioSpear", "ilosc": 0, "img": "img/BladeScorpioSpear.webp", "ATK": 25, "DEF": 55, "STM": 30, "waga": 39.6},
   {
-  "id": "12", "typ": "blade", "nazwa": "SharkScale", "ilosc": 0, "img": "img/BladeSharkScale.webp", "ATK": 70, "DEF": 15, "STM": 15, "waga": 37.6},
+  "id": "12", "typ": "ux-blade","kierunek": "prawy", "nazwa": "SharkScale", "ilosc": 0, "img": "img/BladeSharkScale.webp", "ATK": 70, "DEF": 15, "STM": 15, "waga": 37.6},
   {
-  "id": "13", "typ": "blade", "nazwa": "ShinobiShadow", "ilosc": 0, "img": "img/BladeShinobiShadow.webp", "ATK": 10, "DEF": 70, "STM": 20, "waga": 28.2},
+  "id": "13", "typ": "ux-blade","kierunek": "prawy", "nazwa": "ShinobiShadow", "ilosc": 0, "img": "img/BladeShinobiShadow.webp", "ATK": 10, "DEF": 70, "STM": 20, "waga": 28.2},
   {
-  "id": "14", "typ": "blade", "nazwa": "SilverWolf", "ilosc": 0, "img": "img/BladeSilverWolf.webp", "ATK": 15, "DEF": 30, "STM": 65, "waga": 36.8},
+  "id": "14", "typ": "ux-blade","kierunek": "prawy", "nazwa": "SilverWolf", "ilosc": 0, "img": "img/BladeSilverWolf.webp", "ATK": 15, "DEF": 30, "STM": 65, "waga": 36.8},
   {
-  "id": "15", "typ": "blade", "nazwa": "WizardRod", "ilosc": 0, "img": "img/BladeWizardRod.webp", "ATK": 15, "DEF": 25, "STM": 60, "waga": 35.3},
+  "id": "15", "typ": "ux-blade","kierunek": "prawy", "nazwa": "WizardRod", "ilosc": 0, "img": "img/BladeWizardRod.webp", "ATK": 15, "DEF": 25, "STM": 60, "waga": 35.3},
   {
-  "id": "16", "typ": "blade", "nazwa": "WyvernHover", "ilosc": 0, "img": "img/BladeWyvernHover.webp", "ATK": 13, "DEF": 60, "STM": 27, "waga": 35},
+  "id": "16", "typ": "ux-blade","kierunek": "prawy", "nazwa": "WyvernHover", "ilosc": 0, "img": "img/BladeWyvernHover.webp", "ATK": 13, "DEF": 60, "STM": 27, "waga": 35},
   {
-  "id": "17", "typ": "blade", "nazwa": "BlackShell", "ilosc": 0, "img": "img/BladeBlackShell.webp", "ATK": 10, "DEF": 65, "STM": 25, "waga": 32.4},
+  "id": "17", "typ": "blade","kierunek": "prawy", "nazwa": "BlackShell", "ilosc": 0, "img": "img/BladeBlackShell.webp", "ATK": 10, "DEF": 65, "STM": 25, "waga": 32.4},
   {
-  "id": "18", "typ": "blade", "nazwa": "CobaltDragoon", "ilosc": 0, "img": "img/BladeCobaltDragoon.webp", "ATK": 60, "DEF":15, "STM": 25, "waga": 37.8},
+  "id": "18", "typ": "blade","kierunek": "lewy", "nazwa": "CobaltDragoon", "ilosc": 0, "img": "img/BladeCobaltDragoon.webp", "ATK": 60, "DEF":15, "STM": 25, "waga": 37.8},
   {
-  "id": "19", "typ": "blade", "nazwa": "CobaltDrake", "ilosc": 0, "img": "img/BladeCobaltDrake.webp", "ATK": 65, "DEF": 30, "STM": 20, "waga": 37.3},
+  "id": "19", "typ": "blade","kierunek": "prawy", "nazwa": "CobaltDrake", "ilosc": 0, "img": "img/BladeCobaltDrake.webp", "ATK": 65, "DEF": 30, "STM": 20, "waga": 37.3},
   {
-  "id": "20", "typ": "blade", "nazwa": "CrimsonGaruda", "ilosc": 0, "img": "img/BladeCrimsonGaruda.webp", "ATK": 45, "DEF": 25, "STM": 30, "waga": 35},
+  "id": "20", "typ": "blade","kierunek": "prawy", "nazwa": "CrimsonGaruda", "ilosc": 0, "img": "img/BladeCrimsonGaruda.webp", "ATK": 45, "DEF": 25, "STM": 30, "waga": 35},
   {
-  "id": "21", "typ": "blade", "nazwa": "DranDagger", "ilosc": 0, "img": "img/BladeDranDagger.webp", "ATK": 50, "DEF": 25, "STM": 25, "waga": 36},
+  "id": "21", "typ": "blade","kierunek": "prawy", "nazwa": "DranDagger", "ilosc": 0, "img": "img/BladeDranDagger.webp", "ATK": 50, "DEF": 25, "STM": 25, "waga": 36},
   {
-  "id": "22", "typ": "blade", "nazwa": "DranSword", "ilosc": 0, "img": "img/BladeDranSword.webp", "ATK": 55, "DEF": 25, "STM": 20, "waga": 35.1},
+  "id": "22", "typ": "blade","kierunek": "prawy", "nazwa": "DranSword", "ilosc": 0, "img": "img/BladeDranSword.webp", "ATK": 55, "DEF": 25, "STM": 20, "waga": 35.1},
   {
-  "id": "23", "typ": "blade", "nazwa": "HellsChain", "ilosc": 0, "img": "img/BladeHellsChain.webp", "ATK": 35, "DEF": 40, "STM": 25, "waga": 32.2},
+  "id": "23", "typ": "blade","kierunek": "prawy", "nazwa": "HellsChain", "ilosc": 0, "img": "img/BladeHellsChain.webp", "ATK": 35, "DEF": 40, "STM": 25, "waga": 32.2},
   {
-  "id": "24", "typ": "blade", "nazwa": "HellsScythe", "ilosc": 0, "img": "img/BladeHellsScythe.webp", "ATK": 30, "DEF": 35, "STM": 35, "waga": 33},
+  "id": "24", "typ": "blade","kierunek": "prawy", "nazwa": "HellsScythe", "ilosc": 0, "img": "img/BladeHellsScythe.webp", "ATK": 30, "DEF": 35, "STM": 35, "waga": 33},
   {
-  "id": "25", "typ": "blade", "nazwa": "KnightLance", "ilosc": 0, "img": "img/BladeKnightLance.webp", "ATK": 25, "DEF": 60, "STM": 15, "waga": 32.9},
+  "id": "25", "typ": "blade","kierunek": "prawy", "nazwa": "KnightLance", "ilosc": 0, "img": "img/BladeKnightLance.webp", "ATK": 25, "DEF": 60, "STM": 15, "waga": 32.9},
   {
-  "id": "26", "typ": "blade", "nazwa": "KnightShield", "ilosc": 0, "img": "img/BladeKnightShield.webp", "ATK": 20, "DEF": 55, "STM": 25, "waga": 34.8},
+  "id": "26", "typ": "blade","kierunek": "prawy", "nazwa": "KnightShield", "ilosc": 0, "img": "img/BladeKnightShield.webp", "ATK": 20, "DEF": 55, "STM": 25, "waga": 34.8},
   {
-  "id": "27", "typ": "blade", "nazwa": "LeonClaw", "ilosc": 0, "img": "img/BladeLeonClaw.webp", "ATK": 40, "DEF": 40, "STM": 20, "waga": 31.4},
+  "id": "27", "typ": "blade","kierunek": "prawy", "nazwa": "LeonClaw", "ilosc": 0, "img": "img/BladeLeonClaw.webp", "ATK": 40, "DEF": 40, "STM": 20, "waga": 31.4},
   {
-  "id": "28", "typ": "blade", "nazwa": "PhoenixFeather", "ilosc": 0, "img": "img/BladePhoenixFeather.webp", "ATK": 50, "DEF": 20, "STM": 30, "waga": 33.3},
+  "id": "28", "typ": "blade","kierunek": "prawy", "nazwa": "PhoenixFeather", "ilosc": 0, "img": "img/BladePhoenixFeather.webp", "ATK": 50, "DEF": 20, "STM": 30, "waga": 33.3},
   {
-  "id": "29", "typ": "blade", "nazwa": "PhoenixWing", "ilosc": 0, "img": "img/BladePhoenixWing.webp", "ATK": 60, "DEF": 25, "STM": 15, "waga": 39},
+  "id": "29", "typ": "blade","kierunek": "prawy", "nazwa": "PhoenixWing", "ilosc": 0, "img": "img/BladePhoenixWing.webp", "ATK": 60, "DEF": 25, "STM": 15, "waga": 39},
   {
-  "id": "30", "typ": "blade", "nazwa": "RhinoHorn", "ilosc": 0, "img": "img/BladeRhinoHorn.webp", "ATK": 20, "DEF": 50, "STM": 30, "waga": 32.7},
+  "id": "30", "typ": "blade","kierunek": "prawy", "nazwa": "RhinoHorn", "ilosc": 0, "img": "img/BladeRhinoHorn.webp", "ATK": 20, "DEF": 50, "STM": 30, "waga": 32.7},
   {
-  "id": "31", "typ": "blade", "nazwa": "SamuraiCalibur", "ilosc": 0, "img": "img/BladeSamuraiCalibur.webp", "ATK": 40, "DEF": 30, "STM": 30, "waga":36},
+  "id": "31", "typ": "blade","kierunek": "prawy", "nazwa": "SamuraiCalibur", "ilosc": 0, "img": "img/BladeSamuraiCalibur.webp", "ATK": 40, "DEF": 30, "STM": 30, "waga":36},
   {
-  "id": "32", "typ": "blade", "nazwa": "SharkEdge", "ilosc": 0, "img": "img/BladeSharkEdge.webp", "ATK": 60, "DEF": 25, "STM": 15, "waga": 34.5},
+  "id": "32", "typ": "blade","kierunek": "prawy", "nazwa": "SharkEdge", "ilosc": 0, "img": "img/BladeSharkEdge.webp", "ATK": 60, "DEF": 25, "STM": 15, "waga": 34.5},
   {
-  "id": "33", "typ": "blade", "nazwa": "ShelterDrake", "ilosc": 0, "img": "img/BladeShelterDrake.webp", "ATK": 25, "DEF": 40, "STM": 35, "waga": 32.6},
+  "id": "33", "typ": "blade","kierunek": "prawy", "nazwa": "ShelterDrake", "ilosc": 0, "img": "img/BladeShelterDrake.webp", "ATK": 25, "DEF": 40, "STM": 35, "waga": 32.6},
   {
-  "id": "34", "typ": "blade", "nazwa": "SphinxCowl", "ilosc": 0, "img": "img/BladeSphinxCowl.webp", "ATK": 35, "DEF": 55, "STM": 10, "waga": 32.7},
+  "id": "34", "typ": "blade","kierunek": "prawy", "nazwa": "SphinxCowl", "ilosc": 0, "img": "img/BladeSphinxCowl.webp", "ATK": 35, "DEF": 55, "STM": 10, "waga": 32.7},
   {
-  "id": "35", "typ": "blade", "nazwa": "TriceraPress", "ilosc": 0, "img": "img/BladeTriceraPress.webp", "ATK":20, "DEF": 65, "STM": 15, "waga": 36.5},
+  "id": "35", "typ": "blade","kierunek": "prawy", "nazwa": "TriceraPress", "ilosc": 0, "img": "img/BladeTriceraPress.webp", "ATK":20, "DEF": 65, "STM": 15, "waga": 36.5},
   {
-  "id": "36", "typ": "blade", "nazwa": "TyrannoBeat", "ilosc": 0, "img": "img/BladeTyrannoBeat.webp", "ATK": 65, "DEF": 30, "STM": 5, "waga":37},
+  "id": "36", "typ": "blade","kierunek": "prawy", "nazwa": "TyrannoBeat", "ilosc": 0, "img": "img/BladeTyrannoBeat.webp", "ATK": 65, "DEF": 30, "STM": 5, "waga":37},
   {
-  "id": "37", "typ": "blade", "nazwa": "UnicornSting", "ilosc": 0, "img": "img/BladeUnicornSting.webp", "ATK": 35, "DEF": 35, "STM": 30, "waga": 34},
+  "id": "37", "typ": "blade","kierunek": "prawy", "nazwa": "UnicornSting", "ilosc": 0, "img": "img/BladeUnicornSting.webp", "ATK": 35, "DEF": 35, "STM": 30, "waga": 34},
   {
-  "id": "38", "typ": "blade", "nazwa": "ViperTail", "ilosc": 0, "img": "img/BladeViperTail.webp", "ATK": 30, "DEF": 20, "STM": 50, "waga": 34.7},
+  "id": "38", "typ": "blade","kierunek": "prawy", "nazwa": "ViperTail", "ilosc": 0, "img": "img/BladeViperTail.webp", "ATK": 30, "DEF": 20, "STM": 50, "waga": 34.7},
   {
-  "id": "39", "typ": "blade", "nazwa": "WeissTiger", "ilosc": 0, "img": "img/BladeWeissTiger.webp", "ATK": 45, "DEF": 30, "STM": 25, "waga": 34.6},
+  "id": "39", "typ": "blade","kierunek": "prawy", "nazwa": "WeissTiger", "ilosc": 0, "img": "img/BladeWeissTiger.webp", "ATK": 45, "DEF": 30, "STM": 25, "waga": 34.6},
   {
-  "id": "40", "typ": "blade", "nazwa": "WhaleWave", "ilosc": 0, "img": "img/BladeWhaleWave.webp", "ATK": 45, "DEF": 35, "STM": 20, "waga": 38.2},
+  "id": "40", "typ": "blade","kierunek": "prawy", "nazwa": "WhaleWave", "ilosc": 0, "img": "img/BladeWhaleWave.webp", "ATK": 45, "DEF": 35, "STM": 20, "waga": 38.2},
   {
-  "id": "41", "typ": "blade", "nazwa": "WizardArrow", "ilosc": 0, "img": "img/BladeWizardArrow.webp", "ATK": 15, "DEF": 30, "STM": 55, "waga": 31.8},
+  "id": "41", "typ": "blade","kierunek": "prawy", "nazwa": "WizardArrow", "ilosc": 0, "img": "img/BladeWizardArrow.webp", "ATK": 15, "DEF": 30, "STM": 55, "waga": 31.8},
   {
-  "id": "42", "typ": "blade", "nazwa": "WyvernGale", "ilosc": 0, "img": "img/BladeWyvernGale.webp", "ATK": 10, "DEF": 40, "STM": 50, "waga": 31.9},
+  "id": "42", "typ": "blade","kierunek": "prawy", "nazwa": "WyvernGale", "ilosc": 0, "img": "img/BladeWyvernGale.webp", "ATK": 10, "DEF": 40, "STM": 50, "waga": 31.9},
   {
-  "id": "43", "typ": "blade",
+  "id": "43", "typ": "blade","kierunek": "prawy",
     "nazwa": "Bite Croc",
     "ilosc": 1,
     "img": "img/BladeBite-Croc.webp",
@@ -3411,97 +3540,97 @@ document.addEventListener('DOMContentLoaded', function() {
     "waga": 34.1
   },
 {
-  "id": "44", "typ": "blade", "nazwa": "GillShark", "ilosc": 0, "img": "img/BladeGill-Shark.webp", "ATK": 20, "DEF": 25, "STM": 55, "waga": 29.6},
+  "id": "44", "typ": "blade","kierunek": "prawy", "nazwa": "GillShark", "ilosc": 0, "img": "img/BladeGill-Shark.webp", "ATK": 20, "DEF": 25, "STM": 55, "waga": 29.6},
   {
-  "id": "45", "typ": "blade", "nazwa": "ShinobiKnife", "ilosc": 0, "img": "img/BladeKnifeShinobi.webp", "ATK": 23, "DEF": 50, "STM": 27, "waga": 30.9},
+  "id": "45", "typ": "blade","kierunek": "prawy", "nazwa": "ShinobiKnife", "ilosc": 0, "img": "img/BladeKnifeShinobi.webp", "ATK": 23, "DEF": 50, "STM": 27, "waga": 30.9},
   {
-  "id": "46", "typ": "blade", "nazwa": "TriceraSpiky", "ilosc": 0, "img": "img/BladeTriceraSpiky.webp", "ATK": 32, "DEF": 55, "STM": 13, "waga": 29.9},
+  "id": "46", "typ": "blade","kierunek": "prawy", "nazwa": "TriceraSpiky", "ilosc": 0, "img": "img/BladeTriceraSpiky.webp", "ATK": 32, "DEF": 55, "STM": 13, "waga": 29.9},
   {
-  "id": "47", "typ": "blade", "nazwa": "TyrannoRoar", "ilosc": 0, "img": "img/BladeRoar-Tyranno.webp", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
+  "id": "47", "typ": "blade","kierunek": "prawy", "nazwa": "TyrannoRoar", "ilosc": 0, "img": "img/BladeRoar-Tyranno.webp", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
   {
-  "id": "48", "typ": "blade", "nazwa": "BearScratch", "ilosc": 0, "img": "img/BladeSavage-Bear.webp", "ATK": 25, "DEF": 45, "STM": 30, "waga": 29.6},
+  "id": "48", "typ": "blade","kierunek": "prawy", "nazwa": "BearScratch", "ilosc": 0, "img": "img/BladeSavage-Bear.webp", "ATK": 25, "DEF": 45, "STM": 30, "waga": 29.6},
   {
-  "id": "49", "typ": "blade", "nazwa": "SamuraiSteel", "ilosc": 0, "img": "img/BladeSteel-Samurai.webp", "ATK": 40, "DEF": 37, "STM": 23, "waga": 31.2},
+  "id": "49", "typ": "blade","kierunek": "prawy", "nazwa": "SamuraiSteel", "ilosc": 0, "img": "img/BladeSteel-Samurai.webp", "ATK": 40, "DEF": 37, "STM": 23, "waga": 31.2},
   {
-  "id": "50", "typ": "blade", "nazwa": "GoatTackle", "ilosc": 0, "img": "img/BladeTackle-Goat.webp", "ATK": 13, "DEF": 65, "STM": 22, "waga": 31.5},
+  "id": "50", "typ": "blade","kierunek": "prawy", "nazwa": "GoatTackle", "ilosc": 0, "img": "img/BladeTackle-Goat.webp", "ATK": 13, "DEF": 65, "STM": 22, "waga": 31.5},
   {
-  "id": "51", "typ": "blade", "nazwa": "PteraSwing", "ilosc": 0, "img": "img/BladeTalon-Ptera.webp", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.4},
+  "id": "51", "typ": "blade","kierunek": "prawy", "nazwa": "PteraSwing", "ilosc": 0, "img": "img/BladeTalon-Ptera.webp", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.4},
   {
-  "id": "52", "typ": "blade", "nazwa": "MammothTusk", "ilosc": 0, "img": "img/BladeTusk-Mammoth.webp", "ATK": 33, "DEF": 35, "STM": 32, "waga": 32},
+  "id": "52", "typ": "blade","kierunek": "prawy", "nazwa": "MammothTusk", "ilosc": 0, "img": "img/BladeTusk-Mammoth.webp", "ATK": 33, "DEF": 35, "STM": 32, "waga": 32},
   {
-  "id": "53", "typ": "blade", "nazwa": "KongYell", "ilosc": 0, "img": "img/BladeYell-Kong.webp", "ATK": 13, "DEF": 37, "STM": 50, "waga": 31.1},
+  "id": "53", "typ": "blade","kierunek": "prawy", "nazwa": "KongYell", "ilosc": 0, "img": "img/BladeYell-Kong.webp", "ATK": 13, "DEF": 37, "STM": 50, "waga": 31.1},
   {
-  "id": "54", "typ": "blade", "nazwa": "DragoonStorm", "ilosc": 0, "img": "img/BladeDragoon-Storm.webp", "ATK": 55, "DEF": 30, "STM": 15, "waga": 25.1},
+  "id": "54", "typ": "blade","kierunek": "lewy", "nazwa": "DragoonStorm", "ilosc": 0, "img": "img/BladeDragoon-Storm.webp", "ATK": 55, "DEF": 30, "STM": 15, "waga": 25.1},
   {
-  "id": "55", "typ": "blade", "nazwa": "DranzerSpiral", "ilosc": 0, "img": "img/BladeDranzerSpiral.webp", "ATK": 35, "DEF": 30, "STM": 35, "waga": 27.7},
+  "id": "55", "typ": "blade","kierunek": "prawy", "nazwa": "DranzerSpiral", "ilosc": 0, "img": "img/BladeDranzerSpiral.webp", "ATK": 35, "DEF": 30, "STM": 35, "waga": 27.7},
   {
-  "id": "56", "typ": "blade", "nazwa": "DrigerSlash", "ilosc": 0, "img": "img/BladeDrigerSlash.webp", "ATK": 40, "DEF": 35, "STM": 25, "waga": 28.6},
+  "id": "56", "typ": "blade","kierunek": "prawy", "nazwa": "DrigerSlash", "ilosc": 0, "img": "img/BladeDrigerSlash.webp", "ATK": 40, "DEF": 35, "STM": 25, "waga": 28.6},
   {
-  "id": "57", "typ": "blade", "nazwa": "DracielShield", "ilosc": 0, "img": "img/BladeDracielShield.webp", "ATK": 30, "DEF": 50, "STM": 20, "waga": 28},
+  "id": "57", "typ": "blade","kierunek": "prawy", "nazwa": "DracielShield", "ilosc": 0, "img": "img/BladeDracielShield.webp", "ATK": 30, "DEF": 50, "STM": 20, "waga": 28},
   {
-  "id": "58", "typ": "blade", "nazwa": "Lightning L-Drago (Rapid-Hit Type)", "ilosc": 0, "img": "img/BladeLightningL_(Rapid-Hit_Type).webp", "ATK": 50, "DEF": 30, "STM": 20, "waga": 33.5},
+  "id": "58", "typ": "blade","kierunek": "lewy", "nazwa": "Lightning L-Drago (Rapid-Hit Type)", "ilosc": 0, "img": "img/BladeLightningL_(Rapid-Hit_Type).webp", "ATK": 50, "DEF": 30, "STM": 20, "waga": 33.5},
   {
-  "id": "59", "typ": "blade", "nazwa": "Lightning L-Drago (Upper Type)", "ilosc": 0, "img": "img/BladeLightningL_(Upper_Type).webp", "ATK": 55, "DEF": 25, "STM": 20, "waga": 34},
+  "id": "59", "typ": "blade","kierunek": "lewy", "nazwa": "Lightning L-Drago (Upper Type)", "ilosc": 0, "img": "img/BladeLightningL_(Upper_Type).webp", "ATK": 55, "DEF": 25, "STM": 20, "waga": 34},
   {
-  "id": "60", "typ": "blade", "nazwa": "Rock Leone", "ilosc": 0, "img": "img/BladeRockLeone.webp", "ATK": 30, "DEF": 55, "STM": 15, "waga": 29.8},
+  "id": "60", "typ": "blade","kierunek": "prawy", "nazwa": "Rock Leone", "ilosc": 0, "img": "img/BladeRockLeone.webp", "ATK": 30, "DEF": 55, "STM": 15, "waga": 29.8},
   {
-  "id": "61", "typ": "blade", "nazwa": "StormPegasis", "ilosc": 0, "img": "img/BladeStorm-Pegasis.webp", "ATK": 55, "DEF": 15, "STM": 30, "waga": 31},
+  "id": "61", "typ": "blade","kierunek": "prawy", "nazwa": "StormPegasis", "ilosc": 0, "img": "img/BladeStorm-Pegasis.webp", "ATK": 55, "DEF": 15, "STM": 30, "waga": 31},
   {
-  "id": "62", "typ": "blade", "nazwa": "Trypio", "ilosc": 0, "img": "img/Trypio_3-60N.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0},
+  "id": "62", "typ": "blade","kierunek": "prawy", "nazwa": "Trypio", "ilosc": 0, "img": "img/Trypio_3-60N.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0},
   {
-  "id": "63", "typ": "blade", "nazwa": "VictoryValkyrie", "ilosc": 0, "img": "img/BladeVictory-Valkyrie.webp", "ATK": 55, "DEF": 20, "STM": 25, "waga": 33.2},
+  "id": "63", "typ": "blade","kierunek": "prawy", "nazwa": "VictoryValkyrie", "ilosc": 0, "img": "img/BladeVictory-Valkyrie.webp", "ATK": 55, "DEF": 20, "STM": 25, "waga": 33.2},
   {
-  "id": "64", "typ": "blade", "nazwa": "XenoXcalibur", "ilosc": 0, "img": "img/BladeXenoXcalibur.webp", "ATK": 65, "DEF": 25, "STM": 10, "waga": 31},
+  "id": "64", "typ": "blade","kierunek": "prawy", "nazwa": "XenoXcalibur", "ilosc": 0, "img": "img/BladeXenoXcalibur.webp", "ATK": 65, "DEF": 25, "STM": 10, "waga": 31},
    {
-  "id": "64", "typ": "blade", "nazwa": "Quetzalcoatlus", "ilosc": 0, "img": "img/BladeQuetzalcoatlus.webp", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.3},
+  "id": "64", "typ": "blade","kierunek": "prawy", "nazwa": "Quetzalcoatlus", "ilosc": 0, "img": "img/BladeQuetzalcoatlus.webp", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.3},
    {
-  "id": "65", "typ": "blade", "nazwa": "Spinosaurus", "ilosc": 0, "img": "img/BladeSpinosaurus.webp", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
+  "id": "65", "typ": "blade","kierunek": "prawy", "nazwa": "Spinosaurus", "ilosc": 0, "img": "img/BladeSpinosaurus.webp", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
    {
-  "id": "66", "typ": "blade", "nazwa": "T.Rex", "ilosc": 0, "img": "img/BladeT._Rex.webp", "ATK": 65, "DEF": 30, "STM": 5, "waga": 37},
+  "id": "66", "typ": "blade","kierunek": "prawy", "nazwa": "T.Rex", "ilosc": 0, "img": "img/BladeT._Rex.webp", "ATK": 65, "DEF": 30, "STM": 5, "waga": 37},
    {
-  "id": "67", "typ": "blade", "nazwa": "Captain America", "ilosc": 0, "img": "img/BladeCaptainAmerica.webp", "ATK": 55, "DEF": 28, "STM": 17, "waga": 32.3},
+  "id": "67", "typ": "blade","kierunek": "prawy", "nazwa": "Captain America", "ilosc": 0, "img": "img/BladeCaptainAmerica.webp", "ATK": 55, "DEF": 28, "STM": 17, "waga": 32.3},
    {
-  "id": "68", "typ": "blade", "nazwa": "Green Goblin", "ilosc": 0, "img": "img/BladeGreen_Goblin.webp", "ATK": 17, "DEF": 28, "STM": 55, "waga": 31.7},
+  "id": "68", "typ": "blade","kierunek": "prawy", "nazwa": "Green Goblin", "ilosc": 0, "img": "img/BladeGreen_Goblin.webp", "ATK": 17, "DEF": 28, "STM": 55, "waga": 31.7},
    {
-  "id": "69", "typ": "blade", "nazwa": "Iron Man", "ilosc": 0, "img": "img/BladeIron_Man.webp", "ATK": 17, "DEF": 55, "STM": 28, "waga": 33.6},
+  "id": "69", "typ": "blade","kierunek": "prawy", "nazwa": "Iron Man", "ilosc": 0, "img": "img/BladeIron_Man.webp", "ATK": 17, "DEF": 55, "STM": 28, "waga": 33.6},
    {
-  "id": "70", "typ": "blade", "nazwa": "Miles Morales", "ilosc": 0, "img": "img/BladeMiles_Morales.webp", "ATK": 12, "DEF": 33, "STM": 55, "waga": 31.7},
+  "id": "70", "typ": "blade","kierunek": "prawy", "nazwa": "Miles Morales", "ilosc": 0, "img": "img/BladeMiles_Morales.webp", "ATK": 12, "DEF": 33, "STM": 55, "waga": 31.7},
    {
-  "id": "71", "typ": "blade", "nazwa": "Red Hulk", "ilosc": 0, "img": "img/BladeRed_Hulk.webp", "ATK": 65, "DEF": 27, "STM": 8, "waga": 36.3},
+  "id": "71", "typ": "blade","kierunek": "prawy", "nazwa": "Red Hulk", "ilosc": 0, "img": "img/BladeRed_Hulk.webp", "ATK": 65, "DEF": 27, "STM": 8, "waga": 36.3},
    {
-  "id": "72", "typ": "blade", "nazwa": "Spider-Man", "ilosc": 0, "img": "img/BladeSpider-Man.webp", "ATK": 33, "DEF": 17, "STM": 50, "waga": 33.2},
+  "id": "72", "typ": "blade","kierunek": "prawy", "nazwa": "Spider-Man", "ilosc": 0, "img": "img/BladeSpider-Man.webp", "ATK": 33, "DEF": 17, "STM": 50, "waga": 33.2},
    {
-  "id": "73", "typ": "blade", "nazwa": "Thanos", "ilosc": 0, "img": "img/BladeThanos.webp", "ATK": 22, "DEF": 60, "STM": 18, "waga": 29.5},
+  "id": "73", "typ": "blade","kierunek": "prawy", "nazwa": "Thanos", "ilosc": 0, "img": "img/BladeThanos.webp", "ATK": 22, "DEF": 60, "STM": 18, "waga": 29.5},
    {
-  "id": "74", "typ": "blade", "nazwa": "Venom", "ilosc": 0, "img": "img/BladeVenom.webp", "ATK": 55, "DEF": 22, "STM": 23, "waga": 34.3},
+  "id": "74", "typ": "blade","kierunek": "prawy", "nazwa": "Venom", "ilosc": 0, "img": "img/BladeVenom.webp", "ATK": 55, "DEF": 22, "STM": 23, "waga": 34.3},
    {
-  "id": "75", "typ": "blade", "nazwa": "Chewbacca", "ilosc": 0, "img": "img/BladeChewbacca.webp", "ATK": 22, "DEF": 23, "STM": 55, "waga": 31.8},
+  "id": "75", "typ": "blade","kierunek": "prawy", "nazwa": "Chewbacca", "ilosc": 0, "img": "img/BladeChewbacca.webp", "ATK": 22, "DEF": 23, "STM": 55, "waga": 31.8},
    {
-  "id": "76", "typ": "blade", "nazwa": "Darth Vader", "ilosc": 0, "img": "img/BladeDarth_Vader.webp", "ATK": 28, "DEF": 60, "STM": 12, "waga": 30.7},
+  "id": "76", "typ": "blade","kierunek": "prawy", "nazwa": "Darth Vader", "ilosc": 0, "img": "img/BladeDarth_Vader.webp", "ATK": 28, "DEF": 60, "STM": 12, "waga": 30.7},
    {
-  "id": "77", "typ": "blade", "nazwa": "General Grievous", "ilosc": 0, "img": "img/BladeGeneral_Grievous.webp", "ATK": 22, "DEF": 55, "STM": 28, "waga": 31},
+  "id": "77", "typ": "blade","kierunek": "prawy", "nazwa": "General Grievous", "ilosc": 0, "img": "img/BladeGeneral_Grievous.webp", "ATK": 22, "DEF": 55, "STM": 28, "waga": 31},
    {
-  "id": "78", "typ": "blade", "nazwa": "Luke Skywalker", "ilosc": 0, "img": "img/BladeLuke_Skywalker.webp", "ATK": 23, "DEF": 55, "STM": 22, "waga": 31.5},
+  "id": "78", "typ": "blade","kierunek": "prawy", "nazwa": "Luke Skywalker", "ilosc": 0, "img": "img/BladeLuke_Skywalker.webp", "ATK": 23, "DEF": 55, "STM": 22, "waga": 31.5},
    {
-  "id": "79", "typ": "blade", "nazwa": "Moff Gideon", "ilosc": 0, "img": "img/BladeMoff_Gideon.webp", "ATK": 32, "DEF": 35, "STM": 33, "waga": 30.5},
+  "id": "79", "typ": "blade","kierunek": "prawy", "nazwa": "Moff Gideon", "ilosc": 0, "img": "img/BladeMoff_Gideon.webp", "ATK": 32, "DEF": 35, "STM": 33, "waga": 30.5},
    {
-  "id": "80", "typ": "blade", "nazwa": "Obi-Wan Kenobi", "ilosc": 0, "img": "img/BladeObi-Wan_Kenobi.webp", "ATK": 23, "DEF": 60, "STM": 17, "waga": 30.6},
+  "id": "80", "typ": "blade","kierunek": "prawy", "nazwa": "Obi-Wan Kenobi", "ilosc": 0, "img": "img/BladeObi-Wan_Kenobi.webp", "ATK": 23, "DEF": 60, "STM": 17, "waga": 30.6},
    {
-  "id": "81", "typ": "blade", "nazwa": "Stormtrooper", "ilosc": 0, "img": "img/BladeStormtrooper.webp", "ATK": 18, "DEF": 50, "STM": 32, "waga": 33.6},
+  "id": "81", "typ": "blade","kierunek": "prawy", "nazwa": "Stormtrooper", "ilosc": 0, "img": "img/BladeStormtrooper.webp", "ATK": 18, "DEF": 50, "STM": 32, "waga": 33.6},
   {
-  "id": "82", "typ": "blade", "nazwa": "Mandalorian", "ilosc": 0, "img": "img/BladeMandalorian.webp", "ATK": 30.3, "DEF": 40, "STM": 43, "waga": 17},
+  "id": "82", "typ": "blade","kierunek": "prawy", "nazwa": "Mandalorian", "ilosc": 0, "img": "img/BladeMandalorian.webp", "ATK": 30.3, "DEF": 40, "STM": 43, "waga": 17},
     {
-  "id": "83", "typ": "blade", "nazwa": "Bumblebee", "ilosc": 0, "img": "img/BladeBumblebee.webp", "ATK": 21, "DEF": 55, "STM": 24, "waga": 34.8},
+  "id": "83", "typ": "blade","kierunek": "prawy", "nazwa": "Bumblebee", "ilosc": 0, "img": "img/BladeBumblebee.webp", "ATK": 21, "DEF": 55, "STM": 24, "waga": 34.8},
    {
-  "id": "84", "typ": "blade", "nazwa": "Megatron", "ilosc": 0, "img": "img/BladeMegatron.webp", "ATK": 27, "DEF": 35, "STM": 38, "waga": 31.1},
+  "id": "84", "typ": "blade","kierunek": "prawy", "nazwa": "Megatron", "ilosc": 0, "img": "img/BladeMegatron.webp", "ATK": 27, "DEF": 35, "STM": 38, "waga": 31.1},
  {
-  "id": "85", "typ": "blade", "nazwa": "Optimus Primal", "ilosc": 0, "img": "img/BladeOptimus_Primal.webp", "ATK": 60, "DEF": 27, "STM": 13, "waga": 35.7},
+  "id": "85", "typ": "blade","kierunek": "prawy", "nazwa": "Optimus Primal", "ilosc": 0, "img": "img/BladeOptimus_Primal.webp", "ATK": 60, "DEF": 27, "STM": 13, "waga": 35.7},
      {
-  "id": "86", "typ": "blade", "nazwa": "Optimus Prime", "ilosc": 0, "img": "img/BladeOptimus_Prime.webp", "ATK": 22, "DEF": 55, "STM": 23, "waga": 33.3},
+  "id": "86", "typ": "blade","kierunek": "prawy", "nazwa": "Optimus Prime", "ilosc": 0, "img": "img/BladeOptimus_Prime.webp", "ATK": 22, "DEF": 55, "STM": 23, "waga": 33.3},
    {
-  "id": "87", "typ": "blade", "nazwa": "Shockwave", "ilosc": 0, "img": "img/BladeShockwave.webp", "ATK": 32, "DEF": 18, "STM": 50, "waga": 34.7},
+  "id": "87", "typ": "ublade","kierunek": "prawy", "nazwa": "Shockwave", "ilosc": 0, "img": "img/BladeShockwave.webp", "ATK": 32, "DEF": 18, "STM": 50, "waga": 34.7},
    {
-  "id": "88", "typ": "blade", "nazwa": "Starscream", "ilosc": 0, "img": "img/BladeStarscream.webp", "ATK": 18, "DEF": 27, "STM": 55, "waga": 29.5},
+  "id": "88", "typ": "blade","kierunek": "prawy", "nazwa": "Starscream", "ilosc": 0, "img": "img/BladeStarscream.webp", "ATK": 18, "DEF": 27, "STM": 55, "waga": 29.5},
   
   {
   "id": "96", "typ": "rachet", "nazwa": "1-70", "ilosc": 0, "img": "img/Ratchet1-70.webp", "ATK": 17, "DEF": 6, "STM": 7, "waga": 7.3},
@@ -3564,53 +3693,53 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "125", "typ": "rachet", "nazwa": "6-80", "ilosc": 0, "img": "img/Ratchet6-80.webp", "ATK": 14, "DEF": 6, "STM": 10, "waga": 6.9 },
   {
-  "id": "126", "typ": "bit", "nazwa": "Ball", "ilosc": 0, "img": "img/BitBall.webp", "ATK":15, "DEF": 25, "STM": 50, "waga": 2.1, "DASH": 10, "BURST_RES": 30},
+  "id": "126", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Ball", "ilosc": 0, "img": "img/BitBall.webp", "ATK":15, "DEF": 25, "STM": 50, "waga": 2.1, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "127", "typ": "bit", "nazwa": "Cyclone", "ilosc": 0, "img": "img/BitCyclone.webp", "ATK": 40, "DEF": 5, "STM": 10, "waga":2.1, "DASH": 45, "BURST_RES": 80},
+  "id": "127", "typ": "bit","rodzaj": "atak", "nazwa": "Cyclone", "ilosc": 0, "img": "img/BitCyclone.webp", "ATK": 40, "DEF": 5, "STM": 10, "waga":2.1, "DASH": 45, "BURST_RES": 80},
   {
-  "id": "128", "typ": "bit", "nazwa": "Dot", "ilosc": 0, "img": "img/BitDot.webp", "ATK": 10, "DEF": 55, "STM": 25, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  "id": "128", "typ": "bit","rodzaj": "obrona", "nazwa": "Dot", "ilosc": 0, "img": "img/BitDot.webp", "ATK": 10, "DEF": 55, "STM": 25, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "129", "typ": "bit", "nazwa": "Elevate", "ilosc": 0, "img": "img/BitElevate.webp", "ATK": 30, "DEF": 15, "STM": 20, "waga": 3.2, "DASH": 35, "BURST_RES": 30},
+  "id": "129", "typ": "bit","rodzaj": "balans", "nazwa": "Elevate", "ilosc": 0, "img": "img/BitElevate.webp", "ATK": 30, "DEF": 15, "STM": 20, "waga": 3.2, "DASH": 35, "BURST_RES": 30},
   {
-  "id": "130", "typ": "bit", "nazwa": "Flat", "ilosc": 0, "img": "img/BitFlat.webp", "ATK": 40, "DEF": 15, "STM": 10, "waga": 2.2, "DASH": 35, "BURST_RES": 80},
+  "id": "130", "typ": "bit","rodzaj": "atak", "nazwa": "Flat", "ilosc": 0, "img": "img/BitFlat.webp", "ATK": 40, "DEF": 15, "STM": 10, "waga": 2.2, "DASH": 35, "BURST_RES": 80},
   {
-  "id": "131", "typ": "bit", "nazwa": "Gear Ball", "ilosc": 0, "img": "img/BitGearBall.webp", "ATK": 10, "DEF": 15, "STM": 45, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
+  "id": "131", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Gear Ball", "ilosc": 0, "img": "img/BitGearBall.webp", "ATK": 10, "DEF": 15, "STM": 45, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
   {
-  "id": "132", "typ": "bit", "nazwa": "Gear Flat", "ilosc": 0, "img": "img/BitGearFlat.webp", "ATK": 50, "DEF": 5, "STM": 5, "waga": 2.3, "DASH": 40, "BURST_RES": 80},
+  "id": "132", "typ": "bit","rodzaj": "atak", "nazwa": "Gear Flat", "ilosc": 0, "img": "img/BitGearFlat.webp", "ATK": 50, "DEF": 5, "STM": 5, "waga": 2.3, "DASH": 40, "BURST_RES": 80},
   {
-  "id": "133", "typ": "bit", "nazwa": "Gear Needle", "ilosc": 0, "img": "img/BitGearNeedle.webp", "ATK": 20, "DEF": 40, "STM": 10, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
+  "id": "133", "typ": "bit","rodzaj": "obrona", "nazwa": "Gear Needle", "ilosc": 0, "img": "img/BitGearNeedle.webp", "ATK": 20, "DEF": 40, "STM": 10, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
   {
-  "id": "134", "typ": "bit", "nazwa": "Gear Point", "ilosc": 0, "img": "img/BitGearPoint.webp", "ATK": 30, "DEF": 25, "STM": 15, "waga": 2.3, "DASH": 30, "BURST_RES": 80},
+  "id": "134", "typ": "bit","rodzaj": "balans", "nazwa": "Gear Point", "ilosc": 0, "img": "img/BitGearPoint.webp", "ATK": 30, "DEF": 25, "STM": 15, "waga": 2.3, "DASH": 30, "BURST_RES": 80},
   {
-  "id": "135", "typ": "bit", "nazwa": "High Needle", "ilosc": 0, "img": "img/BitHighNeedle.webp", "ATK": 15, "DEF": 55, "STM": 20, "waga": 2.2, "DASH": 10, "BURST_RES": 30},
+  "id": "135", "typ": "bit","rodzaj": "obrona", "nazwa": "High Needle", "ilosc": 0, "img": "img/BitHighNeedle.webp", "ATK": 15, "DEF": 55, "STM": 20, "waga": 2.2, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "136", "typ": "bit", "nazwa": "High Taper", "ilosc": 0, "img": "img/BitHighTaper.webp", "ATK": 30, "DEF": 25, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "136", "typ": "bit","rodzaj": "balans", "nazwa": "High Taper", "ilosc": 0, "img": "img/BitHighTaper.webp", "ATK": 30, "DEF": 25, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "137", "typ": "bit", "nazwa": "Low Flat", "ilosc": 0, "img": "img/BitLowFlat.webp", "ATK": 45, "DEF": 5, "STM": 10, "waga": 2.1, "DASH": 40, "BURST_RES": 80},
+  "id": "137", "typ": "bit","rodzaj": "atak", "nazwa": "Low Flat", "ilosc": 0, "img": "img/BitLowFlat.webp", "ATK": 45, "DEF": 5, "STM": 10, "waga": 2.1, "DASH": 40, "BURST_RES": 80},
   {
-  "id": "138", "typ": "bit", "nazwa": "Merge", "ilosc": 0, "img": "img/BitMerge.webp", "ATK": 50, "DEF": 20, "STM": 10, "waga": 3.4, "DASH": 20, "BURST_RES": 80},
+  "id": "138", "typ": "bit","rodzaj": "balans", "nazwa": "Merge", "ilosc": 0, "img": "img/BitMerge.webp", "ATK": 50, "DEF": 20, "STM": 10, "waga": 3.4, "DASH": 20, "BURST_RES": 80},
   {
-  "id": "139", "typ": "bit", "nazwa": "Needle", "ilosc": 0, "img": "img/BitNeedle.webp", "ATK": 10, "DEF": 50, "STM": 30, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  "id": "139", "typ": "bit","rodzaj": "obrona", "nazwa": "Needle", "ilosc": 0, "img": "img/BitNeedle.webp", "ATK": 10, "DEF": 50, "STM": 30, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "140", "typ": "bit", "nazwa": "Orb", "ilosc": 0, "img": "img/BitOrb.webp", "ATK": 10, "DEF": 30, "STM": 50, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  "id": "140", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Orb", "ilosc": 0, "img": "img/BitOrb.webp", "ATK": 10, "DEF": 30, "STM": 50, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "141", "typ": "bit", "nazwa": "Point", "ilosc": 0, "img": "img/BitPoint.webp", "ATK": 25, "DEF": 25, "STM": 25, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "141", "typ": "bit","rodzaj": "balans", "nazwa": "Point", "ilosc": 0, "img": "img/BitPoint.webp", "ATK": 25, "DEF": 25, "STM": 25, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "142", "typ": "bit", "nazwa": "Quake", "ilosc": 0, "img": "img/BitQuake.webp", "ATK": 55, "DEF": 15, "STM": 5, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "142", "typ": "bit","rodzaj": "atak", "nazwa": "Quake", "ilosc": 0, "img": "img/BitQuake.webp", "ATK": 55, "DEF": 15, "STM": 5, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "143", "typ": "bit", "nazwa": "Rush", "ilosc": 0, "img": "img/BitRush.webp", "ATK": 40, "DEF": 10, "STM": 20, "waga": 2.1, "DASH": 30, "BURST_RES": 80},
+  "id": "143", "typ": "bit","rodzaj": "atak", "nazwa": "Rush", "ilosc": 0, "img": "img/BitRush.webp", "ATK": 40, "DEF": 10, "STM": 20, "waga": 2.1, "DASH": 30, "BURST_RES": 80},
   {
-  "id": "144", "typ": "bit", "nazwa": "Spike", "ilosc": 0, "img": "img/BitSpike.webp", "ATK": 10, "DEF": 45, "STM": 35, "waga": 2, "DASH": 10, "BURST_RES": 30},
+  "id": "144", "typ": "bit","rodzaj": "obrona", "nazwa": "Spike", "ilosc": 0, "img": "img/BitSpike.webp", "ATK": 10, "DEF": 45, "STM": 35, "waga": 2, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "145", "typ": "bit", "nazwa": "Taper", "ilosc": 0, "img": "img/BitTaper.webp", "ATK": 35, "DEF": 20, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "145", "typ": "bit","rodzaj": "balans", "nazwa": "Taper", "ilosc": 0, "img": "img/BitTaper.webp", "ATK": 35, "DEF": 20, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "146", "typ": "bit", "nazwa": "Trans Point", "ilosc": 0, "img": "img/BitTransPoint.webp", "ATK": 35, "DEF": 25, "STM": 25, "waga": 2.4, "DASH": 15, "BURST_RES": 80},
+  "id": "146", "typ": "bit","rodzaj": "balans", "nazwa": "Trans Point", "ilosc": 0, "img": "img/BitTransPoint.webp", "ATK": 35, "DEF": 25, "STM": 25, "waga": 2.4, "DASH": 15, "BURST_RES": 80},
   {
-  "id": "147", "typ": "bit", "nazwa": "Unite", "ilosc": 0, "img": "img/BitUnite.webp", "ATK": 25, "DEF": 25, "STM": 30, "waga": 2.1, "DASH": 25, "BURST_RES": 80},
+  "id": "147", "typ": "bit","rodzaj": "balans", "nazwa": "Unite", "ilosc": 0, "img": "img/BitUnite.webp", "ATK": 25, "DEF": 25, "STM": 30, "waga": 2.1, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "148", "typ": "bit", "nazwa": "Accel", "ilosc": 0, "img": "img/BitAccel.webp", "ATK": 40, "DEF": 10, "STM": 10, "waga": 2.6, "DASH": 40, "BURST_RES": 80},
+  "id": "148", "typ": "bit","rodzaj": "atak", "nazwa": "Accel", "ilosc": 0, "img": "img/BitAccel.webp", "ATK": 40, "DEF": 10, "STM": 10, "waga": 2.6, "DASH": 40, "BURST_RES": 80},
   {
-  "id": "149", "typ": "bit", "nazwa": "Bound Spike", "ilosc": 0, "img": "img/BitBoundSpike.webp", "ATK": 5, "DEF": 60, "STM": 30, "waga": 2.0, "DASH": 5, "BURST_RES": 30},
+  "id": "149", "typ": "bit","rodzaj": "obrona", "nazwa": "Bound Spike", "ilosc": 0, "img": "img/BitBoundSpike.webp", "ATK": 5, "DEF": 60, "STM": 30, "waga": 2.0, "DASH": 5, "BURST_RES": 30},
   {
     "typ": "cx-lock-chip",
     "nazwa": "Dran",
@@ -3724,7 +3853,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "163"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Flame",
     "ilosc": 0,
     "ATK": 5,
@@ -3735,7 +3864,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "164"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Antler",
     "ilosc": 0,
     "ATK": 8,
@@ -3746,7 +3875,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "165"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Arc",
     "ilosc": 0,
     "ATK": 10,
@@ -3757,7 +3886,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "166"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Blast",
     "ilosc": 0,
     "ATK": 50,
@@ -3768,7 +3897,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "167"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Brave",
     "ilosc": 0,
     "ATK": 40,
@@ -3779,7 +3908,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "168"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Brush",
     "ilosc": 0,
     "ATK": 40,
@@ -3790,7 +3919,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "169"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Dark",
     "ilosc": 0,
     "ATK": 10,
@@ -3802,7 +3931,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
 {
   "id": "171",
-  "typ": "cx-main-blade",
+  "typ": "cx-main-blade","kierunek": "prawy",
   "nazwa": "Eclipse",
   "ilosc": 0,
   "maTryby": true,
@@ -3828,7 +3957,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Fang",
     "ilosc": 0,
     "ATK": 35,
@@ -3839,7 +3968,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "172"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Fort",
     "ilosc": 0,
     "ATK": 24,
@@ -3850,7 +3979,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "173"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Reaper",
     "ilosc": 0,
     "ATK": 25,
@@ -3861,7 +3990,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "174"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Volt",
     "ilosc": 0,
     "ATK": 45,
@@ -3872,7 +4001,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "175"
   },
   {
-    "typ": "cx-main-blade",
+    "typ": "cx-main-blade","kierunek": "prawy",
     "nazwa": "Wriggle",
     "ilosc": 0,
     "ATK": 18,
@@ -4018,7 +4147,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "188",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "atak",
     "nazwa": "Gear Rush",
     "ilosc": 0,
     "img": "img/BitGearRush.webp",
@@ -4031,7 +4160,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "189",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "balans",
     "nazwa": "Kick",
     "ilosc": 0,
     "img": "img/BitKick.webp",
@@ -4044,7 +4173,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "190",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Low Orb",
     "ilosc": 0,
     "img": "img/BitLowOrb.webp",
@@ -4057,7 +4186,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "191",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "balans",
     "nazwa": "Trans Kick",
     "ilosc": 0,
     "img": "img/BitTransKick.webp",
@@ -4070,7 +4199,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "192",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "atak",
     "nazwa": "Vortex",
     "ilosc": 0,
     "img": "img/BitVortex.webp",
@@ -4083,7 +4212,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "193_wallball", 
-    "typ": "bit",
+    "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Wall Ball",
     "ilosc": 0,
     "img": "img/BitWallBall.webp",
@@ -4096,7 +4225,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "193_wedge", 
-    "typ": "bit",
+    "typ": "bit","rodzaj": "obrona",
     "nazwa": "Wedge",
     "ilosc": 0,
     "img": "img/BitWedge.webp",
@@ -4109,7 +4238,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "194",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Disk Ball",
     "ilosc": 0,
     "img": "img/BitDiskBall.webp",
@@ -4122,7 +4251,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "195",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Free Ball",
     "ilosc": 0,
     "img": "img/BitFreeBall.webp",
@@ -4135,7 +4264,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "196",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Glide",
     "ilosc": 0,
     "img": "img/BitGlide.webp",
@@ -4148,7 +4277,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "197",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "balans",
     "nazwa": "Hexa",
     "ilosc": 0,
     "img": "img/BitHexa.webp",
@@ -4161,7 +4290,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "198",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "atak",
     "nazwa": "Level",
     "ilosc": 0,
     "img": "img/BitLevel.webp",
@@ -4174,7 +4303,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "199",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "atak",
     "nazwa": "Low Rush",
     "ilosc": 0,
     "img": "img/BitLowRush.webp",
@@ -4187,7 +4316,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "200",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "obrona",
     "nazwa": "Metal Needle",
     "ilosc": 0,
     "img": "img/BitMetalNeedle.webp",
@@ -4200,7 +4329,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "201",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "atak",
     "nazwa": "Rubber Accel",
     "ilosc": 0,
     "img": "img/BitRubberAccel.webp",
@@ -4213,7 +4342,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "202",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "atak",
     "nazwa": "Under Flat",
     "ilosc": 0,
     "img": "img/BitUnderFlat.webp",
@@ -4226,7 +4355,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "203",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "obrona",
     "nazwa": "Under Needle",
     "ilosc": 0,
     "img": "img/BitUnderNeedle.webp",
@@ -4239,7 +4368,7 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   {
     "id": "204",
-    "typ": "bit",
+    "typ": "bit","rodzaj": "balans",
     "nazwa": "Zap",
     "ilosc": 0,
     "img": "img/BitZap.webp",
@@ -4254,6 +4383,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "id": "205",
     "typ": "rachet",
     "nazwa": "Turbo",
+	"rodzaj": "atak",
     "ilosc": 0,
     "img": "img/RatchetBitTurbo.webp",
     "ATK": 30,
@@ -4265,7 +4395,7 @@ document.addEventListener('DOMContentLoaded', function() {
     "integrujeBit": true
  },
   {
-  "id": "206", "typ": "blade", "nazwa": "ClockMirage", "ilosc": 0, "img": "img/BladeClockMirage.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0}
+  "id": "206", "typ": "ux-blade","kierunek": "prawy", "nazwa": "ClockMirage", "ilosc": 0, "img": "img/BladeClockMirage.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0}
   
   
 ]
