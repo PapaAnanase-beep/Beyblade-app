@@ -2643,20 +2643,24 @@ function eksportujDeckDoPNG(deckId) {
         return;
     }
 
+    // --- NOWY KROK: Znajdź kontener z przyciskami wewnątrz karty ---
+    const przyciskiAkcji = kartaDecku.querySelector('.item-actions');
+
     const nazwaDecku = kartaDecku.querySelector('h4')?.textContent || 'deck_bez_nazwy';
     const nazwaPliku = `${nazwaDecku.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
 
     showNotification("Przygotowuję obraz PNG...", 2500, 'info');
 
-    // --- KLUCZOWA ZMIANA: Prawidłowe opcje dla dom-to-image-more ---
+    // --- NOWY KROK: Ukryj przyciski przed zrobieniem zdjęcia ---
+    if (przyciskiAkcji) {
+        przyciskiAkcji.style.display = 'none';
+    }
+
     const opcjeRenderowania = {
         bgcolor: '#101018',
-        // Ta opcja jest kluczem do rozwiązania problemu z brakującymi obrazkami.
-        // Nie podając wartości, zmuszamy bibliotekę, aby poczekała na załadowanie oryginalnych obrazów.
-        imagePlaceholder: undefined 
+        imagePlaceholder: undefined // Kluczowe dla poprawnego ładowania obrazków
     };
 
-    // Używamy standardowej funkcji toPng, ale z nowymi opcjami
     domtoimage.toPng(kartaDecku, opcjeRenderowania)
         .then(function (dataUrl) {
             const link = document.createElement('a');
@@ -2668,6 +2672,13 @@ function eksportujDeckDoPNG(deckId) {
         .catch(function (error) {
             console.error('Błąd podczas generowania obrazu z dom-to-image:', error);
             showNotification("Wystąpił błąd podczas eksportu do PNG.", 3000, 'error');
+        })
+        .finally(() => {
+            // --- NOWY KROK: Zawsze pokazuj przyciski z powrotem po wszystkim ---
+            // .finally() wykona się zarówno po sukcesie, jak i po błędzie.
+            if (przyciskiAkcji) {
+                przyciskiAkcji.style.display = 'flex'; // Przywróć oryginalny styl wyświetlania
+            }
         });
 }
 
