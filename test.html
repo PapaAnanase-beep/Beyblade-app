@@ -706,6 +706,20 @@ align-items: center;
     z-index: 1;
 }
 
+/* --- NOWE STYLE DLA TYMCZASOWEGO OBRAZKA TŁA PRZY EKSPORCIE PNG --- */
+
+.background-symbol-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    opacity: 0.15; /* Ustaw tutaj tę samą wartość, co dla :before */
+    z-index: 0;
+    /* Ten element będzie dodawany i usuwany przez JS, więc nie musi być display: none */
+}
 
 </style>
 </head>
@@ -2768,45 +2782,78 @@ function displaySavedDecks() {
 function eksportujDeckDoPNG(deckId) {
     const kartaDecku = document.querySelector(`.saved-deck-card[data-deck-id="${deckId}"]`);
     if (!kartaDecku) {
-        showNotification("Błąd: Nie znaleziono karty decku.", 3000, 'error');
+        showNotification("Błąd: Nie znaleziono karty decku do eksportu.", 3000, 'error');
         return;
     }
 
-    // --- NOWY KROK: Znajdź kontener z przyciskami wewnątrz karty ---
     const przyciskiAkcji = kartaDecku.querySelector('.item-actions');
-
     const nazwaDecku = kartaDecku.querySelector('h4')?.textContent || 'deck_bez_nazwy';
     const nazwaPliku = `${nazwaDecku.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
 
     showNotification("Przygotowuję obraz PNG...", 2500, 'info');
 
-    // --- NOWY KROK: Ukryj przyciski przed zrobieniem zdjęcia ---
+    // Krok 1: Ukryj elementy, których nie chcemy na zdjęciu (przyciski)
     if (przyciskiAkcji) {
         przyciskiAkcji.style.display = 'none';
     }
 
+    // === NOWA LOGIKA: Dynamiczne wstawianie obrazków tła ===
+    const zestawyWDecku = kartaDecku.querySelectorAll('.deck-card-set-preview');
+    const dodaneObrazkiTla = []; // Tablica do przechowywania dodanych elementów, aby je potem usunąć
+
+    zestawyWDecku.forEach(zestawNode => {
+        // Odczytaj URL obrazka tła bezpośrednio ze stylu inline
+        const stylZestawu = zestawNode.getAttribute('style');
+        const urlMatch = stylZestawu.match(/--bg-symbol-url:\s*url\(['"]?([^'"]+)['"]?\)/);
+
+        if (urlMatch && urlMatch[1]) {
+            const urlObrazka = urlMatch[1];
+            // Stwórz nowy element <img>, który będzie naszym tymczasowym tłem
+            const bgImage = document.createElement('img');
+            bgImage.src = urlObrazka;
+            bgImage.className = 'background-symbol-img'; // Użyj stylów, które dodaliśmy
+
+            // Wstaw obrazek jako pierwszy element wewnątrz kontenera zestawu,
+            // aby był on na samym spodzie (z-index: 0)
+            zestawNode.prepend(bgImage);
+            dodaneObrazkiTla.push(bgImage); // Zapisz referencję do usunięcia
+        }
+    });
+    // === KONIEC NOWEJ LOGIKI ===
+
     const opcjeRenderowania = {
         bgcolor: '#101018',
-        imagePlaceholder: undefined // Kluczowe dla poprawnego ładowania obrazków
+        imagePlaceholder: undefined
     };
 
     domtoimage.toPng(kartaDecku, opcjeRenderowania)
         .then(function (dataUrl) {
-            const link = document.createElement('a');
-            link.download = nazwaPliku;
-            link.href = dataUrl;
-            link.click();
-            showNotification("Eksport do PNG zakończony!", 2500, 'success');
+            // --- Logika zapisu (dla przeglądarki i aplikacji Android) ---
+            if (window.Android && typeof window.Android.zapiszObrazPNG === 'function') {
+                window.Android.zapiszObrazPNG(dataUrl, nazwaPliku);
+                showNotification("Przekazano obraz do zapisu w aplikacji...", 2500, 'success');
+            } else {
+                const link = document.createElement('a');
+                link.download = nazwaPliku;
+                link.href = dataUrl;
+                link.click();
+                showNotification("Eksport do PNG zakończony!", 2500, 'success');
+            }
         })
         .catch(function (error) {
             console.error('Błąd podczas generowania obrazu z dom-to-image:', error);
             showNotification("Wystąpił błąd podczas eksportu do PNG.", 3000, 'error');
         })
         .finally(() => {
-            // --- NOWY KROK: Zawsze pokazuj przyciski z powrotem po wszystkim ---
-            // .finally() wykona się zarówno po sukcesie, jak i po błędzie.
+            // --- OSTATECZNE CZYSZCZENIE ---
+            // Niezależnie od sukcesu czy porażki, musimy posprzątać po sobie.
+
+            // 1. Usuń tymczasowo dodane obrazki tła
+            dodaneObrazkiTla.forEach(img => img.remove());
+
+            // 2. Pokaż z powrotem ukryte przyciski
             if (przyciskiAkcji) {
-                przyciskiAkcji.style.display = 'flex'; // Przywróć oryginalny styl wyświetlania
+                przycisksyAkcji.style.display = 'flex';
             }
         });
 }
