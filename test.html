@@ -2797,65 +2797,70 @@ function eksportujDeckDoPNG(deckId) {
         przyciskiAkcji.style.display = 'none';
     }
 
-    // === NOWA LOGIKA: Dynamiczne wstawianie obrazków tła ===
+    // Krok 2: Dynamiczne wstawianie obrazków tła
     const zestawyWDecku = kartaDecku.querySelectorAll('.deck-card-set-preview');
-    const dodaneObrazkiTla = []; // Tablica do przechowywania dodanych elementów, aby je potem usunąć
+    const dodaneObrazkiTla = [];
 
     zestawyWDecku.forEach(zestawNode => {
-        // Odczytaj URL obrazka tła bezpośrednio ze stylu inline
         const stylZestawu = zestawNode.getAttribute('style');
         const urlMatch = stylZestawu.match(/--bg-symbol-url:\s*url\(['"]?([^'"]+)['"]?\)/);
 
         if (urlMatch && urlMatch[1]) {
             const urlObrazka = urlMatch[1];
-            // Stwórz nowy element <img>, który będzie naszym tymczasowym tłem
-            const bgImage = document.createElement('img');
-            bgImage.src = urlObrazka;
-            bgImage.className = 'background-symbol-img'; // Użyj stylów, które dodaliśmy
-
-            // Wstaw obrazek jako pierwszy element wewnątrz kontenera zestawu,
-            // aby był on na samym spodzie (z-index: 0)
-            zestawNode.prepend(bgImage);
-            dodaneObrazkiTla.push(bgImage); // Zapisz referencję do usunięcia
+            
+            // Sprawdź, czy URL nie jest pusty (na wszelki wypadek)
+            if (urlObrazka.trim() !== "") {
+                const bgImage = document.createElement('img');
+                bgImage.src = urlObrazka;
+                bgImage.className = 'background-symbol-img';
+                
+                zestawNode.prepend(bgImage); // Wstawia obrazek na początek kontenera zestawu
+                dodaneObrazkiTla.push(bgImage);
+            }
         }
     });
-    // === KONIEC NOWEJ LOGIKI ===
 
     const opcjeRenderowania = {
         bgcolor: '#101018',
-        imagePlaceholder: undefined
+        imagePlaceholder: undefined,
+        // Można dodać cacheBust: true, jeśli obrazki się nie odświeżają
+        // cacheBust: true 
     };
 
-    domtoimage.toPng(kartaDecku, opcjeRenderowania)
-        .then(function (dataUrl) {
-            // --- Logika zapisu (dla przeglądarki i aplikacji Android) ---
-            if (window.Android && typeof window.Android.zapiszObrazPNG === 'function') {
-                window.Android.zapiszObrazPNG(dataUrl, nazwaPliku);
-                showNotification("Przekazano obraz do zapisu w aplikacji...", 2500, 'success');
-            } else {
-                const link = document.createElement('a');
-                link.download = nazwaPliku;
-                link.href = dataUrl;
-                link.click();
-                showNotification("Eksport do PNG zakończony!", 2500, 'success');
-            }
-        })
-        .catch(function (error) {
-            console.error('Błąd podczas generowania obrazu z dom-to-image:', error);
-            showNotification("Wystąpił błąd podczas eksportu do PNG.", 3000, 'error');
-        })
-        .finally(() => {
-            // --- OSTATECZNE CZYSZCZENIE ---
-            // Niezależnie od sukcesu czy porażki, musimy posprzątać po sobie.
+    // Krok 3: Wygeneruj obraz PNG (z opóźnieniem, aby dać obrazkom tła czas na załadowanie)
+    setTimeout(() => {
+        domtoimage.toPng(kartaDecku, opcjeRenderowania)
+            .then(function (dataUrl) {
+                // Logika zapisu
+                if (window.Android && typeof window.Android.zapiszObrazPNG === 'function') {
+                    // Usuwamy prefix 'data:image/png;base64,' przed wysłaniem do Androida
+                    const base64Data = dataUrl.split(',')[1];
+                    window.Android.zapiszObrazPNG(base64Data, nazwaPliku);
+                    showNotification("Przekazano obraz do zapisu w aplikacji...", 2500, 'success');
+                } else {
+                    const link = document.createElement('a');
+                    link.download = nazwaPliku;
+                    link.href = dataUrl;
+                    link.click();
+                    showNotification("Eksport do PNG zakończony!", 2500, 'success');
+                }
+            })
+            .catch(function (error) {
+                console.error('Błąd podczas generowania obrazu z dom-to-image:', error);
+                showNotification("Wystąpił błąd podczas eksportu do PNG.", 4000, 'error');
+            })
+            .finally(() => {
+                // --- Krok 4: OSTATECZNE CZYSZCZENIE (po wszystkim) ---
+                
+                // 1. Usuń tymczasowo dodane obrazki tła
+                dodaneObrazkiTla.forEach(img => img.remove());
 
-            // 1. Usuń tymczasowo dodane obrazki tła
-            dodaneObrazkiTla.forEach(img => img.remove());
-
-            // 2. Pokaż z powrotem ukryte przyciski
-            if (przyciskiAkcji) {
-                przycisksyAkcji.style.display = 'flex';
-            }
-        });
+                // 2. Pokaż z powrotem ukryte przyciski (Z POPRAWIONĄ NAZWĄ ZMIENNEJ)
+                if (przyciskiAkcji) {
+                    przyciskiAkcji.style.display = 'flex';
+                }
+            });
+    }, 500); // Dodajemy 500ms opóźnienia - kluczowe dla załadowania obrazków
 }
 
 function edytujDeck(deckId) {
