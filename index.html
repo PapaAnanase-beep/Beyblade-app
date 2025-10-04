@@ -9,6 +9,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dom-to-image-more@2.10.1/dist/dom-to-image-more.min.js"></script>
+
+
 <style>
 html, body {
     height:100%;
@@ -245,6 +248,12 @@ button, a, select, input, textarea { outline: none; }
     margin-bottom: 10px; padding-bottom: 10px; 
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
+.deck-card-set-preview:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
 .deck-card-set-preview:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
 .deck-card-set-preview strong { font-size:0.9em; display: block; margin-bottom: 6px; color: #c080ff;}
 .deck-card-set-preview .wynik-zestaw-obrazki { 
@@ -699,7 +708,8 @@ button, a, select, input, textarea { outline: none; }
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
-		<li><strong>v2.2.0:</strong> dodanie systemu trybów na elementach np.<em>Eclipse</em> i <em>Dual</em> </li>
+		<li><strong>v2.2.1:</strong> Możliwość zapisu decku jako png</li>
+		<li><strong>v2.2.0:</strong> Dodanie systemu trybów na elementach np.<em>Eclipse</em> i <em>Dual</em> </li>
 		<li><strong>v2.1.4:</strong> Rozdzielenie <em>Eclipse</em> na upper i smash mode </li>
 		<li><strong>v2.1.3:</strong> Dodano część brakujących statystyk</li>
 		<li><strong>v2.1.2:</strong> Dodano Patch Note</li>
@@ -2615,12 +2625,63 @@ function displaySavedDecks() {
             setStatsSummaryHTML += `</div>`;
             setsHTML += `<div class="deck-card-set-preview"><strong style="text-transform: capitalize; display: block; text-align: center; margin-bottom: 8px;">Zestaw ${index + 1} (${seriaZestawu.toUpperCase().replace('_', '/')})</strong>${setImagesHTML}<div style="font-size:0.8em; color:#ddd; margin-top: 8px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">${setNameHTML}</div>${setStatsSummaryHTML}</div>`;
         });
-        const actionsHTML = `<div class="item-actions" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;"><button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}'">Edytuj</button><button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button></div>`;
-        deckCard.innerHTML = `<h4 style="text-align:center; color:#e0e0e0; margin-bottom: 5px;">${deck.name || 'Deck bez nazwy'}</h4><p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')} ${new Date(deck.lastModified).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}` : `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')} ${new Date(deck.timestamp || Date.now()).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}`}</p>${setsHTML}${actionsHTML}`;
+       const actionsHTML = `
+    <div class="item-actions" style="margin-top: 15px; padding-top: 15px;">
+        <button class="button-auto-width" onclick="edytujDeck('${deck.id}')" title="Edytuj '${deck.name || ''}'">Edytuj</button>
+        <button class="button-auto-width" onclick="eksportujDeckDoPNG('${deck.id}')" title="Zapisz jako obraz PNG">Eksportuj PNG</button>
+        <button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')" title="Usuń '${deck.name || ''}'">Usuń</button>
+    </div>
+`;
+
+		deckCard.innerHTML = `<h4 style="text-align:center; color:#e0e0e0; margin-bottom: 5px;">${deck.name || 'Deck bez nazwy'}</h4><p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')} ${new Date(deck.lastModified).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}` : `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')} ${new Date(deck.timestamp || Date.now()).toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}`}</p>${setsHTML}${actionsHTML}`;
         container.appendChild(deckCard);
     });
 }
+function eksportujDeckDoPNG(deckId) {
+    const kartaDecku = document.querySelector(`.saved-deck-card[data-deck-id="${deckId}"]`);
+    if (!kartaDecku) {
+        showNotification("Błąd: Nie znaleziono karty decku.", 3000, 'error');
+        return;
+    }
 
+    // --- NOWY KROK: Znajdź kontener z przyciskami wewnątrz karty ---
+    const przyciskiAkcji = kartaDecku.querySelector('.item-actions');
+
+    const nazwaDecku = kartaDecku.querySelector('h4')?.textContent || 'deck_bez_nazwy';
+    const nazwaPliku = `${nazwaDecku.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+
+    showNotification("Przygotowuję obraz PNG...", 2500, 'info');
+
+    // --- NOWY KROK: Ukryj przyciski przed zrobieniem zdjęcia ---
+    if (przyciskiAkcji) {
+        przyciskiAkcji.style.display = 'none';
+    }
+
+    const opcjeRenderowania = {
+        bgcolor: '#101018',
+        imagePlaceholder: undefined // Kluczowe dla poprawnego ładowania obrazków
+    };
+
+    domtoimage.toPng(kartaDecku, opcjeRenderowania)
+        .then(function (dataUrl) {
+            const link = document.createElement('a');
+            link.download = nazwaPliku;
+            link.href = dataUrl;
+            link.click();
+            showNotification("Eksport do PNG zakończony!", 2500, 'success');
+        })
+        .catch(function (error) {
+            console.error('Błąd podczas generowania obrazu z dom-to-image:', error);
+            showNotification("Wystąpił błąd podczas eksportu do PNG.", 3000, 'error');
+        })
+        .finally(() => {
+            // --- NOWY KROK: Zawsze pokazuj przyciski z powrotem po wszystkim ---
+            // .finally() wykona się zarówno po sukcesie, jak i po błędzie.
+            if (przyciskiAkcji) {
+                przyciskiAkcji.style.display = 'flex'; // Przywróć oryginalny styl wyświetlania
+            }
+        });
+}
 
 function edytujDeck(deckId) {
     const savedDecks = getSavedDecks(); // Pobierz najświeższą listę decków
@@ -3287,7 +3348,7 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "15", "typ": "blade", "nazwa": "WizardRod", "ilosc": 0, "img": "img/BladeWizardRod.webp", "ATK": 15, "DEF": 25, "STM": 60, "waga": 35.3},
   {
-  "id": "16", "typ": "blade", "nazwa": "WyvernHover", "ilosc": 0, "img": "https://iili.io/K2FvNCN.png", "ATK": 13, "DEF": 60, "STM": 27, "waga": 35},
+  "id": "16", "typ": "blade", "nazwa": "WyvernHover", "ilosc": 0, "img": "img/BladeWyvernHover.webp", "ATK": 13, "DEF": 60, "STM": 27, "waga": 35},
   {
   "id": "17", "typ": "blade", "nazwa": "BlackShell", "ilosc": 0, "img": "img/BladeBlackShell.webp", "ATK": 10, "DEF": 65, "STM": 25, "waga": 32.4},
   {
@@ -3344,34 +3405,34 @@ document.addEventListener('DOMContentLoaded', function() {
   "id": "43", "typ": "blade",
     "nazwa": "Bite Croc",
     "ilosc": 1,
-    "img": "https://iili.io/K2FgVKN.md.png",
+    "img": "img/BladeBite-Croc.webp",
     "ATK": 60,
     "DEF": 22,
     "STM": 18,
     "waga": 34.1
   },
 {
-  "id": "44", "typ": "blade", "nazwa": "GillShark", "ilosc": 0, "img": "https://i.ibb.co/9k3FVVRz/Gill-Shark-4-70-O-removebg-preview.png", "ATK": 20, "DEF": 25, "STM": 55, "waga": 29.6},
+  "id": "44", "typ": "blade", "nazwa": "GillShark", "ilosc": 0, "img": "img/BladeGill-Shark.webp", "ATK": 20, "DEF": 25, "STM": 55, "waga": 29.6},
   {
   "id": "45", "typ": "blade", "nazwa": "ShinobiKnife", "ilosc": 0, "img": "img/BladeKnifeShinobi.webp", "ATK": 23, "DEF": 50, "STM": 27, "waga": 30.9},
   {
-  "id": "46", "typ": "blade", "nazwa": "TriceraSpiky", "ilosc": 0, "img": "img/Mosasaurus_9-60U.webp", "ATK": 32, "DEF": 55, "STM": 13, "waga": 29.9},
+  "id": "46", "typ": "blade", "nazwa": "TriceraSpiky", "ilosc": 0, "img": "img/BladeTriceraSpiky.webp", "ATK": 32, "DEF": 55, "STM": 13, "waga": 29.9},
   {
-  "id": "47", "typ": "blade", "nazwa": "TyrannoRoar", "ilosc": 0, "img": "https://i.ibb.co/tPBZWyBm/Roar-Tyranno-9-60-GF-removebg-preview.png", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
+  "id": "47", "typ": "blade", "nazwa": "TyrannoRoar", "ilosc": 0, "img": "img/BladeRoar-Tyranno.webp", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
   {
-  "id": "48", "typ": "blade", "nazwa": "BearScratch", "ilosc": 0, "img": "https://i.ibb.co/j9522psj/Savage-Bear-3-60-S-removebg-preview.png", "ATK": 25, "DEF": 45, "STM": 30, "waga": 29.6},
+  "id": "48", "typ": "blade", "nazwa": "BearScratch", "ilosc": 0, "img": "img/BladeSavage-Bear.webp", "ATK": 25, "DEF": 45, "STM": 30, "waga": 29.6},
   {
-  "id": "49", "typ": "blade", "nazwa": "SamuraiSteel", "ilosc": 0, "img": "https://i.ibb.co/DfnHcbRB/Steel-Samurai-4-80-T-removebg-preview.png", "ATK": 40, "DEF": 37, "STM": 23, "waga": 31.2},
+  "id": "49", "typ": "blade", "nazwa": "SamuraiSteel", "ilosc": 0, "img": "img/BladeSteel-Samurai.webp", "ATK": 40, "DEF": 37, "STM": 23, "waga": 31.2},
   {
-  "id": "50", "typ": "blade", "nazwa": "GoatTackle", "ilosc": 0, "img": "https://i.ibb.co/DP9tf85q/Tackle-Goat-2-70-N-removebg-preview.png", "ATK": 13, "DEF": 65, "STM": 22, "waga": 31.5},
+  "id": "50", "typ": "blade", "nazwa": "GoatTackle", "ilosc": 0, "img": "img/BladeTackle-Goat.webp", "ATK": 13, "DEF": 65, "STM": 22, "waga": 31.5},
   {
-  "id": "51", "typ": "blade", "nazwa": "PteraSwing", "ilosc": 0, "img": "https://i.ibb.co/qGKsvTR/Talon-Ptera-3-80-B-removebg-preview.png", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.4},
+  "id": "51", "typ": "blade", "nazwa": "PteraSwing", "ilosc": 0, "img": "img/BladeTalon-Ptera.webp", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.4},
   {
-  "id": "52", "typ": "blade", "nazwa": "MammothTusk", "ilosc": 0, "img": "https://i.ibb.co/LdzJFYjL/Tusk-Mammoth-3-60-T-removebg-preview.png", "ATK": 33, "DEF": 35, "STM": 32, "waga": 32},
+  "id": "52", "typ": "blade", "nazwa": "MammothTusk", "ilosc": 0, "img": "img/BladeTusk-Mammoth.webp", "ATK": 33, "DEF": 35, "STM": 32, "waga": 32},
   {
-  "id": "53", "typ": "blade", "nazwa": "KongYell", "ilosc": 0, "img": "https://i.ibb.co/6JNHw42Q/Yell-Kong-3-60-GB-removebg-preview.png", "ATK": 13, "DEF": 37, "STM": 50, "waga": 31.1},
+  "id": "53", "typ": "blade", "nazwa": "KongYell", "ilosc": 0, "img": "img/BladeYell-Kong.webp", "ATK": 13, "DEF": 37, "STM": 50, "waga": 31.1},
   {
-  "id": "54", "typ": "blade", "nazwa": "DragoonStorm", "ilosc": 0, "img": "https://i.ibb.co/SDMPrB3G/Dragoon-Storm-4-60-RA-removebg-preview.png", "ATK": 55, "DEF": 30, "STM": 15, "waga": 25.1},
+  "id": "54", "typ": "blade", "nazwa": "DragoonStorm", "ilosc": 0, "img": "img/BladeDragoon-Storm.webp", "ATK": 55, "DEF": 30, "STM": 15, "waga": 25.1},
   {
   "id": "55", "typ": "blade", "nazwa": "DranzerSpiral", "ilosc": 0, "img": "img/BladeDranzerSpiral.webp", "ATK": 35, "DEF": 30, "STM": 35, "waga": 27.7},
   {
@@ -3379,69 +3440,69 @@ document.addEventListener('DOMContentLoaded', function() {
   {
   "id": "57", "typ": "blade", "nazwa": "DracielShield", "ilosc": 0, "img": "img/BladeDracielShield.webp", "ATK": 30, "DEF": 50, "STM": 20, "waga": 28},
   {
-  "id": "58", "typ": "blade", "nazwa": "Lightning L-Drago (Rapid-Hit Type)", "ilosc": 0, "img": "img/BladeLightningL-Drago29.webp", "ATK": 50, "DEF": 30, "STM": 20, "waga": 33.5},
+  "id": "58", "typ": "blade", "nazwa": "Lightning L-Drago (Rapid-Hit Type)", "ilosc": 0, "img": "img/BladeLightningL_(Rapid-Hit_Type).webp", "ATK": 50, "DEF": 30, "STM": 20, "waga": 33.5},
   {
-  "id": "59", "typ": "blade", "nazwa": "Lightning L-Drago (Upper Type)", "ilosc": 0, "img": "img/BladeLightningL-Drago292.webp", "ATK": 55, "DEF": 25, "STM": 20, "waga": 34},
+  "id": "59", "typ": "blade", "nazwa": "Lightning L-Drago (Upper Type)", "ilosc": 0, "img": "img/BladeLightningL_(Upper_Type).webp", "ATK": 55, "DEF": 25, "STM": 20, "waga": 34},
   {
   "id": "60", "typ": "blade", "nazwa": "Rock Leone", "ilosc": 0, "img": "img/BladeRockLeone.webp", "ATK": 30, "DEF": 55, "STM": 15, "waga": 29.8},
   {
-  "id": "61", "typ": "blade", "nazwa": "StormPegasis", "ilosc": 0, "img": "https://i.ibb.co/9HrvgxqN/Storm-Pegasis-3-70-RA-removebg-preview.png", "ATK": 55, "DEF": 15, "STM": 30, "waga": 31},
+  "id": "61", "typ": "blade", "nazwa": "StormPegasis", "ilosc": 0, "img": "img/BladeStorm-Pegasis.webp", "ATK": 55, "DEF": 15, "STM": 30, "waga": 31},
   {
   "id": "62", "typ": "blade", "nazwa": "Trypio", "ilosc": 0, "img": "img/Trypio_3-60N.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0},
   {
-  "id": "63", "typ": "blade", "nazwa": "VictoryValkyrie", "ilosc": 0, "img": "https://i.ibb.co/svvTNN9v/Victory-Valkyrie-2-60-RA-removebg-preview.png", "ATK": 55, "DEF": 20, "STM": 25, "waga": 33.2},
+  "id": "63", "typ": "blade", "nazwa": "VictoryValkyrie", "ilosc": 0, "img": "img/BladeVictory-Valkyrie.webp", "ATK": 55, "DEF": 20, "STM": 25, "waga": 33.2},
   {
   "id": "64", "typ": "blade", "nazwa": "XenoXcalibur", "ilosc": 0, "img": "img/BladeXenoXcalibur.webp", "ATK": 65, "DEF": 25, "STM": 10, "waga": 31},
    {
-  "id": "64", "typ": "blade", "nazwa": "Quetzalcoatlus", "ilosc": 0, "img": "img/Quetzalcoatlus_4-55D-removebg-preview.png", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.3},
+  "id": "64", "typ": "blade", "nazwa": "Quetzalcoatlus", "ilosc": 0, "img": "img/BladeQuetzalcoatlus.webp", "ATK": 27, "DEF": 23, "STM": 50, "waga": 34.3},
    {
-  "id": "65", "typ": "blade", "nazwa": "Spinosaurus", "ilosc": 0, "img": "img/Spinosaurus_3-85A-removebg-preview.png", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
+  "id": "65", "typ": "blade", "nazwa": "Spinosaurus", "ilosc": 0, "img": "img/BladeSpinosaurus.webp", "ATK": 60, "DEF": 28, "STM": 12, "waga": 36},
    {
-  "id": "66", "typ": "blade", "nazwa": "T.Rex", "ilosc": 0, "img": "img/T._Rex_1-80GB.webp", "ATK": 65, "DEF": 30, "STM": 5, "waga": 37},
+  "id": "66", "typ": "blade", "nazwa": "T.Rex", "ilosc": 0, "img": "img/BladeT._Rex.webp", "ATK": 65, "DEF": 30, "STM": 5, "waga": 37},
    {
-  "id": "67", "typ": "blade", "nazwa": "Captain America", "ilosc": 0, "img": "img/CaptainAmerica.png", "ATK": 55, "DEF": 28, "STM": 17, "waga": 32.3},
+  "id": "67", "typ": "blade", "nazwa": "Captain America", "ilosc": 0, "img": "img/BladeCaptainAmerica.webp", "ATK": 55, "DEF": 28, "STM": 17, "waga": 32.3},
    {
-  "id": "68", "typ": "blade", "nazwa": "Green Goblin", "ilosc": 0, "img": "img/Green_Goblin_9-80HT-removebg-preview.png", "ATK": 17, "DEF": 28, "STM": 55, "waga": 31.7},
+  "id": "68", "typ": "blade", "nazwa": "Green Goblin", "ilosc": 0, "img": "img/BladeGreen_Goblin.webp", "ATK": 17, "DEF": 28, "STM": 55, "waga": 31.7},
    {
-  "id": "69", "typ": "blade", "nazwa": "Iron Man", "ilosc": 0, "img": "img/Iron_Man_4-80B-removebg-preview.png", "ATK": 17, "DEF": 55, "STM": 28, "waga": 33.6},
+  "id": "69", "typ": "blade", "nazwa": "Iron Man", "ilosc": 0, "img": "img/BladeIron_Man.webp", "ATK": 17, "DEF": 55, "STM": 28, "waga": 33.6},
    {
-  "id": "70", "typ": "blade", "nazwa": "Miles Morales", "ilosc": 0, "img": "img/Miles_Morales_1-60GN-removebg-preview.png", "ATK": 12, "DEF": 33, "STM": 55, "waga": 31.7},
+  "id": "70", "typ": "blade", "nazwa": "Miles Morales", "ilosc": 0, "img": "img/BladeMiles_Morales.webp", "ATK": 12, "DEF": 33, "STM": 55, "waga": 31.7},
    {
-  "id": "71", "typ": "blade", "nazwa": "Red Hulk", "ilosc": 0, "img": "img/Red_Hulk_1-80R-removebg-preview.png", "ATK": 65, "DEF": 27, "STM": 8, "waga": 36.3},
+  "id": "71", "typ": "blade", "nazwa": "Red Hulk", "ilosc": 0, "img": "img/BladeRed_Hulk.webp", "ATK": 65, "DEF": 27, "STM": 8, "waga": 36.3},
    {
-  "id": "72", "typ": "blade", "nazwa": "Spider-Man", "ilosc": 0, "img": "img/Spider-Man_3-60F-removebg-preview.png", "ATK": 33, "DEF": 17, "STM": 50, "waga": 33.2},
+  "id": "72", "typ": "blade", "nazwa": "Spider-Man", "ilosc": 0, "img": "img/BladeSpider-Man.webp", "ATK": 33, "DEF": 17, "STM": 50, "waga": 33.2},
    {
-  "id": "73", "typ": "blade", "nazwa": "Thanos", "ilosc": 0, "img": "img/Thanos_4-60P-removebg-preview.png", "ATK": 22, "DEF": 60, "STM": 18, "waga": 29.5},
+  "id": "73", "typ": "blade", "nazwa": "Thanos", "ilosc": 0, "img": "img/BladeThanos.webp", "ATK": 22, "DEF": 60, "STM": 18, "waga": 29.5},
    {
-  "id": "74", "typ": "blade", "nazwa": "Venom", "ilosc": 0, "img": "img/Venom_3-80N-removebg-preview.png", "ATK": 55, "DEF": 22, "STM": 23, "waga": 34.3},
+  "id": "74", "typ": "blade", "nazwa": "Venom", "ilosc": 0, "img": "img/BladeVenom.webp", "ATK": 55, "DEF": 22, "STM": 23, "waga": 34.3},
    {
-  "id": "75", "typ": "blade", "nazwa": "Chewbacca", "ilosc": 0, "img": "img/Chewbacca_4-80LF-removebg-preview.png", "ATK": 22, "DEF": 23, "STM": 55, "waga": 31.8},
+  "id": "75", "typ": "blade", "nazwa": "Chewbacca", "ilosc": 0, "img": "img/BladeChewbacca.webp", "ATK": 22, "DEF": 23, "STM": 55, "waga": 31.8},
    {
-  "id": "76", "typ": "blade", "nazwa": "Darth Vader", "ilosc": 0, "img": "img/Darth_Vader_4-60P-removebg-preview.png", "ATK": 28, "DEF": 60, "STM": 12, "waga": 30.7},
+  "id": "76", "typ": "blade", "nazwa": "Darth Vader", "ilosc": 0, "img": "img/BladeDarth_Vader.webp", "ATK": 28, "DEF": 60, "STM": 12, "waga": 30.7},
    {
-  "id": "77", "typ": "blade", "nazwa": "General Grievous", "ilosc": 0, "img": "img/General_Grievous_3-80HN-removebg-preview.png", "ATK": 22, "DEF": 55, "STM": 28, "waga": 31},
+  "id": "77", "typ": "blade", "nazwa": "General Grievous", "ilosc": 0, "img": "img/BladeGeneral_Grievous.webp", "ATK": 22, "DEF": 55, "STM": 28, "waga": 31},
    {
-  "id": "78", "typ": "blade", "nazwa": "Luke Skywalker", "ilosc": 0, "img": "img/Luke_Skywalker_4-80B-removebg-preview.png", "ATK": 23, "DEF": 55, "STM": 22, "waga": 31.5},
+  "id": "78", "typ": "blade", "nazwa": "Luke Skywalker", "ilosc": 0, "img": "img/BladeLuke_Skywalker.webp", "ATK": 23, "DEF": 55, "STM": 22, "waga": 31.5},
    {
-  "id": "79", "typ": "blade", "nazwa": "Moff Gideon", "ilosc": 0, "img": "img/Moff_Gideon_3-80N-removebg-preview.png", "ATK": 32, "DEF": 35, "STM": 33, "waga": 30.5},
+  "id": "79", "typ": "blade", "nazwa": "Moff Gideon", "ilosc": 0, "img": "img/BladeMoff_Gideon.webp", "ATK": 32, "DEF": 35, "STM": 33, "waga": 30.5},
    {
-  "id": "80", "typ": "blade", "nazwa": "Obi-Wan Kenobi", "ilosc": 0, "img": "img/Obi-Wan_Kenobi_4-60P-removebg-preview.png", "ATK": 23, "DEF": 60, "STM": 17, "waga": 30.6},
+  "id": "80", "typ": "blade", "nazwa": "Obi-Wan Kenobi", "ilosc": 0, "img": "img/BladeObi-Wan_Kenobi.webp", "ATK": 23, "DEF": 60, "STM": 17, "waga": 30.6},
    {
-  "id": "81", "typ": "blade", "nazwa": "Stormtrooper", "ilosc": 0, "img": "img/Stormtrooper_5-70B-removebg-preview.png", "ATK": 18, "DEF": 50, "STM": 32, "waga": 33.6},
+  "id": "81", "typ": "blade", "nazwa": "Stormtrooper", "ilosc": 0, "img": "img/BladeStormtrooper.webp", "ATK": 18, "DEF": 50, "STM": 32, "waga": 33.6},
   {
-  "id": "82", "typ": "blade", "nazwa": "Mandalorian", "ilosc": 0, "img": "img/The_Mandalorian_3-60F-removebg-preview.png", "ATK": 30.3, "DEF": 40, "STM": 43, "waga": 17},
+  "id": "82", "typ": "blade", "nazwa": "Mandalorian", "ilosc": 0, "img": "img/BladeMandalorian.webp", "ATK": 30.3, "DEF": 40, "STM": 43, "waga": 17},
     {
-  "id": "83", "typ": "blade", "nazwa": "Bumblebee", "ilosc": 0, "img": "img/Bumblebee_3-60GP-removebg-preview.png", "ATK": 21, "DEF": 55, "STM": 24, "waga": 34.8},
+  "id": "83", "typ": "blade", "nazwa": "Bumblebee", "ilosc": 0, "img": "img/BladeBumblebee.webp", "ATK": 21, "DEF": 55, "STM": 24, "waga": 34.8},
    {
-  "id": "84", "typ": "blade", "nazwa": "Megatron", "ilosc": 0, "img": "img/Megatron_4-80B-removebg-preview.png", "ATK": 27, "DEF": 35, "STM": 38, "waga": 31.1},
+  "id": "84", "typ": "blade", "nazwa": "Megatron", "ilosc": 0, "img": "img/BladeMegatron.webp", "ATK": 27, "DEF": 35, "STM": 38, "waga": 31.1},
  {
-  "id": "85", "typ": "blade", "nazwa": "Optimus Primal", "ilosc": 0, "img": "img/Optimus_Primal_3-60F-removebg-preview.png", "ATK": 60, "DEF": 27, "STM": 13, "waga": 35.7},
+  "id": "85", "typ": "blade", "nazwa": "Optimus Primal", "ilosc": 0, "img": "img/BladeOptimus_Primal.webp", "ATK": 60, "DEF": 27, "STM": 13, "waga": 35.7},
      {
-  "id": "86", "typ": "blade", "nazwa": "Optimus Prime", "ilosc": 0, "img": "img/Optimus_Prime_4-60P-removebg-preview.png", "ATK": 22, "DEF": 55, "STM": 23, "waga": 33.3},
+  "id": "86", "typ": "blade", "nazwa": "Optimus Prime", "ilosc": 0, "img": "img/BladeOptimus_Prime.webp", "ATK": 22, "DEF": 55, "STM": 23, "waga": 33.3},
    {
-  "id": "87", "typ": "blade", "nazwa": "Shockwave", "ilosc": 0, "img": "img/Shockwave_5-80O-removebg-preview.png", "ATK": 32, "DEF": 18, "STM": 50, "waga": 34.7},
+  "id": "87", "typ": "blade", "nazwa": "Shockwave", "ilosc": 0, "img": "img/BladeShockwave.webp", "ATK": 32, "DEF": 18, "STM": 50, "waga": 34.7},
    {
-  "id": "88", "typ": "blade", "nazwa": "Starscream", "ilosc": 0, "img": "img/Starscream_3-80N-removebg-preview.png", "ATK": 18, "DEF": 27, "STM": 55, "waga": 29.5},
+  "id": "88", "typ": "blade", "nazwa": "Starscream", "ilosc": 0, "img": "img/BladeStarscream.webp", "ATK": 18, "DEF": 27, "STM": 55, "waga": 29.5},
   
   {
   "id": "96", "typ": "rachet", "nazwa": "1-70", "ilosc": 0, "img": "img/Ratchet1-70.webp", "ATK": 17, "DEF": 6, "STM": 7, "waga": 7.3},
@@ -3749,7 +3810,7 @@ document.addEventListener('DOMContentLoaded', function() {
   "tryby": [
     {
       "nazwaTrybu": "Upper",
-      "img": "img/eclipse.png",
+      "img": "img/eclipse.webp",
       "ATK": 0,
       "DEF": 0,
       "STM": 0,
