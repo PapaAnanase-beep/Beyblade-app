@@ -1530,7 +1530,11 @@ function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
     if (seria === 'bx_ux') {
         const bladeInfo = getPartAndHTML(czesci.blade, 'Blade');
         const ratchetInfo = getPartAndHTML(ratchetWylosowany, 'Ratchet');
-        let bitInfo = czySpecjalnyRatchetZostalWylosowany ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` } : getPartAndHTML(czesci.bit, 'Bit');
+        // === ZMIANA TUTAJ: Używamy nowego obrazka dla zintegrowanego bita ===
+        let bitInfo = czySpecjalnyRatchetZostalWylosowany ? 
+            { html: `<img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` } : 
+            getPartAndHTML(czesci.bit, 'Bit');
+        // === KONIEC ZMIANY ===
         setImagesHTML = `<div class="wynik-zestaw-obrazki">${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}</div>`;
         setNameParts = [`<strong>Blade:</strong> ${bladeInfo.name}`, `<strong>Ratchet:</strong> ${ratchetInfo.name}`, `<strong>Bit:</strong> ${bitInfo.name}`];
     } else if (seria === 'cx') {
@@ -1538,7 +1542,11 @@ function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
         const mainBladeInfo = getPartAndHTML(czesci.cx_main_blade, 'MainBlade');
         const assistBladeInfo = getPartAndHTML(czesci.cx_assist_blade, 'AssistBlade');
         const ratchetInfo = getPartAndHTML(ratchetWylosowany, 'Ratchet');
-        let bitInfo = czySpecjalnyRatchetZostalWylosowany ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` } : getPartAndHTML(czesci.bit, 'Bit');
+        // === ZMIANA TUTAJ: Używamy nowego obrazka dla zintegrowanego bita ===
+        let bitInfo = czySpecjalnyRatchetZostalWylosowany ? 
+            { html: `<img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany w ${ratchetWylosowany.nazwa}">`, name: `<em>(Bit zint. w ${ratchetWylosowany.nazwa})</em>` } : 
+            getPartAndHTML(czesci.bit, 'Bit');
+        // === KONIEC ZMIANY ===
         setImagesHTML = `<div class="cx-images-container"><div class="cx-blade-row wynik-zestaw-obrazki">${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}</div><div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetInfo.html} ${bitInfo.html}</div></div>`;
         setNameParts = [`<strong>LockChip:</strong> ${lockChipInfo.name}`, `<strong>Main Blade:</strong> ${mainBladeInfo.name}`, `<strong>Assist Blade:</strong> ${assistBladeInfo.name}`, `<strong>Ratchet:</strong> ${ratchetInfo.name}`, `<strong>Bit:</strong> ${bitInfo.name}`];
     }
@@ -1555,8 +1563,7 @@ function generujHTMLDlaKartyZestawu(zestaw, indexZestawu) {
     statySumaryczneHTML += `</div>`;
 
     let zmienneStatyRatchetHTML = '';
-    // ... (reszta logiki zmiennych statystyk Ratcheta, jeśli jest) ...
-
+    
     return `
         <div class="card saved-deck-card generated-set-card ${seria === 'cx' ? 'wylosowany-zestaw-cx' : ''}" data-zestaw-id="${idZestawu}">
             <h4 style="text-align:center; color:#d1b3ff; margin-bottom: 10px;">Wylosowany Zestaw ${seria.toUpperCase().replace('_','/')} #${indexZestawu + 1}</h4>
@@ -1937,9 +1944,16 @@ function renderActiveDeckSetSlots() {
         const partIdKey = getPartIdKeyForSlot(partTypeInfo.type, setConfig.seria);
         const partId = partIdKey ? setConfig[partIdKey] : null;
 
+        // === ZMIANA TUTAJ: Używamy nowego obrazka dla zintegrowanego bita ===
         if (partTypeInfo.type === 'bit' && jestTurboRatchetWAktywnymZestawie) {
-            slotDiv.classList.add('slot-disabled-integrated');
-            slotDiv.innerHTML = `<span style="font-style: italic; color: #888;">Bit zintegrowany</span>`;
+            slotDiv.classList.add('filled'); // Dodajemy klasę filled, aby wyglądało jak zajęty slot
+            slotDiv.innerHTML = `
+                 <div class="part-info-container">
+                    <img src="img/bitturbo.png" alt="Bit Zintegrowany" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px;">
+                    <span class="part-name" style="font-style: italic; color: #aaa;">Bit zintegrowany</span>
+                </div>
+            `;
+        // === KONIEC ZMIANY ===
         } else {
             if (partId) {
                 const partDetails = magazyn.find(p => p.id === partId);
@@ -1948,11 +1962,9 @@ function renderActiveDeckSetSlots() {
                     const aktywnyTrybIndex = setConfig[trybIndexKey] || 0;
                     const trybAktywny = (partDetails.maTryby && partDetails.tryby) ? partDetails.tryby[aktywnyTrybIndex] : null;
                     
-                    // --- POCZĄTEK POPRAWKI OBRAZKA ---
                     const obrazek = trybAktywny?.img || partDetails.img;
                     let slotImageHTML = obrazek ? `<img src="${obrazek}" alt="${partDetails.nazwa}" style="width: 50px; height: 50px; object-fit: contain; border-radius: 4px;">` : `<div class="dnd-slot-placeholder">Brak<br>Obr.</div>`;
-                    // --- KONIEC POPRAWKI OBRAZKA ---
-
+                    
                     let modeSwitcherHTML = '';
                     if (partDetails.maTryby && Array.isArray(partDetails.tryby) && partDetails.tryby.length > 1) {
                         const nazwaAktywnegoTrybu = trybAktywny?.nazwaTrybu || 'Tryb 1';
@@ -2728,10 +2740,15 @@ function displaySavedDecks() {
             const ratchetWDecku = ratchet;
             const czySpecjalnyRatchetWDecku = ratchetWDecku && (String(ratchetWDecku.id) === "205" || ratchetWDecku.integrujeBit === true);
             let setImagesHTML = '', setNameParts = [];
+
             if (seriaZestawu === 'bx_ux') {
                 const bladeInfo = getPartDetailsAndHTML(set.bladeId, 'blade', 'Blade');
                 const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet');
-                let bitInfo = czySpecjalnyRatchetWDecku && ratchetInfo.partObj ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` } : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                // === ZMIANA TUTAJ: Używamy nowego obrazka dla zintegrowanego bita ===
+                let bitInfo = czySpecjalnyRatchetWDecku ?
+                    { html: `<img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany w ${ratchetInfo.partObj?.nazwa || 'Turbo'}">`, name: `<em>(Bit zint.)</em>` } :
+                    getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                // === KONIEC ZMIANY ===
                 setImagesHTML = `<div class="wynik-zestaw-obrazki">${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}</div>`;
                 setNameParts = [bladeInfo.name, ratchetInfo.name, bitInfo.name];
             } else if (seriaZestawu === 'cx') {
@@ -2739,7 +2756,11 @@ function displaySavedDecks() {
                 const mainBladeInfo = getPartDetailsAndHTML(set.cx_main_bladeId, 'cx-main-blade', 'MainBlade');
                 const assistBladeInfo = getPartDetailsAndHTML(set.cx_assist_bladeId, 'cx-assist-blade', 'AssistBlade');
                 const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet');
-                let bitInfo = czySpecjalnyRatchetWDecku && ratchetInfo.partObj ? { html: `<div class="deck-part-placeholder" style="font-size:0.5em; line-height:1.2; padding:5px;" title="Bit zintegrowany w ${ratchetInfo.partObj.nazwa}">BIT<br>INTEG.</div>`, name: `<em>(Bit zint.)</em>` } : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                // === ZMIANA TUTAJ: Używamy nowego obrazka dla zintegrowanego bita ===
+                let bitInfo = czySpecjalnyRatchetWDecku ?
+                     { html: `<img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany w ${ratchetInfo.partObj?.nazwa || 'Turbo'}">`, name: `<em>(Bit zint.)</em>` } :
+                    getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                // === KONIEC ZMIANY ===
                 setImagesHTML = `<div class="cx-images-container"><div class="cx-blade-row wynik-zestaw-obrazki">${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}</div><div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetInfo.html} ${bitInfo.html}</div></div>`;
                 setNameParts = [lockChipInfo.name, mainBladeInfo.name, assistBladeInfo.name, ratchetInfo.name, bitInfo.name];
             }
