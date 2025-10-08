@@ -375,6 +375,32 @@ saved-deck-card {
 #searchMagazynByName::-webkit-search-cancel-button:hover {
     opacity: 1;
 }
+/* ======================================================= */
+/* === OSTATECZNA POPRAWKA: Style dla nazw pod obrazkami === */
+/* ======================================================= */
+
+.part-with-name {
+    display: flex;
+    flex-direction: column; /* Ustawia obrazek nad tekstem */
+    align-items: center;    /* Centruje w poziomie */
+    text-align: center;
+    max-width: 80px; /* Ogranicza szerokość, by długie nazwy się zawijały */
+}
+
+.part-name-label {
+    font-size: 0.75em;
+    color: #ccc;
+    margin-top: 5px;
+    line-height: 1.2;
+    word-break: break-word; /* Zapewnia zawijanie długich nazw */
+    hyphens: auto;
+}
+
+/* Poprawka dla kontenera obrazków, aby dać mu więcej przestrzeni */
+.wynik-zestaw-obrazki, .cx-images-container {
+    padding-bottom: 15px; /* Zwiększamy odstęp na dole */
+    align-items: flex-start; /* Wyrównuje do góry, jeśli nazwy mają różną wysokość */
+}
 
 </style>
 
@@ -2414,7 +2440,7 @@ function displaySavedDecks() {
         
         let setsHTML = '';
 
-        deck.sets.forEach((set, index) => {
+               deck.sets.forEach((set, index) => {
             if (!set) {
                 setsHTML += `<div class="deck-card-set-preview"><p style="color:red;">Błąd danych zestawu ${index + 1}</p></div>`;
                 return;
@@ -2423,12 +2449,10 @@ function displaySavedDecks() {
             const seriaZestawu = set.seria || 'bx_ux';
             const blade = set.bladeId ? magazynCzesci.find(p => p.id === set.bladeId) : null;
             let bgSymbolUrl = (seriaZestawu === 'cx') ? backgroundSymbolMap['cx'] : ((blade && blade.typ === 'ux-blade') ? backgroundSymbolMap['ux'] : backgroundSymbolMap['bx']);
-            
-            // --- Logika generowania treści lewej kolumny (jest poprawna, zostaje) ---
-            // (Cały blok kodu generujący ikony, nazwy, obrazki i statystyki jest w porządku)
+
+            // --- Nagłówek i Ikony (bez zmian) ---
             let ikonaSeriiHTML = '', ikonaSeriiUX_HTML = '', ikonaRodzajuHTML = '', ikonaKierunkuHTML = '';
-            if (seriaZestawu === 'bx_ux') { if (blade && blade.typ === 'ux-blade') ikonaSeriiUX_HTML = `<img src="img/ux.webp" class="set-icon seria-icon" title="Seria: UX">`; else ikonaSeriiHTML = `<img src="${iconMap.seria['bx_ux']}" class="set-icon seria-icon" title="Seria: BX">`;
-            } else if (seriaZestawu === 'cx') ikonaSeriiHTML = `<img src="${iconMap.seria['cx']}" class="set-icon seria-icon" title="Seria: CX">`;
+            if (seriaZestawu === 'bx_ux') { if (blade && blade.typ === 'ux-blade') ikonaSeriiUX_HTML = `<img src="img/ux.webp" class="set-icon seria-icon" title="Seria: UX">`; else ikonaSeriiHTML = `<img src="${iconMap.seria['bx_ux']}" class="set-icon seria-icon" title="Seria: BX">`; } else if (seriaZestawu === 'cx') ikonaSeriiHTML = `<img src="${iconMap.seria['cx']}" class="set-icon seria-icon" title="Seria: CX">`;
             const ratchet = set.ratchetId ? magazynCzesci.find(p => p.id === set.ratchetId) : null;
             const bit = set.bitId ? magazynCzesci.find(p => p.id === set.bitId) : null;
             let partWithRodzaj = (ratchet && ratchet.integrujeBit === true) ? ratchet : bit;
@@ -2436,47 +2460,80 @@ function displaySavedDecks() {
             let ostrze = (seriaZestawu === 'cx') ? (set.cx_main_bladeId ? magazynCzesci.find(p => p.id === set.cx_main_bladeId) : null) : blade;
             if (ostrze && ostrze.kierunek) ikonaKierunkuHTML = `<img src="${iconMap.kierunek[ostrze.kierunek] || ''}" class="set-icon kierunek-icon" title="Obroty: ${ostrze.kierunek}">`;
             const ikonyZestawuHTML = `<div class="set-icons-container">${ikonaSeriiHTML}${ikonaSeriiUX_HTML}${ikonaRodzajuHTML}${ikonaKierunkuHTML}</div>`;
-            const getPartDetailsAndHTML = (partId, partType, partTypeDefaultName) => { const part = partId ? magazynCzesci.find(p => String(p.id) == String(partId)) : null; let obrazekDoWyswietlenia = part?.img, nazwaDoWyswietlenia = part?.nazwa; if (part && part.maTryby && Array.isArray(part.tryby)) { const partIdKey = getPartIdKeyForSlot(partType, seriaZestawu), trybIndexKey = partIdKey ? partIdKey.replace('Id', 'AktywnyTrybIndex') : null; const zapisanyIndex = (trybIndexKey && set[trybIndexKey] !== undefined) ? set[trybIndexKey] : 0, aktywnyTryb = part.tryby[zapisanyIndex]; if (aktywnyTryb) { obrazekDoWyswietlenia = aktywnyTryb.img || part.img; nazwaDoWyswietlenia = `${part.nazwa} (${aktywnyTryb.nazwaTrybu})`; } } const imgHTML = obrazekDoWyswietlenia ? `<img src="${obrazekDoWyswietlenia}" alt="${part?.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`; const nameText = part ? (nazwaDoWyswietlenia || `<i>${partTypeDefaultName} N/A</i>`) : `<i>Brak ${partTypeDefaultName}</i>`; return { html: imgHTML, name: nameText, partObj: part }; };
-            const ratchetWDecku = ratchet; const czySpecjalnyRatchetWDecku = ratchetWDecku && (String(ratchetWDecku.id) === "205" || ratchetWDecku.integrujeBit === true); let setImagesHTML = '', setNameParts = [];
-            if (seriaZestawu === 'bx_ux') { const bladeInfo = getPartDetailsAndHTML(set.bladeId, 'blade', 'Blade'); const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet'); let bitInfo = czySpecjalnyRatchetWDecku ? { html: `<img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany w ${ratchetInfo.partObj?.nazwa || 'Turbo'}">`, name: `<em>(Bit zint.)</em>` } : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit'); setImagesHTML = `<div class="wynik-zestaw-obrazki">${bladeInfo.html} ${ratchetInfo.html} ${bitInfo.html}</div>`; setNameParts = [bladeInfo.name, ratchetInfo.name, bitInfo.name];
-            } else if (seriaZestawu === 'cx') { const lockChipInfo = getPartDetailsAndHTML(set.cx_lock_chipId, 'cx-lock-chip', 'LockChip'); const mainBladeInfo = getPartDetailsAndHTML(set.cx_main_bladeId, 'cx-main-blade', 'MainBlade'); const assistBladeInfo = getPartDetailsAndHTML(set.cx_assist_bladeId, 'cx-assist-blade', 'AssistBlade'); const ratchetInfo = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet'); let bitInfo = czySpecjalnyRatchetWDecku ? { html: `<img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany w ${ratchetInfo.partObj?.nazwa || 'Turbo'}">`, name: `<em>(Bit zint.)</em>` } : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit'); setImagesHTML = `<div class="cx-images-container"><div class="cx-blade-row wynik-zestaw-obrazki">${lockChipInfo.html} ${mainBladeInfo.html} ${assistBladeInfo.html}</div><div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetInfo.html} ${bitInfo.html}</div></div>`; setNameParts = [lockChipInfo.name, mainBladeInfo.name, assistBladeInfo.name, ratchetInfo.name, bitInfo.name]; }
-            let setNameHTML = setNameParts.map(name => (name || "").replace(/<\/?i>/g, '').replace(/\s\([^)]+\)/, '')).filter(name => name && !name.startsWith('(Bit zint.)')).join(' | ');
-            let setStatsSummaryHTML = '<div class="stat-grid">'; let currentSetStats = set.statystykiObliczone; if (currentSetStats) { setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span>`; setStatsSummaryHTML += `<span>DEF: ${currentSetStats.DEF || 0}</span>`; setStatsSummaryHTML += `<span>STM: ${currentSetStats.STM || 0}</span>`; setStatsSummaryHTML += `<span>Waga: ${(currentSetStats.WAGA || 0)}g</span>`; if ((currentSetStats.DASH || 0) !== 0) setStatsSummaryHTML += `<span>DASH: ${currentSetStats.DASH || 0}</span>`; if ((currentSetStats.B_RES || 0) !== 0) setStatsSummaryHTML += `<span>B-RES: ${currentSetStats.B_RES || 0}</span>`; if (seriaZestawu === 'cx' && (currentSetStats.CX_LC_WYTRZ || 0) !== 0) { setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`; } } else { setStatsSummaryHTML += '<span>Brak danych statystyk</span>'; } setStatsSummaryHTML += `</div>`;
-            const setContentForWrapper = `<div class="set-header-container"><strong style="text-transform: capitalize;">Zestaw ${index + 1}</strong>${ikonyZestawuHTML}</div>${setImagesHTML}<div style="font-size:0.8em; color:#ddd; margin-top: 8px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">${setNameHTML}</div>${setStatsSummaryHTML}`;
+            const naglowekHTML = `<div class="set-header-container"><strong style="text-transform: capitalize;">Zestaw ${index + 1}</strong>${ikonyZestawuHTML}</div>`;
 
+            // =========================================================================
+            // === OSTATECZNA POPRAWKA: Łączenie obrazków z nazwami ===
+            // =========================================================================
+            const getPartDetailsAndHTML = (partId, partType, partTypeDefaultName) => {
+                const part = partId ? magazynCzesci.find(p => String(p.id) == String(partId)) : null;
+                let obrazekDoWyswietlenia = part?.img, nazwaDoWyswietlenia = part?.nazwa;
+                if (part && part.maTryby && Array.isArray(part.tryby)) {
+                    const partIdKey = getPartIdKeyForSlot(partType, seriaZestawu), trybIndexKey = partIdKey ? partIdKey.replace('Id', 'AktywnyTrybIndex') : null;
+                    const zapisanyIndex = (trybIndexKey && set[trybIndexKey] !== undefined) ? set[trybIndexKey] : 0, aktywnyTryb = part.tryby[zapisanyIndex];
+                    if (aktywnyTryb) { obrazekDoWyswietlenia = aktywnyTryb.img || part.img; nazwaDoWyswietlenia = `${part.nazwa} (${aktywnyTryb.nazwaTrybu})`; }
+                }
+                const imgHTML = obrazekDoWyswietlenia ? `<img src="${obrazekDoWyswietlenia}" alt="${part?.nazwa || partTypeDefaultName}" class="deck-part-img">` : `<div class="deck-part-placeholder">${partTypeDefaultName.substring(0,3).toUpperCase()}</div>`;
+                const nameText = part ? (nazwaDoWyswietlenia || `Brak części`) : `Brak części`;
+
+                // Zwracamy teraz kompletny blok HTML dla jednej części
+                return `<div class="part-with-name">
+                            ${imgHTML}
+                            <span class="part-name-label">${nameText}</span>
+                        </div>`;
+            };
+
+            const ratchetWDecku = ratchet;
+            const czySpecjalnyRatchetWDecku = ratchetWDecku && (String(ratchetWDecku.id) === "205" || ratchetWDecku.integrujeBit === true);
+            let setImagesAndNamesHTML = '';
+
+            if (seriaZestawu === 'bx_ux') {
+                const bladeHTML = getPartDetailsAndHTML(set.bladeId, 'blade', 'Blade');
+                const ratchetHTML = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet');
+                const bitHTML = czySpecjalnyRatchetWDecku 
+                    ? `<div class="part-with-name"><img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany"><span class="part-name-label">(Bit zint.)</span></div>` 
+                    : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                setImagesAndNamesHTML = `<div class="wynik-zestaw-obrazki">${bladeHTML} ${ratchetHTML} ${bitHTML}</div>`;
+            } else if (seriaZestawu === 'cx') {
+                const lockChipHTML = getPartDetailsAndHTML(set.cx_lock_chipId, 'cx-lock-chip', 'LockChip');
+                const mainBladeHTML = getPartDetailsAndHTML(set.cx_main_bladeId, 'cx-main-blade', 'MainBlade');
+                const assistBladeHTML = getPartDetailsAndHTML(set.cx_assist_bladeId, 'cx-assist-blade', 'AssistBlade');
+                const ratchetHTML = getPartDetailsAndHTML(set.ratchetId, 'rachet', 'Ratchet');
+                const bitHTML = czySpecjalnyRatchetWDecku 
+                    ? `<div class="part-with-name"><img src="img/bitturbo.png" alt="Bit Zintegrowany" class="deck-part-img" title="Bit zintegrowany"><span class="part-name-label">(Bit zint.)</span></div>` 
+                    : getPartDetailsAndHTML(set.bitId, 'bit', 'Bit');
+                setImagesAndNamesHTML = `<div class="cx-images-container">
+                                            <div class="cx-blade-row wynik-zestaw-obrazki">${lockChipHTML} ${mainBladeHTML} ${assistBladeHTML}</div>
+                                            <div class="cx-drive-row wynik-zestaw-obrazki" style="margin-top: 5px;">${ratchetHTML} ${bitHTML}</div>
+                                        </div>`;
+            }
+            // =========================================================================
+
+            // --- Statystyki i Wykres (bez zmian) ---
+            let setStatsSummaryHTML = '<div class="stat-grid">';
+            let currentSetStats = set.statystykiObliczone;
+            if (currentSetStats) { setStatsSummaryHTML += `<span>ATK: ${currentSetStats.ATK || 0}</span><span>DEF: ${currentSetStats.DEF || 0}</span><span>STM: ${currentSetStats.STM || 0}</span><span>Waga: ${(currentSetStats.WAGA || 0)}g</span>`; if ((currentSetStats.DASH || 0) !== 0) setStatsSummaryHTML += `<span>DASH: ${currentSetStats.DASH || 0}</span>`; if ((currentSetStats.B_RES || 0) !== 0) setStatsSummaryHTML += `<span>B-RES: ${currentSetStats.B_RES || 0}</span>`; if (seriaZestawu === 'cx' && (currentSetStats.CX_LC_WYTRZ || 0) !== 0) { setStatsSummaryHTML += `<span>LC-W: ${currentSetStats.CX_LC_WYTRZ || 0}</span>`; } } else { setStatsSummaryHTML += '<span>Brak danych statystyk</span>'; }
+            setStatsSummaryHTML += `</div>`;
             const chartCanvasId = `chart-deck-${deck.id}-set-${index}`;
-            
-            // --- OSTATECZNA I POPRAWNA STRUKTURA HTML ---
-            // Usunęliśmy zbędny div 'set-content-wrapper' z wnętrza
-                  // --- OSTATECZNA I POPRAWNA STRUKTURA HTML (NAGŁÓWEK NA GÓRZE) ---
+
+            // --- Składanie Finalnego HTML ---
             setsHTML += `
                 <div class="deck-card-set-preview" style="--bg-symbol-url: url('${bgSymbolUrl}');">
-                    
-                    <!-- KROK 1: Nagłówek z ikonami (TERAZ JEST PIERWSZY) -->
-                    <div class="set-header-container">
-                        <strong style="text-transform: capitalize;">Zestaw ${index + 1}</strong>
-                        ${ikonyZestawuHTML}
-                    </div>
-
-                    <!-- KROK 2: Obrazki części (TERAZ SĄ DRUGIE) -->
-                    ${setImagesHTML}
-
-                    <!-- KROK 3: Podsumowanie nazw i statystyk pod obrazkami -->
+                    ${naglowekHTML}
+                    ${setImagesAndNamesHTML}
                     <div class="set-preview-with-chart">
                         <div class="set-info-wrapper">
-                            <div style="font-size:0.8em; color:#ddd; margin-top: -5px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">
-                                ${setNameHTML}
-                            </div>
                             ${setStatsSummaryHTML}
                         </div>
                         <div class="set-chart-container">
                             <canvas id="${chartCanvasId}"></canvas>
                         </div>
                     </div>
-
                 </div>
             `;
         }); // Koniec pętli deck.sets.forEach
+
+
 
         
         const actionsHTML = `<div class="item-actions" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.08);"><button class="button-auto-width" onclick="edytujDeck('${deck.id}')">Edytuj</button><button class="button-auto-width" onclick="eksportujDeckDoPNG('${deck.id}')">PNG</button><button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')">Usuń</button></div>`;
