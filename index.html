@@ -401,7 +401,31 @@ saved-deck-card {
     padding-bottom: 15px; /* Zwiększamy odstęp na dole */
     align-items: flex-start; /* Wyrównuje do góry, jeśli nazwy mają różną wysokość */
 }
+#savedDecksContainer {
+    align-items: start;
+}
+.saved-deck-card .item-actions {
+    display: flex;
+    justify-content: center; /* Centruje przyciski */
+    flex-wrap: wrap;         /* Pozwala zawijać się do nowej linii */
+    gap: 10px;               /* DODAJEMY ODSTĘP 10px między przyciskami */
+}
+.deck-builder-container + .card .action-buttons-wrapper {
+    display: flex;
+    flex-wrap: wrap;         /* Pozwala zawijać przyciski */
+    justify-content: center; /* Centruje przyciski w poziomie */
+    gap: 10px;               /* DODAJEMY ODSTĘP MIĘDZY PRZYCISKAMI */
+    margin-top: 10px;
+}
 
+/*
+  Naprawia wysokość slotów, jeśli jakimś cudem
+  nadal byłaby nieprawidłowa. Ta reguła gwarantuje, że
+  zawsze będą miały minimalną wysokość 70px.
+*/
+.deck-part-slot {
+    min-height: 70px;
+}
 </style>
 
 </head>
@@ -646,9 +670,11 @@ saved-deck-card {
                 <label for="deckName" style="display: block; margin-bottom: 5px;">Nazwa Decku:</label>
                 <input type="text" id="deckName" placeholder="Np. Mój Deck Turniejowy" style="margin-bottom: 10px;">
             </div>
-            <button id="saveDeckButton" onclick="saveCurrentDeck()">Zapisz Aktualny Deck</button>
-             <button onclick="clearCurrentDeckForBuilder()" class="cancel-btn" style="margin-left:10px;">Wyczyść Builder</button>
-        </div>
+          <div class="action-buttons-wrapper">
+        <button id="saveDeckButton" onclick="saveCurrentDeck()">Zapisz Aktualny Deck</button>
+        <button onclick="clearCurrentDeckForBuilder()" class="cancel-btn">Wyczyść Builder</button>
+    </div>
+     </div>
         <div class="deck-builder-container">
             <div class="available-parts-panel" id="available-parts-panel">
                 <h4>Dostępne Części</h4>
