@@ -265,8 +265,27 @@ saved-deck-card {
     .set-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; }
     .set-icons-container { display: flex; gap: 8px; padin;}
     .set-icons-container .set-icon { height: 28px; width: 28px; object-fit: contain; border-radius: 5px; padding: 2px;margin-left:10px; }
-    .stat-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 10px; margin-top: 10px; font-size: 0.8em; line-height: 1.5; }
-    .stat-grid span { white-space: nowrap; }
+   /* ======================================================= */
+/* === OSTATECZNA POPRAWKA: Statystyki w osobnych liniach === */
+/* ======================================================= */
+.stat-grid {
+    display: block; /* Zmieniamy z flex na block, aby elementy układały się pionowo */
+    margin-top: 10px;
+    font-size: 0.9em; /* Lekko powiększamy czcionkę dla czytelności */
+    line-height: 1.6; /* Zwiększamy odstęp między liniami */
+    text-align: left;   /* Wyrównujemy tekst do lewej wewnątrz kolumny statystyk */
+    padding-left: 20px; /* Dodajemy wcięcie, aby wyglądało jak lista */
+}
+
+/* 
+  Ta reguła zamienia każdy element <span> ze statystyką w osobny blok,
+  co wymusza jego wyświetlenie w nowej linii.
+*/
+.stat-grid span {
+    display: block; /* KLUCZOWA ZMIANA */
+    margin-bottom: 3px; /* Mały odstęp pod każdą statystyką */
+}
+.stat-grid span { white-space: nowrap; }
     .set-info-wrapper div[style*="break-word"], .set-info-wrapper .stat-grid { word-break: break-all; hyphens: auto; }
     @media (max-width: 500px) { .set-preview-with-chart { flex-direction: column; } .set-chart-container { width: 180px; height: 180px; margin-top: 15px; } }
 
