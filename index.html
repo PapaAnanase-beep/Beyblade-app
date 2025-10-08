@@ -235,7 +235,16 @@
     /* Linia 'width: 100%;' została usunięta */
     align-self: center; /* Ta linia pomaga w centrowaniu w pionie/poziomie w zależności od kontekstu flex */
 }
-
+.wynik-zestaw-obrazki {
+    padding: 0;
+}
+.cx-images-container { 
+    flex-direction: column; 
+    align-items: center; 
+}
+.cx-blade-row, .cx-drive-row { 
+    width: 100%;
+}
     .wynik-zestaw-obrazki img.deck-part-img { height: 60px; max-width: 60px; object-fit: contain; }
 
     /* ZNAJDŹ I WYKASUJ TEN BLOK */
@@ -411,8 +420,14 @@ saved-deck-card {
 
 /* Poprawka dla kontenera obrazków, aby dać mu więcej przestrzeni */
 .wynik-zestaw-obrazki, .cx-images-container {
-    padding-bottom: 15px; /* Zwiększamy odstęp na dole */
-    align-items: flex-start; /* Wyrównuje do góry, jeśli nazwy mają różną wysokość */
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: flex-start;
+}
+#galeriaDeckow .cx-images-container,
+#galeriaDeckow .wynik-zestaw-obrazki:not(.cx-blade-row):not(.cx-drive-row) {
+    margin-bottom: 15px;
 }
 .saved-deck-card .item-actions {
     display: flex;
@@ -515,7 +530,7 @@ saved-deck-card {
     display: flex;
     flex-direction: row; /* Zapewnia układ poziomy */
     align-items: center;   /* Wyrównuje w pionie statystyki i wykres */
-    gap: 15px;
+    gap: 25px;
     width: 100%;
     margin-left: 0; /* Resetuje stary, błędny margines */
 }
