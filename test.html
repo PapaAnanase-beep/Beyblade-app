@@ -248,7 +248,9 @@
 }
 
 
-    .set-info-wrapper { flex: 1; min-width: 0; }
+    .set-info-wrapper { flex: 1; min-width: 0; display: flex;
+    flex-direction: column;
+    justify-content: center;; }
 .set-chart-container {
     flex-shrink: 0;
     /* Ustawiamy docelowy, większy rozmiar */
@@ -2446,19 +2448,36 @@ function displaySavedDecks() {
             
             // --- OSTATECZNA I POPRAWNA STRUKTURA HTML ---
             // Usunęliśmy zbędny div 'set-content-wrapper' z wnętrza
+                  // --- OSTATECZNA I POPRAWNA STRUKTURA HTML (NAGŁÓWEK NA GÓRZE) ---
             setsHTML += `
                 <div class="deck-card-set-preview" style="--bg-symbol-url: url('${bgSymbolUrl}');">
+                    
+                    <!-- KROK 1: Nagłówek z ikonami (TERAZ JEST PIERWSZY) -->
+                    <div class="set-header-container">
+                        <strong style="text-transform: capitalize;">Zestaw ${index + 1}</strong>
+                        ${ikonyZestawuHTML}
+                    </div>
+
+                    <!-- KROK 2: Obrazki części (TERAZ SĄ DRUGIE) -->
+                    ${setImagesHTML}
+
+                    <!-- KROK 3: Podsumowanie nazw i statystyk pod obrazkami -->
                     <div class="set-preview-with-chart">
                         <div class="set-info-wrapper">
-                            ${setContentForWrapper}
+                            <div style="font-size:0.8em; color:#ddd; margin-top: -5px; margin-bottom:10px; word-break: break-word; text-align:center; line-height: 1.3;">
+                                ${setNameHTML}
+                            </div>
+                            ${setStatsSummaryHTML}
                         </div>
                         <div class="set-chart-container">
                             <canvas id="${chartCanvasId}"></canvas>
                         </div>
                     </div>
+
                 </div>
             `;
-        });
+        }); // Koniec pętli deck.sets.forEach
+
         
         const actionsHTML = `<div class="item-actions" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.08);"><button class="button-auto-width" onclick="edytujDeck('${deck.id}')">Edytuj</button><button class="button-auto-width" onclick="eksportujDeckDoPNG('${deck.id}')">PNG</button><button class="button-auto-width cancel-btn" onclick="usunZapisanyDeck('${deck.id}')">Usuń</button></div>`;
         deckCard.innerHTML = `<h4>${deck.name || 'Deck bez nazwy'}</h4><p style="font-size: 0.75em; color: #aaa; margin-top: 0; margin-bottom:15px; text-align:center;">${deck.lastModified ? `Modyfikacja: ${new Date(deck.lastModified).toLocaleDateString('pl-PL')}` : `Zapisano: ${new Date(deck.timestamp || Date.now()).toLocaleDateString('pl-PL')}`}</p>${setsHTML}${actionsHTML}`;
