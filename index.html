@@ -237,27 +237,16 @@
 }
 
     .wynik-zestaw-obrazki img.deck-part-img { height: 60px; max-width: 60px; object-fit: contain; }
-.set-preview-with-chart {
-    display: flex;
-    justify-content: space-around;
-    /* === OSTATECZNA POPRAWKA: Wyrównaj elementy do dołu === */
-    align-items: flex-end;
-    gap: 15px;
-    width: 100%;
-	margin-left:20px;
-}
 
-.set-info-wrapper {
-    flex: 1; 
-    min-width: 0;
-
-    /* === OSTATECZNA POPRAWKA: Przywrócenie układu poziomego === */
-    display: flex;              /* Użyj flexbox do ułożenia elementów */
-    flex-direction: row;        /* Ustaw kierunek na poziomy (obok siebie) */
-    justify-content: space-between; /* Rozsuń elementy na boki */
-  
-	text-align: left; 
-}
+    /* ZNAJDŹ I WYKASUJ TEN BLOK */
+    .set-info-wrapper {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
 
 .set-chart-container {
     flex-shrink: 0;
@@ -351,10 +340,7 @@ saved-deck-card {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-.set-preview-with-chart {
-    position: relative;
-    z-index: 1;
-}
+
 .deck-card-set-preview.exporting-png::before {
     display: none !important;
 }
@@ -527,11 +513,13 @@ saved-deck-card {
 /* --- Dolny segment (Statystyki + Wykres) --- */
 .set-preview-with-chart {
     display: flex;
-    flex-direction: row; /* Domyślnie obok siebie (dla PC) */
-    align-items: center; /* Wyrównuje staty i wykres w pionie */
+    flex-direction: row; /* Zapewnia układ poziomy */
+    align-items: center;   /* Wyrównuje w pionie statystyki i wykres */
     gap: 15px;
+    width: 100%;
+    margin-left: 0; /* Resetuje stary, błędny margines */
 }
-.set-info-wrapper { flex: 1; min-width: 0; }
+
 .stat-grid { display: block; font-size: 0.85em; line-height: 1.6; text-align: left; }
 .stat-grid span { display: block; }
 .set-chart-container { flex-shrink: 0; width: 140px; height: 140px; position: relative; }
@@ -540,10 +528,6 @@ saved-deck-card {
 /* --- Media Query dla telefonów --- */
 @media (max-width: 500px) {
     /* Zmień kierunek na pionowy: Staty na górze, Wykres na dole */
-    .set-preview-with-chart {
-        flex-direction: column;
-        align-items: center;
-    }
     .set-chart-container {
         width: 180px;
         height: 180px;
