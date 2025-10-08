@@ -247,10 +247,17 @@
 	margin-left:20px;
 }
 
+.set-info-wrapper {
+    flex: 1; 
+    min-width: 0;
 
-    .set-info-wrapper { flex: 1; min-width: 0; display: flex;
-    flex-direction: column;
-    justify-content: center;; }
+    /* === OSTATECZNA POPRAWKA: Przywrócenie układu poziomego === */
+    display: flex;              /* Użyj flexbox do ułożenia elementów */
+    flex-direction: row;        /* Ustaw kierunek na poziomy (obok siebie) */
+    justify-content: space-between; /* Rozsuń elementy na boki */
+    align-items: center;        /* Wyrównaj je w pionie do środka */
+}
+
 .set-chart-container {
     flex-shrink: 0;
     /* Ustawiamy docelowy, większy rozmiar */
