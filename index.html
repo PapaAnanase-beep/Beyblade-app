@@ -255,7 +255,7 @@
     display: flex;              /* Użyj flexbox do ułożenia elementów */
     flex-direction: row;        /* Ustaw kierunek na poziomy (obok siebie) */
     justify-content: space-between; /* Rozsuń elementy na boki */
-    align-left: center;        /* Wyrównaj je w pionie do środka */
+  
 	text-align: left; 
 }
 
@@ -428,9 +428,6 @@ saved-deck-card {
     padding-bottom: 15px; /* Zwiększamy odstęp na dole */
     align-items: flex-start; /* Wyrównuje do góry, jeśli nazwy mają różną wysokość */
 }
-#savedDecksContainer {
-    align-items: start;
-}
 .saved-deck-card .item-actions {
     display: flex;
     justify-content: center; /* Centruje przyciski */
@@ -463,6 +460,14 @@ saved-deck-card {
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 15px;
     align-items: start; /* KLUCZOWE: Karty mają własną wysokość */
+}
+
+/* --- Przyciski na dole karty decku --- */
+.saved-deck-card .item-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 /* --- Pojedyncza karta zestawu (wewnątrz karty decku) --- */
@@ -532,14 +537,6 @@ saved-deck-card {
 .set-chart-container { flex-shrink: 0; width: 140px; height: 140px; position: relative; }
 .set-chart-container canvas { width: 100% !important; height: 100% !important; }
 
-/* --- Przyciski na dole karty decku --- */
-.saved-deck-card .item-actions {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
 /* --- Media Query dla telefonów --- */
 @media (max-width: 500px) {
     /* Zmień kierunek na pionowy: Staty na górze, Wykres na dole */
@@ -556,6 +553,7 @@ saved-deck-card {
         text-align: center; /* Na mobilce wycentruj listę statystyk */
     }
 }
+
 
 </style>
 
