@@ -198,7 +198,6 @@
     #magazyn-filtry-container select, #magazyn-filtry-container .search-input-container { margin-bottom: 0 !important; }
     .search-input-container { position: relative; }
     #searchMagazynByName { -webkit-appearance: none; appearance: none; padding: 12px 15px 12px 40px !important; margin: 0; }
-    .search-input-container::before { content: '🔍'; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2em; opacity: 0.5; pointer-events: none; }
     #searchMagazynByName::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; height: 20px; width: 20px; cursor: pointer; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/></svg>"); opacity: 0.6; transition: opacity 0.2s; }
     #searchMagazynByName::-webkit-search-cancel-button:hover { opacity: 1; }
     #lista-magazyn { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; }
@@ -245,6 +244,7 @@
     align-items: flex-end;
     gap: 15px;
     width: 100%;
+	margin-left:20px;
 }
 
 
@@ -255,13 +255,14 @@
     width: 160px;
     height: 160px;
     position: relative;
-    /* Usuwamy margin-top, bo align-items załatwi sprawę */
 }
-
+saved-deck-card {
+    padding-right: 25px; /* 20px domyślnego paddingu + 5px dodatkowego */
+}
 .set-chart-container canvas { width: 100% !important; height: 100% !important; }
-    .set-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .set-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; }
     .set-icons-container { display: flex; gap: 8px; padin;}
-    .set-icons-container .set-icon { height: 28px; width: 28px; object-fit: contain; background-color: rgba(0,0,0,0.2); border-radius: 5px; padding: 2px;margin-left:10px; }
+    .set-icons-container .set-icon { height: 28px; width: 28px; object-fit: contain; border-radius: 5px; padding: 2px;margin-left:10px; }
     .stat-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 10px; margin-top: 10px; font-size: 0.8em; line-height: 1.5; }
     .stat-grid span { white-space: nowrap; }
     .set-info-wrapper div[style*="break-word"], .set-info-wrapper .stat-grid { word-break: break-all; hyphens: auto; }
@@ -321,6 +322,58 @@
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+.set-preview-with-chart {
+    position: relative;
+    z-index: 1;
+}
+.deck-card-set-preview.exporting-png::before {
+    display: none !important;
+}
+/* Styl dla tymczasowego obrazka tła przy eksporcie PNG */
+.background-symbol-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    z-index: -1; /* Umieść obrazek pod treścią */
+    pointer-events: none; /* Zapobiegaj przechwytywaniu kliknięć */
+}
+/* Styl dla kontenera z ikonką lupy */
+.search-input-container {
+    position: relative;
+}
+
+/* Główne style dla pola wyszukiwania */
+#searchMagazynByName {
+    /* Usuwa domyślny wygląd w niektórych przeglądarkach */
+    -webkit-appearance: none;
+    appearance: none;
+    
+    /* NAJWAŻNIEJSZE: Dodaje wewnętrzny odstęp po lewej stronie, aby zrobić miejsce na ikonkę lupy */
+    padding: 12px 15px 12px 40px !important;
+    
+    margin: 0; /* Usuwa domyślne marginesy */
+}
+/* Styl dla przycisku 'X' (wyczyść) w przeglądarkach WebKit (Chrome, Safari) */
+#searchMagazynByName::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23999'><path d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/></svg>");
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+/* Efekt po najechaniu na przycisk 'X' */
+#searchMagazynByName::-webkit-search-cancel-button:hover {
+    opacity: 1;
+}
+
 </style>
 
 </head>
@@ -403,6 +456,7 @@
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
+		<li><strong>v2.2.4:</strong> Dodano wykresy statystyk</li>
 		<li><strong>v2.2.3:</strong> Dodano wyszukiwanie po nazwie w magazynie</li>
 		<li><strong>v2.2.3:</strong> Dodany Guzik <em>"HELP"</em> do kanału na discordzie</li>
 		<li><strong>v2.2.2:</strong> Zmiany wizualne galerii Decków</li>
@@ -2500,29 +2554,39 @@ function eksportujDeckDoPNG(deckId) {
 
     showNotification("Przygotowuję obraz PNG...", 2500, 'info');
 
-    // Krok 1: Ukryj elementy, których nie chcemy na zdjęciu (przyciski)
+    // Krok 1: Przygotowanie do eksportu (ukrycie niepotrzebnych elementów)
     if (przyciskiAkcji) {
         przyciskiAkcji.style.display = 'none';
     }
 
-    // Krok 2: Dynamiczne wstawianie obrazków tła
     const zestawyWDecku = kartaDecku.querySelectorAll('.deck-card-set-preview');
+    // === KLUCZOWA POPRAWKA #1: Inicjalizujemy pustą tablicę ===
     const dodaneObrazkiTla = [];
 
     zestawyWDecku.forEach(zestawNode => {
+        // Ukrywamy tło z CSS, aby uniknąć dublowania
+        zestawNode.classList.add('exporting-png');
+
         const stylZestawu = zestawNode.getAttribute('style');
+        if (!stylZestawu) return;
+
         const urlMatch = stylZestawu.match(/--bg-symbol-url:\s*url\(['"]?([^'"]+)['"]?\)/);
 
         if (urlMatch && urlMatch[1]) {
             const urlObrazka = urlMatch[1];
-            
-            // Sprawdź, czy URL nie jest pusty (na wszelki wypadek)
             if (urlObrazka.trim() !== "") {
                 const bgImage = document.createElement('img');
                 bgImage.src = urlObrazka;
-                bgImage.className = 'background-symbol-img';
+                // Dodajemy klasę, aby CSS mógł nadać style (pozycja, rozmiar)
+                bgImage.className = 'background-symbol-img'; 
                 
-                zestawNode.prepend(bgImage); // Wstawia obrazek na początek kontenera zestawu
+                // Ustawiamy przezroczystość bezpośrednio w JS - to najważniejszy krok wizualny
+                bgImage.style.opacity = '0.15';
+
+                zestawNode.prepend(bgImage);
+
+                // === KLUCZOWA POPRAWKA #2: Poprawiona nazwa zmiennej ===
+                // Teraz poprawnie dodajemy obrazek do tablicy, aby go później usunąć.
                 dodaneObrazkiTla.push(bgImage);
             }
         }
@@ -2530,21 +2594,18 @@ function eksportujDeckDoPNG(deckId) {
 
     const opcjeRenderowania = {
         bgcolor: '#101018',
-        imagePlaceholder: undefined,
-        // Można dodać cacheBust: true, jeśli obrazki się nie odświeżają
-        // cacheBust: true 
+        cacheBust: true
     };
 
-    // Krok 3: Wygeneruj obraz PNG (z opóźnieniem, aby dać obrazkom tła czas na załadowanie)
+    // Krok 2: Generowanie obrazu (z opóźnieniem)
     setTimeout(() => {
         domtoimage.toPng(kartaDecku, opcjeRenderowania)
             .then(function (dataUrl) {
-                // Logika zapisu
+                // Logika zapisu pliku (bez zmian)
                 if (window.Android && typeof window.Android.zapiszObrazPNG === 'function') {
-                    // Usuwamy prefix 'data:image/png;base64,' przed wysłaniem do Androida
                     const base64Data = dataUrl.split(',')[1];
                     window.Android.zapiszObrazPNG(base64Data, nazwaPliku);
-                    showNotification("Przekazano obraz do zapisu w aplikacji...", 2500, 'success');
+                    showNotification("Przekazano obraz do zapisu...", 2500, 'success');
                 } else {
                     const link = document.createElement('a');
                     link.download = nazwaPliku;
@@ -2554,21 +2615,27 @@ function eksportujDeckDoPNG(deckId) {
                 }
             })
             .catch(function (error) {
-                console.error('Błąd podczas generowania obrazu z dom-to-image:', error);
+                console.error('Błąd podczas generowania obrazu:', error);
                 showNotification("Wystąpił błąd podczas eksportu do PNG.", 4000, 'error');
             })
             .finally(() => {
-                // --- Krok 4: OSTATECZNE CZYSZCZENIE (po wszystkim) ---
+                // Krok 3: Sprzątanie po eksporcie (zawsze się wykonuje)
+                console.log(`Sprzątanie po eksporcie. Znaleziono ${dodaneObrazkiTla.length} obrazków do usunięcia.`);
                 
-                // 1. Usuń tymczasowo dodane obrazki tła
+                // Usuwamy dynamicznie dodane obrazki
                 dodaneObrazkiTla.forEach(img => img.remove());
-
-                // 2. Pokaż z powrotem ukryte przyciski (Z POPRAWIONĄ NAZWĄ ZMIENNEJ)
+                
+                // Pokazujemy z powrotem przyciski
                 if (przyciskiAkcji) {
                     przyciskiAkcji.style.display = 'flex';
                 }
+                
+                // Przywracamy widoczność tła z CSS
+                zestawyWDecku.forEach(zestawNode => {
+                    zestawNode.classList.remove('exporting-png');
+                });
             });
-    }, 500); // Dodajemy 500ms opóźnienia - kluczowe dla załadowania obrazków
+    }, 500);
 }
 
 function edytujDeck(deckId) {
