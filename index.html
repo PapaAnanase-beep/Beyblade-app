@@ -424,9 +424,15 @@ saved-deck-card {
     justify-content: center;
     gap: 10px;
     align-items: flex-start;
+    width: 100%; 
+    padding: 0; 
 }
 #galeriaDeckow .cx-images-container,
 #galeriaDeckow .wynik-zestaw-obrazki:not(.cx-blade-row):not(.cx-drive-row) {
+    margin-bottom: 15px;
+}
+.cx-images-container,
+#galeriaDeckow .wynik-zestaw-obrazki {
     margin-bottom: 15px;
 }
 .saved-deck-card .item-actions {
@@ -553,6 +559,74 @@ saved-deck-card {
     }
 }
 
+/* ========================================= */
+/* === NOWA SEKCJA: OSIĄGNIĘCIA === */
+/* ========================================= */
+#achievementsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.achievement-card {
+    background: rgba(30, 30, 40, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+.achievement-icon {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    object-fit: contain;
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.achievement-info h4 {
+    margin: 0 0 5px 0;
+    color: #e0e0e0;
+}
+
+.achievement-info p {
+    font-size: 0.85em;
+    color: #aaa;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Styl dla ZABLOKOWANEGO osiągnięcia */
+.achievement-card.locked {
+    background: rgba(25, 25, 30, 0.5);
+}
+
+.achievement-card.locked .achievement-icon {
+    filter: grayscale(100%) brightness(0.5);
+}
+
+.achievement-card.locked .achievement-info h4 {
+    color: #777;
+}
+
+/* Styl dla ODBLOKOWANEGO osiągnięcia */
+.achievement-card.unlocked {
+    background: linear-gradient(145deg, rgba(138, 43, 226, 0.15), rgba(60, 60, 70, 0.1));
+    border-color: rgba(138, 43, 226, 0.3);
+}
+
+.achievement-card.unlocked .achievement-info h4 {
+    color: #a25ff0; /* Kolor fioletowy */
+    font-weight: bold;
+}
+
+.achievement-card.unlocked .achievement-icon {
+    filter: none;
+    transform: scale(1.1);
+}
 
 </style>
 
@@ -584,7 +658,8 @@ saved-deck-card {
         <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a>
         <a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a>
         <a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
-		 <a href="https://discord.com/channels/1344364297941286933/1413086273517916161" target="_blank" class="help-link" title="Potrzebujesz pomocy? Kliknij, aby przejść do Discorda!">
+		<a href="#" onclick="navigateTo('osiagniecia', this)" title="Osiągnięcia"><img src="osiagniecie.png" alt="Osiągnięcia"><span>Osiągnięcia</span></a>
+		<a href="https://discord.com/channels/1344364297941286933/1413086273517916161" target="_blank" class="help-link" title="Potrzebujesz pomocy? Kliknij, aby przejść do Discorda!">
         <img src="img/discord.webp" alt="Help">
         <span>Pomoc (Discord)</span>
     </a>
@@ -614,6 +689,9 @@ saved-deck-card {
                 <li><strong>Deck Generator:</strong><img src="4.png" alt="Deck Icon" class="inline-icon"> Składaj własne decki w oparciu o zasady turniejowe</li>
                 <li><strong>Moje Decki:</strong><img src="5.png" alt="Galeria Icon" class="inline-icon"> Przeglądaj, edytuj lub usuwaj decki</li>
                 <li><strong>Dane:</strong><img src="6.png" alt="Dane Icon" class="inline-icon"> W tej sekcji możesz importować/eksportować swoje części jak i decki</li>
+				<li><strong>Osiągnięcia:</strong><img src="img/osiagniecie.png" alt="Osiągnięcia Icon" class="inline-icon"> W tej sekcji możesz zobaczyć swoje osiągnięcia</li>
+				<li><strong>Discord:</strong><img src="img/discord.webp" alt="Discord Icon" class="inline-icon"> Kanał aplikacji na discordzie </li>
+
             </ul>
             <p style="text-align: left; margin-top: 15px;">
                 Pamiętaj, aby regularnie zapisywać swoje dane (magazyn i decki) za pomocą opcji eksportu, aby uniknąć ich utraty!
@@ -636,6 +714,7 @@ saved-deck-card {
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
+		<li><strong>v2.3.0:</strong> Dodano osiągnięcia</li>
 		<li><strong>v2.2.6:</strong> Dodano Nowe elemeny: <em>Operate, Heavy, Might, Emperor, Wolf, Hunt, Free, 0-60, 9-65,</em> statystyki uzupełnione częściowo</li>
 		<li><strong>v2.2.5:</strong> Dodano tryby w bicie <em>Turbo</em></li>
 		<li><strong>v2.2.4:</strong> Dodano wykresy statystyk</li>
@@ -705,10 +784,12 @@ saved-deck-card {
         <h2>Generator Zestawów</h2>
         <div class="card">
             <label for="seriaLosowania">Wybierz Serię do Losowania:</label>
-            <select id="seriaLosowania" aria-label="Seria Beybladów do losowania">
-                <option value="bx_ux">BX / UX (Blade, Ratchet, Bit)</option>
-                <option value="cx">CX (LockChip, Main, Assist, Ratchet, Bit)</option>
-            </select>
+                <select id="seriaLosowania" aria-label="Seria Beybladów do losowania">
+        <option value="all">Wszystkie Serie (All)</option> <!-- DODAJ TĘ LINIĘ -->
+        <option value="bx_ux">BX / UX (Blade, Ratchet, Bit)</option>
+        <option value="cx">CX (LockChip, Main, Assist, Ratchet, Bit)</option>
+    </select>
+    
             <label for="ilosc" style="margin-top:15px;">Wybierz ilość Beybladów do wylosowania:</label>
             <select id="ilosc" aria-label="Ilość Beybladów do wylosowania">
                 <option value="1">1</option><option value="2">2</option><option value="3">3</option>
@@ -766,7 +847,7 @@ saved-deck-card {
             <input 
                 type="search" 
                 id="searchMagazynByName" 
-                placeholder="Np. Dran Sword, 3-60..." 
+                placeholder="Np. DranSword, 3-60..." 
                 oninput="wyswietlMagazyn()"
                 aria-label="Wyszukaj część po nazwie"
             >
@@ -872,14 +953,35 @@ saved-deck-card {
             </button>
         </div>
     </section>
-</div>
 
+    <section id="osiagniecia" class="page">
+        <h2>Odblokowane Osiągnięcia</h2>
+        <p style="text-align: center; margin-bottom: 25px;">Odkrywaj aplikację i buduj potężne zestawy, aby zdobyć wszystkie odznaki!</p>
+        
+        <!-- Kontener, w którym JS wygeneruje karty osiągnięć -->
+        <div id="achievementsContainer">
+            <!-- Przykładowa struktura (generowana przez JS) -->
+            <!-- 
+            <div class="achievement-card unlocked">
+                <img src="img/achievements/kolekcjoner.png" class="achievement-icon">
+                <div class="achievement-info">
+                    <h4>Kolekcjoner</h4>
+                    <p>Posiadaj w magazynie co najmniej 50 unikalnych części.</p>
+                </div>
+            </div> 
+            -->
+        </div>
+    </section>
 
+    </div>
+    
 
 <script>
 // =================================
 // Konfiguracja i Zmienne Globalne
 // =================================
+ const ACHIEVEMENTS_KEY = 'beybladeAchievementsAnanas_v1';
+
 const ID_CLOCK_MIRAGE = "206"
 let sidebarExpanded = false;
 const sidebarWidthExpanded = 260;
@@ -998,6 +1100,295 @@ function setSavedDecks(decksArray) {
         console.error("setSavedDecks Błąd:", e);
     }
 }
+
+// =======================================================================
+// === OSTATECZNY I KOMPLETNY BLOK SYSTEMU OSIĄGNIĘĆ ===
+// =======================================================================
+
+// --- KROK 1: Funkcje pomocnicze, które nic nie wiedzą o obiekcie `allAchievements` ---
+
+function checkPartTypePercentage(typ, percentage, excludeTrypio = false) {
+    const baza = getMagazyn();
+    let czesciDanegoTypu = baza.filter(p => p.typ === typ);
+    if (excludeTrypio) {
+        czesciDanegoTypu = czesciDanegoTypu.filter(p => p.nazwa !== 'Trypio');
+    }
+    if (czesciDanegoTypu.length === 0) return false;
+    const posiadane = czesciDanegoTypu.filter(p => p.ilosc > 0).length;
+    return (posiadane / czesciDanegoTypu.length) >= percentage;
+}
+
+function checkCXPercentage(percentage) {
+    const cxTypes = ['cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
+    const baza = getMagazyn();
+    const wszystkieCX = baza.filter(p => cxTypes.includes(p.typ));
+    if (wszystkieCX.length === 0) return false;
+    const posiadaneCX = wszystkieCX.filter(p => p.ilosc > 0).length;
+    return (posiadaneCX / wszystkieCX.length) >= percentage;
+}
+
+function getUnlockedAchievements() {
+    try {
+        const unlocked = localStorage.getItem(ACHIEVEMENTS_KEY);
+        return unlocked ? JSON.parse(unlocked) : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+// --- KROK 2: Główny obiekt z definicjami osiągnięć ---
+// Zależności między osiągnięciami są na końcu, co jest dobrą praktyką.
+
+const allAchievements = {
+    // Poziomy Kolekcjonerskie (Procentowe)
+    kolekcjoner_poczotkujacy: {
+        title: "Początkujący Kolekcjoner",
+        description: "Posiadaj w magazynie co najmniej 15% wszystkich unikalnych części.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const baza = getMagazyn();
+            if (baza.length === 0) return false;
+            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.15;
+        }
+    },
+    kolekcjoner_zaawansowany: {
+        title: "Zaawansowany Kolekcjoner",
+        description: "Posiadaj w magazynie co najmniej 30% wszystkich unikalnych części.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const baza = getMagazyn();
+            if (baza.length === 0) return false;
+            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.30;
+        }
+    },
+    kolekcjoner_elitarny: {
+        title: "Elitarny Kolekcjoner",
+        description: "Posiadaj w magazynie co najmniej 60% wszystkich unikalnych części.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const baza = getMagazyn();
+            if (baza.length === 0) return false;
+            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.60;
+        }
+    },
+    kolekcjoner_boski: {
+        title: "Boski Kolekcjoner",
+        description: "Posiadaj w magazynie co najmniej 90% wszystkich unikalnych części.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const baza = getMagazyn();
+            if (baza.length === 0) return false;
+            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.90;
+        }
+    },
+    cheater: {
+        title: "Cheater!",
+        description: "Posiadaj w magazynie 100% wszystkich części (łącznie z Easter Eggami).",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const baza = getMagazyn();
+            return baza.length > 0 && baza.every(p => p.ilosc > 0);
+        }
+    },
+
+    // Osiągnięcia Tematyczne (Rodziny)
+    rodzina_smoka: {
+        title: "Rodzina Smoka",
+        description: "Posiadaj DranSword, DranDagger, DranBuster i Lock Chip Dran.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+            return ['DranSword', 'DranDagger', 'DranBuster', 'Dran'].every(nazwa => posiadane.has(nazwa));
+        }
+    },
+    gildia_magow: {
+        title: "Gildia Magów",
+        description: "Posiadaj WizardArrow, WizardRod i Lock Chip Wizard.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+            return ['WizardArrow', 'WizardRod', 'Wizard'].every(nazwa => posiadane.has(nazwa));
+        }
+    },
+    z_piekla_rodem: {
+        title: "Z Piekła Rodem",
+        description: "Posiadaj HellsScythe, HellsChain, HellsHammer i Lock Chip Hells.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+            return ['HellsScythe', 'HellsChain', 'HellsHammer', 'Hells'].every(nazwa => posiadane.has(nazwa));
+        }
+    },
+    bractwo_rycerskie: {
+        title: "Bractwo Rycerskie",
+        description: "Posiadaj KnightShield, KnightLance i KnightMail.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+            return ['KnightShield', 'KnightLance', 'KnightMail'].every(nazwa => posiadane.has(nazwa));
+        }
+    },
+    dojo: {
+        title: "Dojo",
+        description: "Posiadaj SamuraiCalibur, SamuraiSaber, SamuraiSteel, ShinobiKnife i ShinobiShadow.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+            return ['SamuraiCalibur', 'SamuraiSaber', 'SamuraiSteel', 'ShinobiKnife', 'ShinobiShadow'].every(nazwa => posiadane.has(nazwa));
+        }
+    },
+
+    // Osiągnięcia Specjalne (Persony)
+    og_persona: {
+        title: "OG Persona",
+        description: "Posiadaj DranDagger, WizardArrow, KnightLance i HellsScythe.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+            return ['DranDagger', 'WizardArrow', 'KnightLance', 'HellsScythe'].every(nazwa => posiadane.has(nazwa));
+        }
+    },
+    persona_v2: {
+        title: "Persona v2",
+        description: "Posiadaj Dran, Hells, KnightMail, Wizard i SamuraiSaber.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+            return ['Dran', 'Hells', 'KnightMail', 'Wizard', 'SamuraiSaber'].every(nazwa => posiadane.has(nazwa));
+        }
+    },
+
+    // Osiągnięcia Funkcjonalne
+    beycrafter: { title: "BeyCrafter", description: "Zapisz 10 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 10 },
+    bx_braz: { title: "Kolekcja BX: Brąz", description: "Posiadaj 20% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.2, true) },
+    bx_srebro: { title: "Kolekcja BX: Srebro", description: "Posiadaj 40% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.4, true) },
+    bx_zloto: { title: "Kolekcja BX: Złoto", description: "Posiadaj 70% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.7, true) },
+    bx_diament: { title: "Kolekcja BX: Diament", description: "Posiadaj wszystkie części typu BX (Blade), oprócz Trypio.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 1.0, true) },
+    ux_braz: { title: "Kolekcja UX: Brąz", description: "Posiadaj 20% części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 0.2) },
+    ux_srebro: { title: "Kolekcja UX: Srebro", description: "Posiadaj 40% części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 0.4) },
+    ux_zloto: { title: "Kolekcja UX: Złoto", description: "Posiadaj 70% części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 0.7) },
+    ux_diament: { title: "Kolekcja UX: Diament", description: "Posiadaj wszystkie części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 1.0) },
+    cx_braz: { title: "Kolekcja CX: Brąz", description: "Posiadaj 20% części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(0.2) },
+    cx_srebro: { title: "Kolekcja CX: Srebro", description: "Posiadaj 40% części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(0.4) },
+    cx_zloto: { title: "Kolekcja CX: Złoto", description: "Posiadaj 70% części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(0.7) },
+    cx_diament: { title: "Kolekcja CX: Diament", description: "Posiadaj wszystkie części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(1.0) },
+    rachet_braz: { title: "Kolekcja Ratchet: Brąz", description: "Posiadaj 20% wszystkich Ratchetów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 0.2) },
+    rachet_srebro: { title: "Kolekcja Ratchet: Srebro", description: "Posiadaj 40% wszystkich Ratchetów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 0.4) },
+    rachet_zloto: { title: "Kolekcja Ratchet: Złoto", description: "Posiadaj 70% wszystkich Ratchetów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 0.7) },
+    rachet_diament: { title: "Kolekcja Ratchet: Diament", description: "Posiadaj wszystkie Ratchety.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 1.0) },
+    bit_braz: { title: "Kolekcja Bit: Brąz", description: "Posiadaj 20% wszystkich Bitów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 0.2) },
+    bit_srebro: { title: "Kolekcja Bit: Srebro", description: "Posiadaj 40% wszystkich Bitów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 0.4) },
+    bit_zloto: { title: "Kolekcja Bit: Złoto", description: "Posiadaj 70% wszystkich Bitów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 0.7) },
+    bit_diament: { title: "Kolekcja Bit: Diament", description: "Posiadaj wszystkie Bity.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 1.0) },
+    mistrz_lewego_raila: { title: "Mistrz Lewego Raila", description: "Posiadaj wszystkie lewoskrętne Blade'y.", icon: 'img/osiagniecie.png', check: () => {
+        const baza = getMagazyn();
+        const lewoskretne = baza.filter(p => p.kierunek === 'lewy');
+        return lewoskretne.length > 0 && lewoskretne.every(p => p.ilosc > 0);
+    }},
+
+    // Osiągnięcia Synergii i Ukryte
+    sentymenalna_podroz: {
+        title: "Sentymentalna Podróż",
+        description: "Zbuduj i zapisz zestaw składający się z co najmniej jednej części nawiązującej do klasycznych serii.",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const klasyki = ['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'StormPegasis', 'RockLeone', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'VictoryValkyrie', 'XenoXcalibur'];
+            const magazyn = getMagazyn();
+            const nazwyCzesci = (set) => [set.bladeId, set.ratchetId, set.bitId].filter(Boolean).map(id => magazyn.find(p => p.id === id)?.nazwa).filter(Boolean);
+            return getSavedDecks().some(deck => deck.sets.some(set => nazwyCzesci(set).some(czesc => klasyki.includes(czesc))));
+        }
+    },
+    czy_to_legalne: {
+        title: "Czy to jest legalne?",
+        description: "Próbowałeś użyć legendarnej, zakazanej części...",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const trypioId = getMagazyn().find(p => p.nazwa === 'Trypio')?.id;
+            if (!trypioId) return false;
+            return getSavedDecks().some(deck => deck.sets.some(set => set.bladeId === trypioId || set.ratchetId === trypioId || set.bitId === trypioId));
+        }
+    },
+    tecza_mocy: {
+        title: "Tęcza Mocy",
+        description: "Zapisz deck, w którym każdy z 4 zestawów reprezentuje inny typ (Atak, Obrona, Wytrzymałość, Balans).",
+        icon: 'img/osiagniecie.png',
+        check: () => {
+            const magazyn = getMagazyn();
+            const getSetType = (set) => {
+                if (!set) return null;
+                const ratchet = set.ratchetId ? magazyn.find(p => p.id === set.ratchetId) : null;
+                const bit = set.bitId ? magazyn.find(p => p.id === set.bitId) : null;
+                return ((ratchet && ratchet.integrujeBit) ? ratchet : bit)?.rodzaj || null;
+            };
+            return getSavedDecks().some(deck => {
+                if (deck.sets.length < 4) return false;
+                const typy = new Set(deck.sets.slice(0, 4).map(getSetType).filter(Boolean));
+                return typy.size === 4;
+            });
+        }
+    },
+    
+    // Osiągnięcia "Mistrzowskie" (zależne od innych, muszą być na końcu)
+    mistrz_kuzni: {
+        title: "Mistrz Kuźni",
+        description: "Zdobądź wszystkie diamentowe osiągnięcia za kolekcje (BX, UX, CX, Ratchet, Bit).",
+        icon: 'img/osiagniecie.png',
+        check: () => ['bx_diament', 'ux_diament', 'cx_diament', 'rachet_diament', 'bit_diament'].every(id => allAchievements[id] && allAchievements[id].check())
+    }
+};
+
+// --- KROK 3: Główne funkcje zarządzające, które wiedzą już o `allAchievements` ---
+
+function unlockAchievement(id) {
+    const unlocked = getUnlockedAchievements();
+    if (!unlocked[id]) {
+        unlocked[id] = { unlockedAt: Date.now() };
+        localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(unlocked));
+        if (allAchievements[id]) {
+            showNotification(`Osiągnięcie odblokowane: ${allAchievements[id].title}!`, 4000, 'success');
+        }
+    }
+}
+
+function checkAllAchievements() {
+    console.log("Sprawdzanie, czy odblokowano NOWE osiągnięcia...");
+    const unlocked = getUnlockedAchievements();
+    for (const id in allAchievements) {
+        if (!unlocked[id] && allAchievements[id].check()) {
+            unlockAchievement(id);
+        }
+    }
+}
+
+function displayAchievements() {
+    const container = document.getElementById('achievementsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    console.log("Wyświetlanie i ponowne sprawdzanie statusu osiągnięć z sortowaniem...");
+    const achievementIds = Object.keys(allAchievements);
+    achievementIds.sort((a, b) => {
+        const isAUnlocked = allAchievements[a].check();
+        const isBUnlocked = allAchievements[b].check();
+        if (isAUnlocked && !isBUnlocked) return -1;
+        if (!isAUnlocked && isBUnlocked) return 1;
+        return 0;
+    });
+    achievementIds.forEach(id => {
+        const achievement = allAchievements[id];
+        const isCurrentlyUnlocked = achievement.check();
+        const card = document.createElement('div');
+        card.className = `achievement-card ${isCurrentlyUnlocked ? 'unlocked' : 'locked'}`;
+        card.innerHTML = `<img src="${achievement.icon}" class="achievement-icon" alt="${achievement.title}"><div class="achievement-info"><h4>${achievement.title}</h4><p>${achievement.description}</p></div>`;
+        container.appendChild(card);
+        if (isCurrentlyUnlocked) {
+            const unlocked = getUnlockedAchievements();
+            if (!unlocked[id]) {
+                 unlockAchievement(id);
+            }
+        }
+    });
+}
+// =======================================================================
 
 // =================================
 // Logika Licznika Punktów
@@ -1179,17 +1570,20 @@ function toggleSidebar() {
     }
 }
 
-function navigateTo(pageId, clickedLinkElement) { // Usunięto forceRenderDeckBuilder, bo logika jest teraz wewnątrz
+function navigateTo(pageId, clickedLinkElement) {
     console.log(`Nawigacja do: ${pageId}`);
     document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active-link'));
     if (clickedLinkElement) clickedLinkElement.classList.add('active-link');
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const page = document.getElementById(pageId);
-    if (page) page.classList.add('active');
-    else { 
+    if (page) {
+        page.classList.add('active');
+    } else { 
         console.error(`Strona ID '${pageId}' nie znaleziona.`); 
         const fallbackLink = document.querySelector('.sidebar a[onclick*="navigateTo(\'generator"]');
-        if (fallbackLink && pageId !== 'generator') navigateTo('generator', fallbackLink); // Wywołanie bez force
+        if (fallbackLink && pageId !== 'generator') {
+            navigateTo('generator', fallbackLink);
+        }
         return; 
     }
 
@@ -1197,24 +1591,33 @@ function navigateTo(pageId, clickedLinkElement) { // Usunięto forceRenderDeckBu
         const deckNameInput = document.getElementById('deckName');
         if (deckNameInput) deckNameInput.value = '';
         currentEditingDeckId = null; 
-        // initializeOrResetCurrentDeck(); // Już niepotrzebne tutaj, bo deck jest czyszczony przed każdym renderowaniem
         const saveBtn = document.getElementById('saveDeckButton');
         if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
         console.log("Zresetowano stan edycji decku po opuszczeniu strony 'deck'.");
     }
     
-    if (pageId === 'magazyn') wyswietlMagazyn(); 
-    else if (pageId === 'deck') {
-        if (!currentEditingDeckId) { // Jeśli nie edytujemy, to inicjujemy pusty
+    // ==================================================
+    // === TUTAJ ZNAJDUJE SIĘ CAŁA LOGIKA WYWOŁAŃ FUNKCJI ===
+    // ==================================================
+    
+    if (pageId === 'magazyn') {
+        wyswietlMagazyn(); 
+    } else if (pageId === 'deck') {
+        if (!currentEditingDeckId) {
              initializeOrResetCurrentDeck();
         }
-        // Jeśli currentEditingDeckId jest ustawione, to dane zostaną załadowane przez `edytujDeck` -> `initializeOrResetCurrentDeck(deckData)`
-        // a następnie `renderDeckBuilderAndParts`
         renderDeckBuilderAndParts(); 
-    } else if (pageId === 'galeriaDeckow') displaySavedDecks();
-    else if (pageId === 'licznikPunktow') loadScoresFromLocalStorage();
+    } else if (pageId === 'galeriaDeckow') {
+        displaySavedDecks();
+    } else if (pageId === 'osiagniecia') { // <-- TO JEST NOWY, POPRAWNIE WSTAWIONY FRAGMENT
+        displayAchievements();
+    } else if (pageId === 'licznikPunktow') {
+        loadScoresFromLocalStorage();
+    }
     
-    if (sidebarExpanded && window.innerWidth < 768) toggleSidebar();
+    if (sidebarExpanded && window.innerWidth < 768) {
+        toggleSidebar();
+    }
 }
 
 // =================================
@@ -1351,7 +1754,8 @@ function zmienIloscCzesci(idCzesci, zmiana) {
     setMagazyn(magazyn);
     const aktywnaStronaId = document.querySelector('.page.active')?.id;
     if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
-    if (aktywnaStronaId === 'deck') renderAvailablePartsList(); // Odśwież listę części dla D&D
+    if (aktywnaStronaId === 'deck') renderAvailablePartsList();
+	 checkAllAchievements();
 }
 
 // =================================
@@ -1481,7 +1885,7 @@ function LOSUJ() {
     ostatnioWylosowaneZestawyGlobalnie = [];
 
     const iloscZestawowDoWylosowania = parseInt(document.getElementById('ilosc')?.value) || 1;
-    const wybranaSeria = document.getElementById('seriaLosowania')?.value;
+    let wybranaSeria = document.getElementById('seriaLosowania')?.value; // Używamy 'let' zamiast 'const'
 
     if (!wybranaSeria) {
         showNotification("Błąd: Nie wybrano serii.", 3000, 'warning');
@@ -1495,8 +1899,7 @@ function LOSUJ() {
         if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
         return;
     }
-
-    // === ZMIANA TUTAJ: Dodano 'ux-blade' do obiektu ===
+    
     const dostepneCzesciDoLosowania = { blade: [], 'ux-blade': [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
     magazyn.forEach(czesc => {
         const ilosc = parseInt(czesc.ilosc) || 0;
@@ -1507,114 +1910,107 @@ function LOSUJ() {
         }
     });
 
-    let czyWystarczajacoCzesci = true;
-    let komunikatBrakuCzesci = "Niewystarczająca ilość części w magazynie do wylosowania ";
-    if (wybranaSeria === 'bx_ux') {
-        komunikatBrakuCzesci += `${iloscZestawowDoWylosowania} zestawu/ów BX/UX:`;
-        // === ZMIANA TUTAJ: Sprawdzamy sumę części blade i ux-blade ===
-        if ((dostepneCzesciDoLosowania.blade.length + dostepneCzesciDoLosowania['ux-blade'].length) < iloscZestawowDoWylosowania) {
-             czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Blade (BX/UX),";
-        }
-        if (dostepneCzesciDoLosowania.rachet.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Ratchet,"; }
-        let potrzebneBity = 0;
-        let dostepneZwykleRatchety = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
-        if (iloscZestawowDoWylosowania > dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchety) {
-            potrzebneBity = Math.min(iloscZestawowDoWylosowania - (dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchety), dostepneZwykleRatchety)
-        }
-        if (dostepneCzesciDoLosowania.bit.length < potrzebneBity) {}
-    } else if (wybranaSeria === 'cx') {
-        komunikatBrakuCzesci += `${iloscZestawowDoWylosowania} zestawu/ów CX:`;
-        if (dostepneCzesciDoLosowania['cx-lock-chip'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało LockChip,"; }
-        if (dostepneCzesciDoLosowania['cx-main-blade'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało MainBlade,"; }
-        if (dostepneCzesciDoLosowania['cx-assist-blade'].length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało AssistBlade,"; }
-        if (dostepneCzesciDoLosowania.rachet.length < iloscZestawowDoWylosowania) { czyWystarczajacoCzesci = false; komunikatBrakuCzesci += " za mało Ratchet,"; }
-        let potrzebneBityCX = 0;
-        let dostepneZwykleRatchetyCX = dostepneCzesciDoLosowania.rachet.filter(r => !(r.integrujeBit === true || String(r.id) === "205")).length;
-         if (iloscZestawowDoWylosowania > dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchetyCX) {
-            potrzebneBityCX = Math.min(iloscZestawowDoWylosowania - (dostepneCzesciDoLosowania.rachet.length - dostepneZwykleRatchetyCX), dostepneZwykleRatchetyCX)
-        }
-        if (dostepneCzesciDoLosowania.bit.length < potrzebneBityCX) {}
-    }
-    if (!czyWystarczajacoCzesci) {
-        showNotification(komunikatBrakuCzesci.slice(0, -1) + ".", 4000, 'warning');
-        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
-        return;
-    }
-
     const wylosowaneZestawyFragment = document.createDocumentFragment();
+    
+    // --- NOWA LOGIKA LOSOWANIA 'ALL' ---
+    const serieDoWyboru = ['bx_ux', 'cx'];
+
     for (let i = 0; i < iloscZestawowDoWylosowania; i++) {
+        let seriaDoWylosowania = wybranaSeria;
+        if (wybranaSeria === 'all') {
+            // Losuj serię dla każdego zestawu indywidualnie
+            seriaDoWylosowania = serieDoWyboru[Math.floor(Math.random() * serieDoWyboru.length)];
+        }
+
+        // Sprawdzenie dostępności części dla wylosowanej serii (uproszczone)
+        let czyMoznaZbudowac = false;
+        if (seriaDoWylosowania === 'bx_ux') {
+            const maBlade = (dostepneCzesciDoLosowania.blade.length + dostepneCzesciDoLosowania['ux-blade'].length) > 0;
+            const maRatchet = dostepneCzesciDoLosowania.rachet.length > 0;
+            const maBit = dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit);
+            czyMoznaZbudowac = maBlade && maRatchet && maBit;
+        } else if (seriaDoWylosowania === 'cx') {
+            czyMoznaZbudowac = dostepneCzesciDoLosowania['cx-lock-chip'].length > 0 &&
+                               dostepneCzesciDoLosowania['cx-main-blade'].length > 0 &&
+                               dostepneCzesciDoLosowania['cx-assist-blade'].length > 0 &&
+                               dostepneCzesciDoLosowania.rachet.length > 0 &&
+                               (dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit));
+        }
+
+        if (!czyMoznaZbudowac && wybranaSeria === 'all') {
+            // Jeśli w trybie 'all' nie da się zbudować jednego typu, spróbuj drugi
+            const innaSeria = seriaDoWylosowania === 'bx_ux' ? 'cx' : 'bx_ux';
+            // Sprawdź ponownie dla drugiej serii
+            if (innaSeria === 'bx_ux') {
+                 const maBlade = (dostepneCzesciDoLosowania.blade.length + dostepneCzesciDoLosowania['ux-blade'].length) > 0;
+                 const maRatchet = dostepneCzesciDoLosowania.rachet.length > 0;
+                 const maBit = dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit);
+                 if (maBlade && maRatchet && maBit) seriaDoWylosowania = innaSeria; else continue; // Pomiń, jeśli żadnej nie da się zbudować
+            } else if (innaSeria === 'cx') {
+                 if (dostepneCzesciDoLosowania['cx-lock-chip'].length > 0 && dostepneCzesciDoLosowania['cx-main-blade'].length > 0 && dostepneCzesciDoLosowania['cx-assist-blade'].length > 0 && dostepneCzesciDoLosowania.rachet.length > 0 && (dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit))) {
+                     seriaDoWylosowania = innaSeria;
+                 } else continue;
+            }
+        } else if (!czyMoznaZbudowac) {
+            showNotification(`Niewystarczająca ilość części w magazynie do wylosowania zestawu ${seriaDoWylosowania.toUpperCase()}.`, 4000, 'warning');
+            break; // Przerwij pętlę, jeśli wybrano konkretną serię i brakuje części
+        }
+
+        // Reszta logiki losowania (pozostaje taka sama)
         let wylosowanyZestawCzesci = {};
         let czyZestawKompletny = true;
         let wylosowanoSpecjalnyRatchet = false;
 		
         const losujCzescZPulli = (typCzesci, filtrKompatybilnosci = null) => {
-            let pulaFiltrwana = [...dostepneCzesciDoLosowania[typCzesci]];
-            if (filtrKompatybilnosci) {
-                pulaFiltrwana = pulaFiltrwana.filter(filtrKompatybilnosci);
-            }
-
-            if (pulaFiltrwana && pulaFiltrwana.length > 0) {
+            let pulaFiltrwana = [...(dostepneCzesciDoLosowania[typCzesci] || [])];
+            if (filtrKompatybilnosci) pulaFiltrwana = pulaFiltrwana.filter(filtrKompatybilnosci);
+            if (pulaFiltrwana.length > 0) {
                 const randomIndex = Math.floor(Math.random() * pulaFiltrwana.length);
                 const wylosowanaCzescZKopii = pulaFiltrwana[randomIndex];
-
                 const indexWOryginalnejPuli = dostepneCzesciDoLosowania[typCzesci].findIndex(c => c._uniqueDragId === wylosowanaCzescZKopii._uniqueDragId);
                 if (indexWOryginalnejPuli > -1) {
                     const finalnieWylosowanaCzesc = dostepneCzesciDoLosowania[typCzesci].splice(indexWOryginalnejPuli, 1)[0];
-					
-					if (finalnieWylosowanaCzesc.maTryby && Array.isArray(finalnieWylosowanaCzesc.tryby) && finalnieWylosowanaCzesc.tryby.length > 0) {
-						const wylosowanyTrybIndex = Math.floor(Math.random() * finalnieWylosowanaCzesc.tryby.length);
-						const wylosowanyTryb = finalnieWylosowanaCzesc.tryby[wylosowanyTrybIndex];
-						
-						const czescZTrybem = { ...finalnieWylosowanaCzesc };
-						delete czescZTrybem.tryby;
-						
-						Object.assign(czescZTrybem, wylosowanyTryb);
-						
-						czescZTrybem.aktywnyTrybIndex = wylosowanyTrybIndex;
-						czescZTrybem.nazwa = `${finalnieWylosowanaCzesc.nazwa} (${wylosowanyTryb.nazwaTrybu})`;
-
-						return czescZTrybem;
-					}
+                    if (finalnieWylosowanaCzesc.maTryby && Array.isArray(finalnieWylosowanaCzesc.tryby) && finalnieWylosowanaCzesc.tryby.length > 0) {
+                        const wylosowanyTrybIndex = Math.floor(Math.random() * finalnieWylosowanaCzesc.tryby.length);
+                        const wylosowanyTryb = finalnieWylosowanaCzesc.tryby[wylosowanyTrybIndex];
+                        const czescZTrybem = { ...finalnieWylosowanaCzesc };
+                        delete czescZTrybem.tryby;
+                        Object.assign(czescZTrybem, wylosowanyTryb);
+                        czescZTrybem.aktywnyTrybIndex = wylosowanyTrybIndex;
+                        czescZTrybem.nazwa = `${finalnieWylosowanaCzesc.nazwa} (${wylosowanyTryb.nazwaTrybu})`;
+                        return czescZTrybem;
+                    }
                     return finalnieWylosowanaCzesc;
-                } else {
-                    return null;
                 }
             }
             return null;
         };
 
-        if (wybranaSeria === 'bx_ux') {
-            // === ZMIANA TUTAJ: Logika losowania z dwóch puli 'blade' i 'ux-blade' ===
-            const dostepneBX = dostepneCzesciDoLosowania.blade;
-            const dostepneUX = dostepneCzesciDoLosowania['ux-blade'];
-            let pulaDoLosowaniaBlade = [];
-            if (dostepneBX.length > 0) pulaDoLosowaniaBlade.push('blade');
-            if (dostepneUX.length > 0) pulaDoLosowaniaBlade.push('ux-blade');
-
-            if (pulaDoLosowaniaBlade.length > 0) {
-                const losowyTypBlade = pulaDoLosowaniaBlade[Math.floor(Math.random() * pulaDoLosowaniaBlade.length)];
-                wylosowanyZestawCzesci.blade = losujCzescZPulli(losowyTypBlade);
-            } else {
-                wylosowanyZestawCzesci.blade = null;
-            }
-
-            if (wylosowanyZestawCzesci.blade && String(wylosowanyZestawCzesci.blade.id) === ID_CLOCK_MIRAGE) {
+        if (seriaDoWylosowania === 'bx_ux') {
+            const pulaBlade = [...dostepneCzesciDoLosowania.blade, ...dostepneCzesciDoLosowania['ux-blade']];
+            if (pulaBlade.length > 0) {
+                const losowyIndex = Math.floor(Math.random() * pulaBlade.length);
+                const wybranyBlade = pulaBlade[losowyIndex];
+                wylosowanyZestawCzesci.blade = losujCzescZPulli(wybranyBlade.typ, c => c._uniqueDragId === wybranyBlade._uniqueDragId);
+            } else { wylosowanyZestawCzesci.blade = null; }
+            // ... reszta logiki dla bx_ux
+             if (wylosowanyZestawCzesci.blade && String(wylosowanyZestawCzesci.blade.id) === ID_CLOCK_MIRAGE) {
                 wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet', czesc => typeof czesc.nazwa === 'string' && (czesc.nazwa.match(/-\d*5$/) || czesc.nazwa.match(/^M-\d*5$/)));
-                if (!wylosowanyZestawCzesci.rchet) { czyZestawKompletny = false; }
+                if (!wylosowanyZestawCzesci.rachet) czyZestawKompletny = false;
             } else if (wylosowanyZestawCzesci.blade) {
                 wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
             } else { czyZestawKompletny = false; }
-
             if (wylosowanyZestawCzesci.rachet) {
                 if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
                     wylosowanoSpecjalnyRatchet = true; wylosowanyZestawCzesci.bit = null;
                 } else { wylosowanyZestawCzesci.bit = losujCzescZPulli('bit'); }
             } else if (czyZestawKompletny) { czyZestawKompletny = false; wylosowanyZestawCzesci.bit = null; }
-
             if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) {
                 czyZestawKompletny = false;
             }
-        } else if (wybranaSeria === 'cx') {
+
+        } else if (seriaDoWylosowania === 'cx') {
+            // ... logika dla cx
             wylosowanyZestawCzesci.cx_lock_chip = losujCzescZPulli('cx-lock-chip');
             wylosowanyZestawCzesci.cx_main_blade = losujCzescZPulli('cx-main-blade');
             wylosowanyZestawCzesci.cx_assist_blade = losujCzescZPulli('cx-assist-blade');
@@ -1637,29 +2033,26 @@ function LOSUJ() {
                     czesciDoStatystyk[key] = resztaCzesci;
                 } else { czesciDoStatystyk[key] = null; }
             }
-
-            const statystykiZestawu = obliczSumeStatystykZestawu(czesciDoStatystyk, wybranaSeria);
+            const statystykiZestawu = obliczSumeStatystykZestawu(czesciDoStatystyk, seriaDoWylosowania);
             const idUnikalnyZestawu = `wylosowany-${Date.now()}-${i}-${Math.random().toString(16).slice(2)}`;
-            const pelnyZestaw = { idZestawu: idUnikalnyZestawu, seria: wybranaSeria, czesci: czesciDoStatystyk, statystyki: statystykiZestawu };
+            const pelnyZestaw = { idZestawu: idUnikalnyZestawu, seria: seriaDoWylosowania, czesci: czesciDoStatystyk, statystyki: statystykiZestawu };
             ostatnioWylosowaneZestawyGlobalnie.push(pelnyZestaw);
             const kartaHTML = generujHTMLDlaKartyZestawu(pelnyZestaw, i);
             const tempDiv = document.createElement('div'); tempDiv.innerHTML = kartaHTML.trim();
             wylosowaneZestawyFragment.appendChild(tempDiv.firstChild);
         } else {
-            showNotification(`Nie udało się wylosować kompletu dla zestawu #${i + 1}.`, 3500, 'warning');
+             if (wybranaSeria !== 'all') { // Pokaż ostrzeżenie tylko jeśli nie losujemy z 'all'
+                showNotification(`Nie udało się wylosować kompletu dla zestawu #${i + 1}.`, 3500, 'warning');
+            }
         }
     }
 
     if (wylosowaneZestawyFragment.childNodes.length > 0) {
         wynikiDivGenerator.appendChild(wylosowaneZestawyFragment);
         showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów)!`, 2500, 'success');
-        const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
-        if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'block';
-    } else if (iloscZestawowDoWylosowania > 0) {
-        wynikiDivGenerator.innerHTML = '<div class="card"><p>Nie udało się wylosować żadnego kompletnego zestawu.</p></div>';
+    } else {
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Nie udało się wylosować żadnego kompletnego zestawu z dostępnych części.</p></div>';
         if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
-        const zapiszGlownyControls = document.getElementById('zapisz-glowny-zestaw-controls');
-        if (zapiszGlownyControls) zapiszGlownyControls.style.display = 'none';
     }
 }
 
@@ -3360,8 +3753,7 @@ function wykonajPelnyResetAplikacji() {
     console.log("Pełny reset aplikacji zakończony.");
 }
    
-// Używamy 'load' zamiast 'DOMContentLoaded', ponieważ 'load' czeka na wszystkie zasoby,
-// w tym obrazki i arkusze stylów, co jest idealne dla naszej logiki.
+
 window.addEventListener('load', function() {
     console.log("Wydarzenie 'load': Strona i wszystkie zasoby (w tym obrazki) załadowane.");
 
@@ -3403,6 +3795,7 @@ window.addEventListener('load', function() {
     try {
         console.log("Rozpoczynanie automatycznej synchronizacji magazynu z domyślną bazą...");
         const czyCosSieZmienilo = importujMagazynZBazyDomyslnejHTML(true);
+		checkAllAchievements();
         if (czyCosSieZmienilo) {
             console.log("Magazyn został zsynchronizowany z domyślną bazą.");
         } else {
