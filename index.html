@@ -636,6 +636,8 @@ saved-deck-card {
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
+		<li><strong>v2.2.6:</strong> Dodano Nowe elemeny: <em>Operate, Heavy, Might, Emperor, Wolf, Hunt, Free, 0-60, 9-65,</em> statystyki uzupełnione częściowo</li>
+		<li><strong>v2.2.5:</strong> Dodano tryby w bicie <em>Turbo</em></li>
 		<li><strong>v2.2.4:</strong> Dodano wykresy statystyk</li>
 		<li><strong>v2.2.3:</strong> Dodano wyszukiwanie po nazwie w magazynie</li>
 		<li><strong>v2.2.3:</strong> Dodany Guzik <em>"HELP"</em> do kanału na discordzie</li>
@@ -1331,7 +1333,7 @@ function wyswietlMagazyn() {
                 <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', 1)" title="Zwiększ ilość ${czesc.nazwa}">+</button>
             </div>`;
         
-        cardDiv.innerHTML = `${imgHTML}<h3>${nazwaDoWyswietlenia}${isBeta ? '<span class="beta-label">BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>${statyString}${buttonHTML}${quantityControlsHTML}`;
+        cardDiv.innerHTML = `${imgHTML}<h3>${nazwaDoWyswietlenia}${isBeta ? '<span class="beta-label"> BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>${statyString}${buttonHTML}${quantityControlsHTML}`;
         lista.appendChild(cardDiv);
     });
 }
@@ -4408,18 +4410,130 @@ window.addEventListener('load', function() {
 	"rodzaj": "atak",
     "ilosc": 0,
     "img": "img/RatchetBitTurbo.webp",
-    "ATK": 30,
+   "integrujeBit": true,
+	 "ilosc": 0,
+  "maTryby": true,
+  "tryby": [
+    {
+      "nazwaTrybu": "Stamina",
+      
+     "ATK": 30,
     "DEF": 30,
     "STM": 60,
-    "waga": 9.0,
+    "waga": 12.8,
     "DASH": 10,
-    "BURST_RES": 30,
-    "integrujeBit": true
+    "BURST_RES": 30
+    },
+    {
+      "nazwaTrybu": "Atak",
+     
+      "ATK": 55,
+    "DEF": 20,
+    "STM": 10,
+    "waga": 9.0,
+    "DASH": 45,
+    "BURST_RES": 30
+    }
+  ]
  },
   {
-  "id": "206", "typ": "ux-blade","kierunek": "prawy", "nazwa": "ClockMirage", "ilosc": 0, "img": "img/BladeClockMirage.webp", "ATK": 0, "DEF": 0, "STM": 0, "waga": 0}
-  
-  
+  "id": "206", "typ": "ux-blade","kierunek": "prawy", "nazwa": "ClockMirage", "ilosc": 0, "img": "img/BladeClockMirage.webp", "ATK": 10, "DEF": 10, "STM": 80, "waga": 37.6},
+   {
+  "id": "207", "typ": "rachet", "nazwa": "9-65", "ilosc": 0, "img": "img/Ratchet9-65.webp", "ATK": 8, "DEF": 19, "STM": 13, "waga": 10.6},
+ {
+    "id": "208",
+    "typ": "rachet",
+    "nazwa": "Operate",
+	"rodzaj": "balans",
+    "ilosc": 0,
+    "img": "img/RachetBitOperate.webp",
+    "integrujeBit": true,
+	 "maTryby": true,
+  "tryby": [
+    {
+      "nazwaTrybu": "obrona",
+      
+    "ATK": 20,
+    "DEF": 50,
+    "STM": 50,
+    "waga": 0,
+    "DASH": 10,
+    "BURST_RES": 30
+    },
+    {
+      "nazwaTrybu": "atak",
+     
+    "ATK": 50,
+    "DEF": 35,
+    "STM": 10,
+    "waga": 0,
+    "DASH": 35,
+    "BURST_RES": 30
+    }
+  ]
+ }, 
+    {
+    "typ": "cx-main-blade","kierunek": "prawy",
+    "nazwa": "Might",
+    "ilosc": 0,
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "img": "img/MainBladeMight.webp",
+    "id": "209"
+  },
+    {
+    "typ": "cx-assist-blade",
+    "nazwa": "Heavy",
+    "ilosc": 0,
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "img": "img/AssistBladeHeavy.webp",
+    "id": "210"
+  },
+    {
+    "typ": "cx-lock-chip",
+    "nazwa": "Emperor",
+    "ilosc": 0,
+    "waga": 0,
+    "img": "img/LockChipEmperor.webp",
+    "id": "211"
+  },
+    {
+    "typ": "cx-lock-chip",
+    "nazwa": "Wolf",
+    "ilosc": 0,
+    "waga": 1.7,
+    "img": "img/LockChipWolf.webp",
+    "id": "212"
+  },
+  {
+  "id": "213", "typ": "rachet", "nazwa": "0-60", "ilosc": 0, "img": "img/Ratchet0-60.webp", "ATK": 3, "DEF": 14, "STM": 13, "waga": 0},
+    {
+    "typ": "cx-main-blade","kierunek": "prawy",
+    "nazwa": "Hunt",
+    "ilosc": 0,
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "img": "img/MainBladeHunt.webp",
+    "id": "214"
+  },
+    {
+    "typ": "cx-assist-blade",
+    "nazwa": "Free",
+    "ilosc": 0,
+    "ATK": 0,
+    "DEF": 0,
+    "STM": 0,
+    "waga": 0,
+    "img": "img/AssistBladeFree.webp",
+    "id": "215"
+  }
 ]
 
 
