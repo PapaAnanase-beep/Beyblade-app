@@ -1259,7 +1259,12 @@ const allAchievements = {
     },
 
     // Osiągnięcia Funkcjonalne
-    beycrafter: { title: "BeyCrafter", description: "Zapisz 10 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 10 },
+	mojpierwszydeck: { title: "Mój Pierwszy Deck", description: "Zapisz pierwszy deck.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 1 },
+    beycrafter_braz: { title: "BeyCrafter Brąz", description: "Zapisz 5 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 5 },
+	beycrafter_srebro: { title: "BeyCrafter Srebro", description: "Zapisz 10 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 10 },
+    beycrafter_zloto: { title: "BeyCrafter Złoto", description: "Zapisz 15 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 15 },
+    beycrafter_diament: { title: "BeyCrafter Diament", description: "Zapisz 20 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 20 },
+
     bx_braz: { title: "Kolekcja BX: Brąz", description: "Posiadaj 20% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.2, true) },
     bx_srebro: { title: "Kolekcja BX: Srebro", description: "Posiadaj 40% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.4, true) },
     bx_zloto: { title: "Kolekcja BX: Złoto", description: "Posiadaj 70% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.7, true) },
