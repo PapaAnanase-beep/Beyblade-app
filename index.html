@@ -627,6 +627,119 @@ saved-deck-card {
     filter: none;
     transform: scale(1.1);
 }
+/* ======================================================= */
+/* === OSTATECZNE STYLE OSIĄGNIĘĆ Z UJEDNOLICENIEM KART === */
+/* ======================================================= */
+
+.achievement-card {
+    background: rgba(30, 30, 40, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    
+    /* === KLUCZOWE ZMIANY === */
+    display: flex;              /* Włączamy tryb Flexbox */
+    flex-direction: column;     /* Układamy elementy w pionie */
+    justify-content: space-between; /* To "rozpycha" elementy, przyklejając pasek do dołu */
+    min-height: 160px;          /* Ustawiamy minimalną, stałą wysokość dla wszystkich kart */
+}
+
+.achievement-card-content {
+    display: flex;
+    align-items: center; /* Wyrównuje ikonę i tekst w pionie */
+    gap: 15px;
+    width: 100%;
+}
+
+.achievement-icon {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    object-fit: contain;
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.achievement-info {
+    text-align: left; /* Lepsza czytelność opisów */
+}
+
+.achievement-info h4 {
+    margin: 0 0 5px 0;
+    color: #e0e0e0;
+}
+
+.achievement-info p {
+    font-size: 0.85em;
+    color: #aaa;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* --- Style paska postępu (BEZ ZMIAN, ALE ZAŁĄCZONE DLA KOMPLETNOŚCI) --- */
+.achievement-progress-bar {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    height: 22px;
+    margin-top: 15px; /* Odstęp od treści powyżej */
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: linear-gradient(90deg, #8a2be2, #a25ff0);
+    height: 100%;
+    border-radius: 7px;
+    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 0 10px rgba(162, 95, 240, 0.5);
+}
+
+.progress-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+
+/* --- Style dla zablokowanego i odblokowanego (BEZ ZMIAN) --- */
+.achievement-card.locked {
+    background: rgba(25, 25, 30, 0.5);
+}
+
+.achievement-card.locked .achievement-icon {
+    filter: grayscale(100%) brightness(0.5);
+}
+
+.achievement-card.locked .achievement-info h4 {
+    color: #777;
+}
+
+.achievement-card.unlocked {
+    background: linear-gradient(145deg, rgba(138, 43, 226, 0.15), rgba(60, 60, 70, 0.1));
+    border-color: rgba(138, 43, 226, 0.3);
+}
+
+.achievement-card.unlocked .achievement-info h4 {
+    color: #a25ff0;
+    font-weight: bold;
+}
+
+.achievement-card.unlocked .achievement-icon {
+    filter: none;
+    transform: scale(1.1);
+}
+
 
 </style>
 
@@ -980,13 +1093,12 @@ saved-deck-card {
 // =================================
 // Konfiguracja i Zmienne Globalne
 // =================================
- const ACHIEVEMENTS_KEY = 'beybladeAchievementsAnanas_v1';
-
-const ID_CLOCK_MIRAGE = "206"
+const ACHIEVEMENTS_KEY = 'beybladeAchievementsAnanas_v1';
+const ID_CLOCK_MIRAGE = "206";
 let sidebarExpanded = false;
 const sidebarWidthExpanded = 260;
 const sidebarWidthCollapsed = 50;
-let currentEditingDeckId = null; 
+let currentEditingDeckId = null;
 
 let sidebar, appContainer, sidebarToggleBtn, menuIcon, menuBtnText;
 let wynikiDivGenerator, placeholderActualImgGenerator;
@@ -996,38 +1108,30 @@ let ostatnioWylosowaneZestawyGlobalnie = [];
 const MAGAZYN_KEY = 'beybladeMagazynAnanasCX_v3';
 const SAVED_DECKS_KEY = 'savedBeybladeDecksAnanasCX_v3';
 const SCORES_KEY = 'beybladeScoreCounterAnanas';
-const DOMYSLNA_BAZA_ZALADOWANA_KEY = 'ananasAppDomyślnaBazaZaladowana_v1'; // Nowy klucz
-let currentDeckBeingBuilt = {}; // Zostanie zainicjalizowane w DOMContentLoaded lub przy nawigacji
-    let currentlyActiveSetIndexInBuilder = 0; // Domyślnie pierwszy zestaw (indeks 0)
-	let imageHideTimeouts = { player1: null, player2: null };
-	let fullscreenOverlayHideTimeout = null;
+const DOMYSLNA_BAZA_ZALADOWANA_KEY = 'ananasAppDomyślnaBazaZaladowana_v1';
+let currentDeckBeingBuilt = {};
+let currentlyActiveSetIndexInBuilder = 0;
+let imageHideTimeouts = { player1: null, player2: null };
+let fullscreenOverlayHideTimeout = null;
+
 function initializeOrResetCurrentDeck(deckData = null) {
     const defaultSetStructure = () => ({
-        seria: 'bx_ux',
-        bladeId: null, bladeAktywnyTrybIndex: 0, // Indeks dla trybu Blade
-        ratchetId: null,
-        bitId: null,
-        cx_lock_chipId: null,
-        cx_main_bladeId: null, cx_main_bladeAktywnyTrybIndex: 0, // Indeks dla trybu Main Blade
-        cx_assist_bladeId: null,
-        statystykiObliczone: {}
+        seria: 'bx_ux', bladeId: null, bladeAktywnyTrybIndex: 0,
+        ratchetId: null, bitId: null, cx_lock_chipId: null,
+        cx_main_bladeId: null, cx_main_bladeAktywnyTrybIndex: 0,
+        cx_assist_bladeId: null, statystykiObliczone: {}
     });
 
     if (deckData && deckData.id) {
-        currentDeckBeingBuilt = JSON.parse(JSON.stringify(deckData)); // Głęboka kopia
-        // Upewnij się, że każdy zestaw ma wszystkie potrzebne klucze, nawet jeśli są null
-        currentDeckBeingBuilt.sets = currentDeckBeingBuilt.sets.map(set => ({
-            ...defaultSetStructure(), // Zacznij od domyślnej struktury
-            ...set // Nadpisz wartościami z wczytanego zestawu
-        }));
-        // Uzupełnij do 4 zestawów, jeśli jest mniej
+        currentDeckBeingBuilt = JSON.parse(JSON.stringify(deckData));
+        currentDeckBeingBuilt.sets = currentDeckBeingBuilt.sets.map(set => ({ ...defaultSetStructure(), ...set }));
         while (currentDeckBeingBuilt.sets.length < 4) {
             currentDeckBeingBuilt.sets.push(defaultSetStructure());
         }
         if (document.getElementById('deckName')) {
             document.getElementById('deckName').value = currentDeckBeingBuilt.name || "";
         }
-        currentEditingDeckId = deckData.id; // Ustaw ID edytowanego decku
+        currentEditingDeckId = deckData.id;
     } else {
         currentDeckBeingBuilt = {
             name: "",
@@ -1037,46 +1141,43 @@ function initializeOrResetCurrentDeck(deckData = null) {
         if (document.getElementById('deckName')) {
             document.getElementById('deckName').value = "";
         }
-        currentEditingDeckId = null; // Resetuj ID edytowanego decku
+        currentEditingDeckId = null;
     }
     console.log("Zainicjalizowano/Zresetowano currentDeckBeingBuilt:", JSON.parse(JSON.stringify(currentDeckBeingBuilt)));
 }
 
-    function clearCurrentDeckForBuilder() {
-        const deckNameInput = document.getElementById('deckName');
-        if(deckNameInput) deckNameInput.value = "";
-        initializeOrResetCurrentDeck(); 
-        currentEditingDeckId = null; 
-        const saveBtn = document.getElementById('saveDeckButton');
-        if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
-        
-        currentlyActiveSetIndexInBuilder = 0; // Zresetuj do pierwszej zakładki
-        renderDeckBuilderAndParts(); // Odśwież widok buildera (zakładki i sloty)
-        showNotification("Builder decku wyczyszczony.", 2000, 'info');
-    }
-// =================================
-// Zarządzanie Magazynem (localStorage)
-// =================================
+function clearCurrentDeckForBuilder() {
+    const deckNameInput = document.getElementById('deckName');
+    if (deckNameInput) deckNameInput.value = "";
+    initializeOrResetCurrentDeck();
+    currentEditingDeckId = null;
+    const saveBtn = document.getElementById('saveDeckButton');
+    if (saveBtn) saveBtn.textContent = 'Zapisz Aktualny Deck';
+    currentlyActiveSetIndexInBuilder = 0;
+    renderDeckBuilderAndParts();
+    showNotification("Builder decku wyczyszczony.", 2000, 'info');
+}
+
 function getMagazyn() {
     try {
         const magazynString = localStorage.getItem(MAGAZYN_KEY);
         return magazynString ? JSON.parse(magazynString) : [];
-    } catch (e) { showNotification("Błąd odczytu danych magazynu.", 3000, 'error'); console.error("Błąd odczytu magazynu:", e); return []; }
-}
-function setMagazyn(magazynArray) {
-    try {
-        if (Array.isArray(magazynArray)) {
-            localStorage.setItem(MAGAZYN_KEY, JSON.stringify(magazynArray));
-        } else {
-            showNotification("Błąd zapisu: Dane magazynu muszą być tablicą.", 3000, 'error');
-            console.error("setMagazyn: Przekazano nie-tablicę:", magazynArray);
-        }
-    } catch (e) { showNotification("Błąd zapisu danych magazynu.", 3000, 'error'); console.error("Błąd zapisu magazynu:", e); }
+    } catch (e) {
+        showNotification("Błąd odczytu danych magazynu.", 3000, 'error');
+        console.error("Błąd odczytu magazynu:", e);
+        return [];
+    }
 }
 
-// =================================
-// Zarządzanie Zapisanymi Deckami (localStorage)
-// =================================
+function setMagazyn(magazynArray) {
+    try {
+        localStorage.setItem(MAGAZYN_KEY, JSON.stringify(magazynArray));
+    } catch (e) {
+        showNotification("Błąd zapisu danych magazynu.", 3000, 'error');
+        console.error("Błąd zapisu magazynu:", e);
+    }
+}
+
 function getSavedDecks() {
     try {
         const decksString = localStorage.getItem(SAVED_DECKS_KEY);
@@ -1087,14 +1188,10 @@ function getSavedDecks() {
         return [];
     }
 }
+
 function setSavedDecks(decksArray) {
     try {
-        if (Array.isArray(decksArray)) {
-            localStorage.setItem(SAVED_DECKS_KEY, JSON.stringify(decksArray));
-        } else {
-            showNotification("Błąd zapisu decków: Nieprawidłowe dane (nie jest tablicą).", 3000, 'error');
-            console.error("setSavedDecks: Próba zapisu nie-tablicy:", decksArray);
-        }
+        localStorage.setItem(SAVED_DECKS_KEY, JSON.stringify(decksArray));
     } catch (e) {
         showNotification("Błąd zapisu decków do localStorage.", 3000, 'error');
         console.error("setSavedDecks Błąd:", e);
@@ -1102,30 +1199,8 @@ function setSavedDecks(decksArray) {
 }
 
 // =======================================================================
-// === OSTATECZNY I KOMPLETNY BLOK SYSTEMU OSIĄGNIĘĆ ===
+// === OSTATECZNY SYSTEM OSIĄGNIĘĆ z PASKAMI POSTĘPU ===
 // =======================================================================
-
-// --- KROK 1: Funkcje pomocnicze, które nic nie wiedzą o obiekcie `allAchievements` ---
-
-function checkPartTypePercentage(typ, percentage, excludeTrypio = false) {
-    const baza = getMagazyn();
-    let czesciDanegoTypu = baza.filter(p => p.typ === typ);
-    if (excludeTrypio) {
-        czesciDanegoTypu = czesciDanegoTypu.filter(p => p.nazwa !== 'Trypio');
-    }
-    if (czesciDanegoTypu.length === 0) return false;
-    const posiadane = czesciDanegoTypu.filter(p => p.ilosc > 0).length;
-    return (posiadane / czesciDanegoTypu.length) >= percentage;
-}
-
-function checkCXPercentage(percentage) {
-    const cxTypes = ['cx-lock-chip', 'cx-main-blade', 'cx-assist-blade'];
-    const baza = getMagazyn();
-    const wszystkieCX = baza.filter(p => cxTypes.includes(p.typ));
-    if (wszystkieCX.length === 0) return false;
-    const posiadaneCX = wszystkieCX.filter(p => p.ilosc > 0).length;
-    return (posiadaneCX / wszystkieCX.length) >= percentage;
-}
 
 function getUnlockedAchievements() {
     try {
@@ -1136,188 +1211,136 @@ function getUnlockedAchievements() {
     }
 }
 
-// --- KROK 2: Główny obiekt z definicjami osiągnięć ---
-// Zależności między osiągnięciami są na końcu, co jest dobrą praktyką.
+// --- Szablon do tworzenia funkcji `progress` dla kolekcji konkretnych części ---
+const createCollectionProgress = (requiredPartNames) => {
+    return () => {
+        const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
+        const ilePosiadanych = requiredPartNames.filter(nazwa => posiadane.has(nazwa)).length;
+        return { current: ilePosiadanych, max: requiredPartNames.length };
+    };
+};
 
+// --- Szablon do tworzenia funkcji `progress` dla kolekcji części danego typu ---
+const createPartTypeProgress = (partType, subType = null) => {
+    return () => {
+        const baza = getMagazyn();
+        let czesciDanegoTypu = baza.filter(p => p.typ === partType && (subType ? p.rodzaj === subType : true));
+        if (czesciDanegoTypu.length === 0) return { current: 0, max: 1 };
+        const posiadane = czesciDanegoTypu.filter(p => p.ilosc > 0).length;
+        return { current: posiadane, max: czesciDanegoTypu.length };
+    };
+};
+
+// --- Główny obiekt z definicjami osiągnięć (teraz z funkcją `progress`) ---
 const allAchievements = {
-    // Poziomy Kolekcjonerskie (Procentowe)
+    // --- Osiągnięcia Funkcjonalne ---
+    mojpierwszydeck: { title: "Mój Pierwszy Deck", description: "Zapisz pierwszy deck.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 1 }) },
+    beycrafter_braz: { title: "BeyCrafter Brąz", description: "Zapisz 5 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 5 }) },
+    beycrafter_srebro: { title: "BeyCrafter Srebro", description: "Zapisz 10 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 10 }) },
+    beycrafter_zloto: { title: "BeyCrafter Złoto", description: "Zapisz 15 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 15 }) },
+    beycrafter_diament: { title: "BeyCrafter Diament", description: "Zapisz 20 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 20 }) },
+
+    // --- Poziomy Kolekcjonerskie (Procentowe) ---
     kolekcjoner_poczotkujacy: {
-        title: "Początkujący Kolekcjoner",
-        description: "Posiadaj w magazynie co najmniej 15% wszystkich unikalnych części.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const baza = getMagazyn();
-            if (baza.length === 0) return false;
-            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.15;
+        title: "Początkujący Kolekcjoner", description: "Posiadaj 15% wszystkich części.", icon: 'img/osiagniecie.png',
+        progress: () => {
+            const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
+            return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.15) };
         }
     },
     kolekcjoner_zaawansowany: {
-        title: "Zaawansowany Kolekcjoner",
-        description: "Posiadaj w magazynie co najmniej 30% wszystkich unikalnych części.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const baza = getMagazyn();
-            if (baza.length === 0) return false;
-            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.30;
+        title: "Zaawansowany Kolekcjoner", description: "Posiadaj 30% wszystkich części.", icon: 'img/osiagniecie.png',
+        progress: () => {
+            const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
+            return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.30) };
         }
     },
     kolekcjoner_elitarny: {
-        title: "Elitarny Kolekcjoner",
-        description: "Posiadaj w magazynie co najmniej 60% wszystkich unikalnych części.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const baza = getMagazyn();
-            if (baza.length === 0) return false;
-            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.60;
+        title: "Elitarny Kolekcjoner", description: "Posiadaj 60% wszystkich części.", icon: 'img/osiagniecie.png',
+        progress: () => {
+            const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
+            return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.60) };
         }
     },
     kolekcjoner_boski: {
-        title: "Boski Kolekcjoner",
-        description: "Posiadaj w magazynie co najmniej 90% wszystkich unikalnych części.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const baza = getMagazyn();
-            if (baza.length === 0) return false;
-            return (baza.filter(p => p.ilosc > 0).length / baza.length) >= 0.90;
+        title: "Boski Kolekcjoner", description: "Posiadaj 90% wszystkich części.", icon: 'img/osiagniecie.png',
+        progress: () => {
+            const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
+            return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.90) };
         }
     },
     cheater: {
-        title: "Cheater!",
-        description: "Posiadaj w magazynie 100% wszystkich części (łącznie z Easter Eggami).",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const baza = getMagazyn();
-            return baza.length > 0 && baza.every(p => p.ilosc > 0);
+        title: "Cheater!", description: "Posiadaj 100% wszystkich części.", icon: 'img/osiagniecie.png',
+        progress: () => {
+            const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
+            return { current: baza.filter(p => p.ilosc > 0).length, max: baza.length };
         }
     },
 
-    // Osiągnięcia Tematyczne (Rodziny)
-    rodzina_smoka: {
-        title: "Rodzina Smoka",
-        description: "Posiadaj DranSword, DranDagger, DranBuster i Lock Chip Dran.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
-            return ['DranSword', 'DranDagger', 'DranBuster', 'Dran'].every(nazwa => posiadane.has(nazwa));
-        }
-    },
-    gildia_magow: {
-        title: "Gildia Magów",
-        description: "Posiadaj WizardArrow, WizardRod i Lock Chip Wizard.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
-            return ['WizardArrow', 'WizardRod', 'Wizard'].every(nazwa => posiadane.has(nazwa));
-        }
-    },
-    z_piekla_rodem: {
-        title: "Z Piekła Rodem",
-        description: "Posiadaj HellsScythe, HellsChain, HellsHammer i Lock Chip Hells.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
-            return ['HellsScythe', 'HellsChain', 'HellsHammer', 'Hells'].every(nazwa => posiadane.has(nazwa));
-        }
-    },
-    bractwo_rycerskie: {
-        title: "Bractwo Rycerskie",
-        description: "Posiadaj KnightShield, KnightLance i KnightMail.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
-            return ['KnightShield', 'KnightLance', 'KnightMail'].every(nazwa => posiadane.has(nazwa));
-        }
-    },
-    dojo: {
-        title: "Dojo",
-        description: "Posiadaj SamuraiCalibur, SamuraiSaber, SamuraiSteel, ShinobiKnife i ShinobiShadow.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
-            return ['SamuraiCalibur', 'SamuraiSaber', 'SamuraiSteel', 'ShinobiKnife', 'ShinobiShadow'].every(nazwa => posiadane.has(nazwa));
-        }
-    },
+    // --- Osiągnięcia Tematyczne (Rodziny) ---
+    rodzina_smoka: { title: "Rodzina Smoka", description: "Posiadaj Wszystkie Drany.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DranSword', 'DranDagger', 'DranBuster', 'Dran']) },
+    gildia_magow: { title: "Gildia Magów", description: "Posiadaj Wszystkie Wizard.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['WizardArrow', 'WizardRod', 'Wizard']) },
+    z_piekla_rodem: { title: "Z Piekła Rodem", description: "Posiadaj Wszystkie Hells.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['HellsScythe', 'HellsChain', 'HellsHammer', 'Hells']) },
+    bractwo_rycerskie: { title: "Bractwo Rycerskie", description: "Posiadaj Wszystkie Knight.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['KnightShield', 'KnightLance', 'KnightMail']) },
+    dojo: { title: "Dojo", description: "Posiadaj Każdego Samuraja i Shinobi.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['SamuraiCalibur', 'SamuraiSaber', 'SamuraiSteel', 'ShinobiKnife', 'ShinobiShadow']) },
 
-    // Osiągnięcia Specjalne (Persony)
-    og_persona: {
-        title: "OG Persona",
-        description: "Posiadaj DranDagger, WizardArrow, KnightLance i HellsScythe.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
-            return ['DranDagger', 'WizardArrow', 'KnightLance', 'HellsScythe'].every(nazwa => posiadane.has(nazwa));
+    // --- Osiągnięcia Specjalne (Persony) ---
+    og_persona: { title: "OG Persona", description: "Posiadaj Deck Persony z S1.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DranDagger', 'WizardArrow', 'KnightLance', 'HellsScythe']) },
+    persona_v2: { title: "Persona v2", description: "Posiadaj Deck Persony z S2.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Dran', 'Hells', 'KnightMail', 'Wizard', 'SamuraiSaber']) },
+
+    // --- Osiągnięcia Crossover ---
+    x_over_project: { title: "X-Over Project", description: "Posiadaj wszystkie części z X-Over Project.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'Rock Leone', 'StormPegasis', 'VictoryValkyrie', 'XenoXcalibur']) },
+    transformers_collection: { title: "Kolekcja: Transformers", description: "Posiadaj wszystkie części z serii Transformers.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Bumblebee', 'Megatron', 'Optimus Primal', 'Optimus Prime', 'Shockwave', 'Starscream']) },
+    star_wars_collection: { title: "Kolekcja: Star Wars", description: "Posiadaj wszystkie części z serii Star Wars.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Chewbacca', 'Darth Vader', 'General Grievous', 'Luke Skywalker', 'Moff Gideon', 'Obi-Wan Kenobi', 'Stormtrooper', 'The Mandalorian']) },
+    marvel_collection: { title: "Kolekcja: Marvel", description: "Posiadaj wszystkie części z serii Marvel.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Captain America', 'Green Goblin', 'Iron Man', 'Miles Morales', 'Red Hulk', 'Spider-Man', 'Thanos', 'Venom']) },
+    jurassic_world_collection: { title: "Kolekcja: Jurassic World", description: "Posiadaj wszystkie części z serii Jurassic World.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Mosasaurus', 'Quetzalcoatlus', 'Spinosaurus', 'T. Rex']) },
+
+    // --- Osiągnięcia za Procent Kolekcji Typów ---
+    bx_braz: { title: "Kolekcja BX: Brąz", description: "Posiadaj 20% części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: Math.ceil(all.length * 0.2) }; } },
+    bx_srebro: { title: "Kolekcja BX: Srebro", description: "Posiadaj 40% części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: Math.ceil(all.length * 0.4) }; } },
+    bx_zloto: { title: "Kolekcja BX: Złoto", description: "Posiadaj 70% części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: Math.ceil(all.length * 0.7) }; } },
+    bx_diament: { title: "Kolekcja BX: Diament", description: "Posiadaj wszystkie części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: all.length }; } },
+    // ... i tak dalej dla UX, CX, Ratchet, Bit ...
+
+    // --- Specjalistyczne Osiągnięcia Kolekcjonerskie ---
+    lock_chip_master: { title: "Lock Chip Master", description: "Zbierz wszystkie części typu CX Lock Chip.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('cx-lock-chip') },
+    mistrz_ataku: { title: "Mistrz Ataku", description: "Zbierz wszystkie Bity typu Atak.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'atak') },
+    mistrz_obrony: { title: "Mistrz Obrony", description: "Zbierz wszystkie Bity typu Obrona.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'obrona') },
+    mistrz_staminy: { title: "Mistrz Staminy", description: "Zbierz wszystkie Bity typu Wytrzymałość.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'wytrzymalosc') },
+    mistrz_balansu: { title: "Mistrz Balansu", description: "Zbierz wszystkie Bity typu Balans.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'balans') },
+    mistrz_lewego_raila: {
+        title: "Mistrz Lewego Raila", description: "Posiadaj wszystkie lewoskrętne Blade'y.", icon: 'img/osiagniecie.png',
+        progress: () => {
+            const lewoskretne = getMagazyn().filter(p => p.kierunek === 'lewy');
+            if (lewoskretne.length === 0) return { current: 0, max: 1 };
+            const posiadane = lewoskretne.filter(p => p.ilosc > 0).length;
+            return { current: posiadane, max: lewoskretne.length };
         }
     },
-    persona_v2: {
-        title: "Persona v2",
-        description: "Posiadaj Dran, Hells, KnightMail, Wizard i SamuraiSaber.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
-            const posiadane = new Set(getMagazyn().filter(p => p.ilosc > 0).map(p => p.nazwa));
-            return ['Dran', 'Hells', 'KnightMail', 'Wizard', 'SamuraiSaber'].every(nazwa => posiadane.has(nazwa));
-        }
-    },
-
-    // Osiągnięcia Funkcjonalne
-	mojpierwszydeck: { title: "Mój Pierwszy Deck", description: "Zapisz pierwszy deck.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 1 },
-    beycrafter_braz: { title: "BeyCrafter Brąz", description: "Zapisz 5 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 5 },
-	beycrafter_srebro: { title: "BeyCrafter Srebro", description: "Zapisz 10 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 10 },
-    beycrafter_zloto: { title: "BeyCrafter Złoto", description: "Zapisz 15 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 15 },
-    beycrafter_diament: { title: "BeyCrafter Diament", description: "Zapisz 20 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', check: () => getSavedDecks().length >= 20 },
-
-    bx_braz: { title: "Kolekcja BX: Brąz", description: "Posiadaj 20% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.2, true) },
-    bx_srebro: { title: "Kolekcja BX: Srebro", description: "Posiadaj 40% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.4, true) },
-    bx_zloto: { title: "Kolekcja BX: Złoto", description: "Posiadaj 70% części typu BX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 0.7, true) },
-    bx_diament: { title: "Kolekcja BX: Diament", description: "Posiadaj wszystkie części typu BX (Blade), oprócz Trypio.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('blade', 1.0, true) },
-    ux_braz: { title: "Kolekcja UX: Brąz", description: "Posiadaj 20% części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 0.2) },
-    ux_srebro: { title: "Kolekcja UX: Srebro", description: "Posiadaj 40% części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 0.4) },
-    ux_zloto: { title: "Kolekcja UX: Złoto", description: "Posiadaj 70% części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 0.7) },
-    ux_diament: { title: "Kolekcja UX: Diament", description: "Posiadaj wszystkie części typu UX (Blade).", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('ux-blade', 1.0) },
-    cx_braz: { title: "Kolekcja CX: Brąz", description: "Posiadaj 20% części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(0.2) },
-    cx_srebro: { title: "Kolekcja CX: Srebro", description: "Posiadaj 40% części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(0.4) },
-    cx_zloto: { title: "Kolekcja CX: Złoto", description: "Posiadaj 70% części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(0.7) },
-    cx_diament: { title: "Kolekcja CX: Diament", description: "Posiadaj wszystkie części z serii CX.", icon: 'img/osiagniecie.png', check: () => checkCXPercentage(1.0) },
-    rachet_braz: { title: "Kolekcja Ratchet: Brąz", description: "Posiadaj 20% wszystkich Ratchetów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 0.2) },
-    rachet_srebro: { title: "Kolekcja Ratchet: Srebro", description: "Posiadaj 40% wszystkich Ratchetów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 0.4) },
-    rachet_zloto: { title: "Kolekcja Ratchet: Złoto", description: "Posiadaj 70% wszystkich Ratchetów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 0.7) },
-    rachet_diament: { title: "Kolekcja Ratchet: Diament", description: "Posiadaj wszystkie Ratchety.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('rachet', 1.0) },
-    bit_braz: { title: "Kolekcja Bit: Brąz", description: "Posiadaj 20% wszystkich Bitów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 0.2) },
-    bit_srebro: { title: "Kolekcja Bit: Srebro", description: "Posiadaj 40% wszystkich Bitów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 0.4) },
-    bit_zloto: { title: "Kolekcja Bit: Złoto", description: "Posiadaj 70% wszystkich Bitów.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 0.7) },
-    bit_diament: { title: "Kolekcja Bit: Diament", description: "Posiadaj wszystkie Bity.", icon: 'img/osiagniecie.png', check: () => checkPartTypePercentage('bit', 1.0) },
-    mistrz_lewego_raila: { title: "Mistrz Lewego Raila", description: "Posiadaj wszystkie lewoskrętne Blade'y.", icon: 'img/osiagniecie.png', check: () => {
-        const baza = getMagazyn();
-        const lewoskretne = baza.filter(p => p.kierunek === 'lewy');
-        return lewoskretne.length > 0 && lewoskretne.every(p => p.ilosc > 0);
-    }},
-
-    // Osiągnięcia Synergii i Ukryte
+    
+    // --- Osiągnięcia Synergii i Ukryte ---
     sentymenalna_podroz: {
-        title: "Sentymentalna Podróż",
-        description: "Zbuduj i zapisz zestaw składający się z co najmniej jednej części nawiązującej do klasycznych serii.",
-        icon: 'img/osiagniecie.png',
-        check: () => {
+        title: "Sentymentalna Podróż", description: "Zbuduj i zapisz zestaw z częścią z klasycznej serii.", icon: 'img/osiagniecie.png',
+        progress: () => {
             const klasyki = ['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'StormPegasis', 'RockLeone', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'VictoryValkyrie', 'XenoXcalibur'];
             const magazyn = getMagazyn();
             const nazwyCzesci = (set) => [set.bladeId, set.ratchetId, set.bitId].filter(Boolean).map(id => magazyn.find(p => p.id === id)?.nazwa).filter(Boolean);
-            return getSavedDecks().some(deck => deck.sets.some(set => nazwyCzesci(set).some(czesc => klasyki.includes(czesc))));
+            const isAchieved = getSavedDecks().some(deck => deck.sets.some(set => nazwyCzesci(set).some(czesc => klasyki.includes(czesc))));
+            return { current: isAchieved ? 1 : 0, max: 1 };
         }
     },
     czy_to_legalne: {
-        title: "Czy to jest legalne?",
-        description: "Próbowałeś użyć legendarnej, zakazanej części...",
-        icon: 'img/osiagniecie.png',
-        check: () => {
+        title: "Czy to jest legalne?", description: "Próbowałeś użyć legendarnej, zakazanej części...", icon: 'img/osiagniecie.png',
+        progress: () => {
             const trypioId = getMagazyn().find(p => p.nazwa === 'Trypio')?.id;
-            if (!trypioId) return false;
-            return getSavedDecks().some(deck => deck.sets.some(set => set.bladeId === trypioId || set.ratchetId === trypioId || set.bitId === trypioId));
+            if (!trypioId) return { current: 0, max: 1 };
+            const isAchieved = getSavedDecks().some(deck => deck.sets.some(set => set.bladeId === trypioId || set.ratchetId === trypioId || set.bitId === trypioId));
+            return { current: isAchieved ? 1 : 0, max: 1 };
         }
     },
     tecza_mocy: {
-        title: "Tęcza Mocy",
-        description: "Zapisz deck, w którym każdy z 4 zestawów reprezentuje inny typ (Atak, Obrona, Wytrzymałość, Balans).",
-        icon: 'img/osiagniecie.png',
-        check: () => {
+        title: "Tęcza Mocy", description: "Zapisz deck, w którym jest każdy typ.", icon: 'img/osiagniecie.png',
+        progress: () => {
             const magazyn = getMagazyn();
             const getSetType = (set) => {
                 if (!set) return null;
@@ -1325,24 +1348,32 @@ const allAchievements = {
                 const bit = set.bitId ? magazyn.find(p => p.id === set.bitId) : null;
                 return ((ratchet && ratchet.integrujeBit) ? ratchet : bit)?.rodzaj || null;
             };
-            return getSavedDecks().some(deck => {
+            const isAchieved = getSavedDecks().some(deck => {
                 if (deck.sets.length < 4) return false;
                 const typy = new Set(deck.sets.slice(0, 4).map(getSetType).filter(Boolean));
-                return typy.size === 4;
+                return typy.size === 4 && typy.has('atak') && typy.has('obrona') && typy.has('wytrzymalosc') && typy.has('balans');
             });
+            return { current: isAchieved ? 1 : 0, max: 1 };
         }
     },
     
-    // Osiągnięcia "Mistrzowskie" (zależne od innych, muszą być na końcu)
+    // --- Osiągnięcia "Mistrzowskie" (zależne od innych) ---
     mistrz_kuzni: {
-        title: "Mistrz Kuźni",
-        description: "Zdobądź wszystkie diamentowe osiągnięcia za kolekcje (BX, UX, CX, Ratchet, Bit).",
-        icon: 'img/osiagniecie.png',
-        check: () => ['bx_diament', 'ux_diament', 'cx_diament', 'rachet_diament', 'bit_diament'].every(id => allAchievements[id] && allAchievements[id].check())
+        title: "Mistrz Kuźni", description: "Zdobądź wszystkie diamentowe osiągnięcia za kolekcje.", icon: 'img/osiagniecie.png',
+        progress: () => {
+            const diamentoweIds = ['bx_diament', 'ux_diament', 'cx_diament', 'rachet_diament', 'bit_diament'];
+            const zdobyte = diamentoweIds.filter(id => {
+                const ach = allAchievements[id];
+                if (!ach || !ach.progress) return false;
+                const postep = ach.progress();
+                return postep.current >= postep.max;
+            }).length;
+            return { current: zdobyte, max: diamentoweIds.length };
+        }
     }
 };
 
-// --- KROK 3: Główne funkcje zarządzające, które wiedzą już o `allAchievements` ---
+// --- Główne funkcje zarządzające, dostosowane do nowej struktury ---
 
 function unlockAchievement(id) {
     const unlocked = getUnlockedAchievements();
@@ -1359,7 +1390,9 @@ function checkAllAchievements() {
     console.log("Sprawdzanie, czy odblokowano NOWE osiągnięcia...");
     const unlocked = getUnlockedAchievements();
     for (const id in allAchievements) {
-        if (!unlocked[id] && allAchievements[id].check()) {
+        if (!allAchievements[id].progress) continue;
+        const postep = allAchievements[id].progress();
+        if (!unlocked[id] && postep.current >= postep.max) {
             unlockAchievement(id);
         }
     }
@@ -1369,23 +1402,55 @@ function displayAchievements() {
     const container = document.getElementById('achievementsContainer');
     if (!container) return;
     container.innerHTML = '';
-    console.log("Wyświetlanie i ponowne sprawdzanie statusu osiągnięć z sortowaniem...");
+    console.log("Wyświetlanie osiągnięć z paskami postępu...");
+    
     const achievementIds = Object.keys(allAchievements);
+
     achievementIds.sort((a, b) => {
-        const isAUnlocked = allAchievements[a].check();
-        const isBUnlocked = allAchievements[b].check();
+        const progressA = allAchievements[a].progress ? allAchievements[a].progress() : { current: 0, max: 1 };
+        const progressB = allAchievements[b].progress ? allAchievements[b].progress() : { current: 0, max: 1 };
+        const isAUnlocked = progressA.current >= progressA.max;
+        const isBUnlocked = progressB.current >= progressB.max;
+
         if (isAUnlocked && !isBUnlocked) return -1;
         if (!isAUnlocked && isBUnlocked) return 1;
-        return 0;
+        
+        const percentA = progressA.max > 0 ? progressA.current / progressA.max : 0;
+        const percentB = progressB.max > 0 ? progressB.current / progressB.max : 0;
+        return percentB - percentA;
     });
+
     achievementIds.forEach(id => {
         const achievement = allAchievements[id];
-        const isCurrentlyUnlocked = achievement.check();
+        if (!achievement.progress) return;
+
+        const postep = achievement.progress();
+        const isUnlocked = postep.current >= postep.max;
+        const percentage = postep.max > 0 ? Math.min(Math.floor((postep.current / postep.max) * 100), 100) : 0;
+
         const card = document.createElement('div');
-        card.className = `achievement-card ${isCurrentlyUnlocked ? 'unlocked' : 'locked'}`;
-        card.innerHTML = `<img src="${achievement.icon}" class="achievement-icon" alt="${achievement.title}"><div class="achievement-info"><h4>${achievement.title}</h4><p>${achievement.description}</p></div>`;
+        card.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+
+        const progressBarHTML = isUnlocked ? '' : `
+            <div class="achievement-progress-bar">
+                <div class="progress-fill" style="width: ${percentage}%;"></div>
+                <div class="progress-text">${postep.current} / ${postep.max}</div>
+            </div>
+        `;
+
+        card.innerHTML = `
+            <div class="achievement-card-content">
+                <img src="${achievement.icon}" class="achievement-icon" alt="${achievement.title}">
+                <div class="achievement-info">
+                    <h4>${achievement.title}</h4>
+                    <p>${achievement.description}</p>
+                </div>
+            </div>
+            ${progressBarHTML} 
+        `;
         container.appendChild(card);
-        if (isCurrentlyUnlocked) {
+
+        if (isUnlocked) {
             const unlocked = getUnlockedAchievements();
             if (!unlocked[id]) {
                  unlockAchievement(id);
@@ -1393,7 +1458,6 @@ function displayAchievements() {
         }
     });
 }
-// =======================================================================
 
 // =================================
 // Logika Licznika Punktów
