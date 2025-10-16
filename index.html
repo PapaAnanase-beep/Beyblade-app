@@ -1293,7 +1293,7 @@ const allAchievements = {
     transformers_collection: { title: "Kolekcja: Transformers", description: "Posiadaj wszystkie części z serii Transformers.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Bumblebee', 'Megatron', 'Optimus Primal', 'Optimus Prime', 'Shockwave', 'Starscream']) },
     star_wars_collection: { title: "Kolekcja: Star Wars", description: "Posiadaj wszystkie części z serii Star Wars.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Chewbacca', 'Darth Vader', 'General Grievous', 'Luke Skywalker', 'Moff Gideon', 'Obi-Wan Kenobi', 'Stormtrooper', 'Mandalorian']) },
     marvel_collection: { title: "Kolekcja: Marvel", description: "Posiadaj wszystkie części z serii Marvel.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Captain America', 'Green Goblin', 'Iron Man', 'Miles Morales', 'Red Hulk', 'Spider-Man', 'Thanos', 'Venom']) },
-    jurassic_world_collection: { title: "Kolekcja: Jurassic World", description: "Posiadaj wszystkie części z serii Jurassic World.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Mosasaurus', 'Quetzalcoatlus', 'Spinosaurus', 'T. Rex']) },
+    jurassic_world_collection: { title: "Kolekcja: Jurassic World", description: "Posiadaj wszystkie części z serii Jurassic World.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['TriceraSpiky', 'Quetzalcoatlus', 'Spinosaurus', 'T.Rex']) },
 
     // --- Osiągnięcia za Procent Kolekcji Typów ---
     bx_braz: { title: "Kolekcja BX: Brąz", description: "Posiadaj 20% części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: Math.ceil(all.length * 0.2) }; } },
@@ -1358,20 +1358,7 @@ const allAchievements = {
     },
     
     // --- Osiągnięcia "Mistrzowskie" (zależne od innych) ---
-    mistrz_kuzni: {
-        title: "Mistrz Kuźni", description: "Zdobądź wszystkie diamentowe osiągnięcia za kolekcje.", icon: 'img/osiagniecie.png',
-        progress: () => {
-            const diamentoweIds = ['bx_diament', 'ux_diament', 'cx_diament', 'rachet_diament', 'bit_diament'];
-            const zdobyte = diamentoweIds.filter(id => {
-                const ach = allAchievements[id];
-                if (!ach || !ach.progress) return false;
-                const postep = ach.progress();
-                return postep.current >= postep.max;
-            }).length;
-            return { current: zdobyte, max: diamentoweIds.length };
-        }
-    }
-};
+  
 
 // --- Główne funkcje zarządzające, dostosowane do nowej struktury ---
 
