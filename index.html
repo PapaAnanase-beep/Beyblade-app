@@ -1291,7 +1291,7 @@ const allAchievements = {
     // --- Osiągnięcia Crossover ---
     x_over_project: { title: "X-Over Project", description: "Posiadaj wszystkie części z X-Over Project.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'Rock Leone', 'StormPegasis', 'VictoryValkyrie', 'XenoXcalibur']) },
     transformers_collection: { title: "Kolekcja: Transformers", description: "Posiadaj wszystkie części z serii Transformers.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Bumblebee', 'Megatron', 'Optimus Primal', 'Optimus Prime', 'Shockwave', 'Starscream']) },
-    star_wars_collection: { title: "Kolekcja: Star Wars", description: "Posiadaj wszystkie części z serii Star Wars.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Chewbacca', 'Darth Vader', 'General Grievous', 'Luke Skywalker', 'Moff Gideon', 'Obi-Wan Kenobi', 'Stormtrooper', 'The Mandalorian']) },
+    star_wars_collection: { title: "Kolekcja: Star Wars", description: "Posiadaj wszystkie części z serii Star Wars.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Chewbacca', 'Darth Vader', 'General Grievous', 'Luke Skywalker', 'Moff Gideon', 'Obi-Wan Kenobi', 'Stormtrooper', 'Mandalorian']) },
     marvel_collection: { title: "Kolekcja: Marvel", description: "Posiadaj wszystkie części z serii Marvel.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Captain America', 'Green Goblin', 'Iron Man', 'Miles Morales', 'Red Hulk', 'Spider-Man', 'Thanos', 'Venom']) },
     jurassic_world_collection: { title: "Kolekcja: Jurassic World", description: "Posiadaj wszystkie części z serii Jurassic World.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Mosasaurus', 'Quetzalcoatlus', 'Spinosaurus', 'T. Rex']) },
 
@@ -1322,7 +1322,7 @@ const allAchievements = {
     sentymenalna_podroz: {
         title: "Sentymentalna Podróż", description: "Zbuduj i zapisz zestaw z częścią z klasycznej serii.", icon: 'img/osiagniecie.png',
         progress: () => {
-            const klasyki = ['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'StormPegasis', 'RockLeone', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'VictoryValkyrie', 'XenoXcalibur'];
+            const klasyki = ['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'StormPegasis', 'Rock Leone', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'VictoryValkyrie', 'XenoXcalibur'];
             const magazyn = getMagazyn();
             const nazwyCzesci = (set) => [set.bladeId, set.ratchetId, set.bitId].filter(Boolean).map(id => magazyn.find(p => p.id === id)?.nazwa).filter(Boolean);
             const isAchieved = getSavedDecks().some(deck => deck.sets.some(set => nazwyCzesci(set).some(czesc => klasyki.includes(czesc))));
