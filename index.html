@@ -558,132 +558,83 @@ saved-deck-card {
         text-align: center; /* Na mobilce wycentruj listę statystyk */
     }
 }
+/* ===================================================================== */
+/* === NOWY WYGLĄD OSIĄGNIĘĆ v2.0 (Pasek postępu pod opisem) === */
+/* ===================================================================== */
 
-/* ========================================= */
-/* === NOWA SEKCJA: OSIĄGNIĘCIA === */
-/* ========================================= */
+/* --- Główna siatka dla kart --- */
 #achievementsContainer {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 20px;
 }
 
+/* --- Główny kontener karty osiągnięcia --- */
 .achievement-card {
-    background: rgba(30, 30, 40, 0.6);
+    background: rgba(30, 30, 40, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
 }
 
-.achievement-icon {
-    width: 64px;
-    height: 64px;
-    flex-shrink: 0;
-    object-fit: contain;
-    transition: filter 0.3s ease, transform 0.3s ease;
-}
-
-.achievement-info h4 {
-    margin: 0 0 5px 0;
-    color: #e0e0e0;
-}
-
-.achievement-info p {
-    font-size: 0.85em;
-    color: #aaa;
-    line-height: 1.4;
-    margin: 0;
-}
-
-/* Styl dla ZABLOKOWANEGO osiągnięcia */
-.achievement-card.locked {
-    background: rgba(25, 25, 30, 0.5);
-}
-
-.achievement-card.locked .achievement-icon {
-    filter: grayscale(100%) brightness(0.5);
-}
-
-.achievement-card.locked .achievement-info h4 {
-    color: #777;
-}
-
-/* Styl dla ODBLOKOWANEGO osiągnięcia */
-.achievement-card.unlocked {
-    background: linear-gradient(145deg, rgba(138, 43, 226, 0.15), rgba(60, 60, 70, 0.1));
-    border-color: rgba(138, 43, 226, 0.3);
-}
-
-.achievement-card.unlocked .achievement-info h4 {
-    color: #a25ff0; /* Kolor fioletowy */
+/* --- Tytuł na samej górze karty --- */
+.achievement-title {
+    font-size: 1.2em;
     font-weight: bold;
-}
-
-.achievement-card.unlocked .achievement-icon {
-    filter: none;
-    transform: scale(1.1);
-}
-/* ======================================================= */
-/* === OSTATECZNE STYLE OSIĄGNIĘĆ Z UJEDNOLICENIEM KART === */
-/* ======================================================= */
-
-.achievement-card {
-    background: rgba(30, 30, 40, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    padding: 20px;
-    transition: all 0.3s ease;
-    
-    /* === KLUCZOWE ZMIANY === */
-    display: flex;              /* Włączamy tryb Flexbox */
-    flex-direction: column;     /* Układamy elementy w pionie */
-    justify-content: space-between; /* To "rozpycha" elementy, przyklejając pasek do dołu */
-    min-height: 160px;          /* Ustawiamy minimalną, stałą wysokość dla wszystkich kart */
-}
-
-.achievement-card-content {
-    display: flex;
-    align-items: center; /* Wyrównuje ikonę i tekst w pionie */
-    gap: 15px;
+    color: #e0e0e0;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     width: 100%;
 }
 
+/* --- Kontener na treść (ikona + blok info) --- */
+.achievement-card-content {
+    display: flex;
+    align-items: flex-start; /* Wyrównuje ikonę i blok info do góry */
+    gap: 20px;
+    width: 100%;
+}
+
+/* --- Ikona osiągnięcia po lewej (większa) --- */
 .achievement-icon {
-    width: 64px;
-    height: 64px;
+    width: 120px; /* Zwiększamy rozmiar ikony */
+    height: 120px;
     flex-shrink: 0;
     object-fit: contain;
-    transition: filter 0.3s ease, transform 0.3s ease;
+    border-radius: 8px;
+    transition: filter 0.3s ease;
 }
 
+/* --- Blok po prawej (opis + pasek) --- */
 .achievement-info {
-    text-align: left; /* Lepsza czytelność opisów */
+    display: flex;
+    flex-direction: column; /* Układa opis i pasek w pionie */
+    gap: 12px; /* Odstęp między opisem a paskiem */
+    flex-grow: 1; /* Blok zajmuje całą dostępną przestrzeń */
 }
 
-.achievement-info h4 {
-    margin: 0 0 5px 0;
-    color: #e0e0e0;
-}
-
-.achievement-info p {
-    font-size: 0.85em;
+.achievement-description {
+    font-size: 0.9em;
     color: #aaa;
-    line-height: 1.4;
+    line-height: 1.5;
     margin: 0;
+    min-height: 54px; /* Zapewnia stałą wysokość na 3 linie tekstu */
 }
 
-/* --- Style paska postępu (BEZ ZMIAN, ALE ZAŁĄCZONE DLA KOMPLETNOŚCI) --- */
+/* --- Pasek postępu (teraz wewnątrz .achievement-info) --- */
 .achievement-progress-bar {
     width: 100%;
     background-color: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     height: 22px;
-    margin-top: 15px; /* Odstęp od treści powyżej */
     position: relative;
     overflow: hidden;
 }
@@ -692,16 +643,12 @@ saved-deck-card {
     background: linear-gradient(90deg, #8a2be2, #a25ff0);
     height: 100%;
     border-radius: 7px;
-    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: width 0.5s ease;
     box-shadow: 0 0 10px rgba(162, 95, 240, 0.5);
 }
 
 .progress-text {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -711,33 +658,25 @@ saved-deck-card {
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
-
-/* --- Style dla zablokowanego i odblokowanego (BEZ ZMIAN) --- */
-.achievement-card.locked {
-    background: rgba(25, 25, 30, 0.5);
-}
-
+/* --- Style stanu: ZABLOKOWANE --- */
 .achievement-card.locked .achievement-icon {
     filter: grayscale(100%) brightness(0.5);
 }
-
-.achievement-card.locked .achievement-info h4 {
+.achievement-card.locked .achievement-title {
     color: #777;
 }
 
+/* --- Style stanu: ODBLOKOWANE --- */
 .achievement-card.unlocked {
-    background: linear-gradient(145deg, rgba(138, 43, 226, 0.15), rgba(60, 60, 70, 0.1));
-    border-color: rgba(138, 43, 226, 0.3);
+    background: linear-gradient(145deg, rgba(138, 43, 226, 0.1), rgba(40, 40, 50, 0.2));
+    border-color: rgba(138, 43, 226, 0.25);
 }
-
-.achievement-card.unlocked .achievement-info h4 {
+.achievement-card.unlocked .achievement-title {
     color: #a25ff0;
-    font-weight: bold;
 }
-
 .achievement-card.unlocked .achievement-icon {
     filter: none;
-    transform: scale(1.1);
+    border: 2px solid rgba(170, 95, 240, 0.4);
 }
 
 
@@ -1235,42 +1174,42 @@ const createPartTypeProgress = (partType, subType = null) => {
 const allAchievements = {
     // --- Osiągnięcia Funkcjonalne ---
     mojpierwszydeck: { title: "Mój Pierwszy Deck", description: "Zapisz pierwszy deck.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 1 }) },
-    beycrafter_braz: { title: "BeyCrafter Brąz", description: "Zapisz 5 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 5 }) },
-    beycrafter_srebro: { title: "BeyCrafter Srebro", description: "Zapisz 10 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 10 }) },
-    beycrafter_zloto: { title: "BeyCrafter Złoto", description: "Zapisz 15 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 15 }) },
-    beycrafter_diament: { title: "BeyCrafter Diament", description: "Zapisz 20 lub więcej decków w galerii.", icon: 'img/osiagniecie.png', progress: () => ({ current: getSavedDecks().length, max: 20 }) },
+    beycrafter_braz: { title: "BeyCrafter Brąz", description: "Zapisz 5 lub więcej decków w galerii.", icon: 'img/PucharBraz.png', progress: () => ({ current: getSavedDecks().length, max: 5 }) },
+    beycrafter_srebro: { title: "BeyCrafter Srebro", description: "Zapisz 10 lub więcej decków w galerii.", icon: 'img/PucharSrebro.png', progress: () => ({ current: getSavedDecks().length, max: 10 }) },
+    beycrafter_zloto: { title: "BeyCrafter Złoto", description: "Zapisz 15 lub więcej decków w galerii.", icon: 'img/PucharZloto.png', progress: () => ({ current: getSavedDecks().length, max: 15 }) },
+    beycrafter_diament: { title: "BeyCrafter Diament", description: "Zapisz 20 lub więcej decków w galerii.", icon: 'img/PucharDiament.png', progress: () => ({ current: getSavedDecks().length, max: 20 }) },
 
     // --- Poziomy Kolekcjonerskie (Procentowe) ---
     kolekcjoner_poczotkujacy: {
-        title: "Początkujący Kolekcjoner", description: "Posiadaj 15% wszystkich części.", icon: 'img/osiagniecie.png',
+        title: "Kolekcjoner Brąz", description: "Posiadaj 15% wszystkich części.", icon: 'img/PucharBraz.png',
         progress: () => {
             const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
             return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.15) };
         }
     },
     kolekcjoner_zaawansowany: {
-        title: "Zaawansowany Kolekcjoner", description: "Posiadaj 30% wszystkich części.", icon: 'img/osiagniecie.png',
+        title: "Kolekcjoner Srebro", description: "Posiadaj 30% wszystkich części.", icon: 'img/PucharSrebro.png',
         progress: () => {
             const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
             return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.30) };
         }
     },
     kolekcjoner_elitarny: {
-        title: "Elitarny Kolekcjoner", description: "Posiadaj 60% wszystkich części.", icon: 'img/osiagniecie.png',
+        title: "Kolekcjoner Złoto", description: "Posiadaj 60% wszystkich części.", icon: 'img/PucharZloto.png',
         progress: () => {
             const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
             return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.60) };
         }
     },
     kolekcjoner_boski: {
-        title: "Boski Kolekcjoner", description: "Posiadaj 90% wszystkich części.", icon: 'img/osiagniecie.png',
+        title: "Kolekcjoner Diament", description: "Posiadaj 90% wszystkich części.", icon: 'img/PucharDiament.png',
         progress: () => {
             const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
             return { current: baza.filter(p => p.ilosc > 0).length, max: Math.ceil(baza.length * 0.90) };
         }
     },
     cheater: {
-        title: "Cheater!", description: "Posiadaj 100% wszystkich części.", icon: 'img/osiagniecie.png',
+        title: "Cheater!", description: "Posiadaj 100% wszystkich części.", icon: 'img/PucharEnigma.png',
         progress: () => {
             const baza = getMagazyn(); if (baza.length === 0) return { current: 0, max: 1 };
             return { current: baza.filter(p => p.ilosc > 0).length, max: baza.length };
@@ -1278,38 +1217,88 @@ const allAchievements = {
     },
 
     // --- Osiągnięcia Tematyczne (Rodziny) ---
-    rodzina_smoka: { title: "Rodzina Smoka", description: "Posiadaj Wszystkie Drany.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DranSword', 'DranDagger', 'DranBuster', 'Dran']) },
-    gildia_magow: { title: "Gildia Magów", description: "Posiadaj Wszystkie Wizard.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['WizardArrow', 'WizardRod', 'Wizard']) },
-    z_piekla_rodem: { title: "Z Piekła Rodem", description: "Posiadaj Wszystkie Hells.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['HellsScythe', 'HellsChain', 'HellsHammer', 'Hells']) },
-    bractwo_rycerskie: { title: "Bractwo Rycerskie", description: "Posiadaj Wszystkie Knight.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['KnightShield', 'KnightLance', 'KnightMail']) },
-    dojo: { title: "Dojo", description: "Posiadaj Każdego Samuraja i Shinobi.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['SamuraiCalibur', 'SamuraiSaber', 'SamuraiSteel', 'ShinobiKnife', 'ShinobiShadow']) },
+    rodzina_smoka: { title: "Rodzina Smoka", description: "Posiadaj Wszystkie Drany.", icon: 'img/PucharDran.png', progress: createCollectionProgress(['DranSword', 'DranDagger', 'DranBuster', 'Dran']) },
+    gildia_magow: { title: "Gildia Magów", description: "Posiadaj Wszystkie Wizard.", icon: 'img/PucharWizard.png', progress: createCollectionProgress(['WizardArrow', 'WizardRod', 'Wizard']) },
+    z_piekla_rodem: { title: "Z Piekła Rodem", description: "Posiadaj Wszystkie Hells.", icon: 'img/PucharHells.png', progress: createCollectionProgress(['HellsScythe', 'HellsChain', 'HellsHammer', 'Hells']) },
+    bractwo_rycerskie: { title: "Bractwo Rycerskie", description: "Posiadaj Wszystkie Knight.", icon: 'img/PucharKnight.png', progress: createCollectionProgress(['KnightShield', 'KnightLance', 'KnightMail']) },
+    dojo: { title: "Dojo", description: "Posiadaj Każdego Samuraja i Shinobi.", icon: 'img/PucharDojo.png', progress: createCollectionProgress(['SamuraiCalibur', 'SamuraiSaber', 'SamuraiSteel', 'ShinobiKnife', 'ShinobiShadow']) },
 
     // --- Osiągnięcia Specjalne (Persony) ---
     og_persona: { title: "OG Persona", description: "Posiadaj Deck Persony z S1.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DranDagger', 'WizardArrow', 'KnightLance', 'HellsScythe']) },
     persona_v2: { title: "Persona v2", description: "Posiadaj Deck Persony z S2.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Dran', 'Hells', 'KnightMail', 'Wizard', 'SamuraiSaber']) },
 
     // --- Osiągnięcia Crossover ---
-    x_over_project: { title: "X-Over Project", description: "Posiadaj wszystkie części z X-Over Project.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'Rock Leone', 'StormPegasis', 'VictoryValkyrie', 'XenoXcalibur']) },
-    transformers_collection: { title: "Kolekcja: Transformers", description: "Posiadaj wszystkie części z serii Transformers.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Bumblebee', 'Megatron', 'Optimus Primal', 'Optimus Prime', 'Shockwave', 'Starscream']) },
-    star_wars_collection: { title: "Kolekcja: Star Wars", description: "Posiadaj wszystkie części z serii Star Wars.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Chewbacca', 'Darth Vader', 'General Grievous', 'Luke Skywalker', 'Moff Gideon', 'Obi-Wan Kenobi', 'Stormtrooper', 'Mandalorian']) },
-    marvel_collection: { title: "Kolekcja: Marvel", description: "Posiadaj wszystkie części z serii Marvel.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Captain America', 'Green Goblin', 'Iron Man', 'Miles Morales', 'Red Hulk', 'Spider-Man', 'Thanos', 'Venom']) },
-    jurassic_world_collection: { title: "Kolekcja: Jurassic World", description: "Posiadaj wszystkie części z serii Jurassic World.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['TriceraSpiky', 'Quetzalcoatlus', 'Spinosaurus', 'T.Rex']) },
+    x_over_project: { title: "X-Over Project", description: "Posiadaj wszystkie części z X-Over Project.", icon: 'img/PucharX.png', progress: createCollectionProgress(['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'Rock Leone', 'StormPegasis', 'VictoryValkyrie', 'XenoXcalibur']) },
+    transformers_collection: { title: "Kolekcja: Transformers", description: "Posiadaj wszystkie części z serii Transformers.", icon: 'img/PucharTrans.png', progress: createCollectionProgress(['Bumblebee', 'Megatron', 'Optimus Primal', 'Optimus Prime', 'Shockwave', 'Starscream']) },
+    star_wars_collection: { title: "Kolekcja: Star Wars", description: "Posiadaj wszystkie części z serii Star Wars.", icon: 'img/PucharStar.png', progress: createCollectionProgress(['Chewbacca', 'Darth Vader', 'General Grievous', 'Luke Skywalker', 'Moff Gideon', 'Obi-Wan Kenobi', 'Stormtrooper', 'Mandalorian']) },
+    marvel_collection: { title: "Kolekcja: Marvel", description: "Posiadaj wszystkie części z serii Marvel.", icon: 'img/PucharMarvel.png', progress: createCollectionProgress(['Captain America', 'Green Goblin', 'Iron Man', 'Miles Morales', 'Red Hulk', 'Spider-Man', 'Thanos', 'Venom']) },
+    jurassic_world_collection: { title: "Kolekcja: Jurassic World", description: "Posiadaj wszystkie części z serii Jurassic World.", icon: 'img/PucharDino.png', progress: createCollectionProgress(['TriceraSpiky', 'Quetzalcoatlus', 'Spinosaurus', 'T.Rex']) },
 
-    // --- Osiągnięcia za Procent Kolekcji Typów ---
-    bx_braz: { title: "Kolekcja BX: Brąz", description: "Posiadaj 20% części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: Math.ceil(all.length * 0.2) }; } },
-    bx_srebro: { title: "Kolekcja BX: Srebro", description: "Posiadaj 40% części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: Math.ceil(all.length * 0.4) }; } },
-    bx_zloto: { title: "Kolekcja BX: Złoto", description: "Posiadaj 70% części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: Math.ceil(all.length * 0.7) }; } },
-    bx_diament: { title: "Kolekcja BX: Diament", description: "Posiadaj wszystkie części typu BX (Blade).", icon: 'img/osiagniecie.png', progress: () => { const all = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio'); return { current: all.filter(p => p.ilosc > 0).length, max: all.length }; } },
-    // ... i tak dalej dla UX, CX, Ratchet, Bit ...
-
+ 
     // --- Specjalistyczne Osiągnięcia Kolekcjonerskie ---
-    lock_chip_master: { title: "Lock Chip Master", description: "Zbierz wszystkie części typu CX Lock Chip.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('cx-lock-chip') },
-    mistrz_ataku: { title: "Mistrz Ataku", description: "Zbierz wszystkie Bity typu Atak.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'atak') },
-    mistrz_obrony: { title: "Mistrz Obrony", description: "Zbierz wszystkie Bity typu Obrona.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'obrona') },
-    mistrz_staminy: { title: "Mistrz Staminy", description: "Zbierz wszystkie Bity typu Wytrzymałość.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'wytrzymalosc') },
-    mistrz_balansu: { title: "Mistrz Balansu", description: "Zbierz wszystkie Bity typu Balans.", icon: 'img/osiagniecie.png', progress: createPartTypeProgress('bit', 'balans') },
+       // --- NOWA KATEGORIA: OSIĄGNIĘCIA ZA SKOMPLETOWANIE TYPU CZĘŚCI ---
+
+    mistrz_blade_bx: {
+        title: "Mistrz Ostrzy BX",
+        description: "Zbierz wszystkie części typu Blade z serii BX.",
+        icon: 'img/PucharBX.png', // Przygotuj ikonę
+        progress: () => {
+            const all_bx = getMagazyn().filter(p => p.typ === 'blade' && p.nazwa !== 'Trypio');
+            if (all_bx.length === 0) return { current: 0, max: 1 };
+            const owned_bx = all_bx.filter(p => p.ilosc > 0).length;
+            return { current: owned_bx, max: all_bx.length };
+        }
+    },
+
+    mistrz_blade_ux: {
+        title: "Mistrz Ostrzy UX",
+        description: "Zbierz wszystkie części typu Blade z serii UX.",
+        icon: 'img/PucharUx.png', // Przygotuj ikonę
+        progress: createPartTypeProgress('ux-blade')
+    },
+    
+    mistrz_lock_chip: {
+        title: "Mistrz Lock Chipów",
+        description: "Zbierz wszystkie części typu CX Lock Chip.",
+        icon: 'img/PucharCX.png', // Przygotuj ikonę
+        progress: createPartTypeProgress('cx-lock-chip')
+    },
+
+    mistrz_main_blade: {
+        title: "Mistrz Głównych Ostrzy",
+        description: "Zbierz wszystkie części typu CX Main Blade.",
+        icon: 'img/PucharCX.png', // Przygotuj ikonę
+        progress: createPartTypeProgress('cx-main-blade')
+    },
+
+    mistrz_assist_blade: {
+        title: "Mistrz Ostrzy Asystujących",
+        description: "Zbierz wszystkie części typu CX Assist Blade.",
+        icon: 'img/PucharCX.png', // Przygotuj ikonę
+        progress: createPartTypeProgress('cx-assist-blade')
+    },
+
+    mistrz_ratchet: {
+        title: "Mistrz Ratchetów",
+        description: "Zbierz wszystkie części typu Ratchet.",
+        icon: 'img/PucharDiament.png', // Przygotuj ikonę
+        progress: createPartTypeProgress('rachet')
+    },
+
+    mistrz_bit: {
+        title: "Mistrz Bitów",
+        description: "Zbierz wszystkie części typu Bit.",
+        icon: 'img/PucharDiament.png', // Przygotuj ikonę
+        progress: createPartTypeProgress('bit')
+    },
+
+
+    mistrz_ataku: { title: "Mistrz Ataku", description: "Zbierz wszystkie Bity typu Atak.", icon: 'img/PucharATK.png', progress: createPartTypeProgress('bit', 'atak') },
+    mistrz_obrony: { title: "Mistrz Obrony", description: "Zbierz wszystkie Bity typu Obrona.", icon: 'img/PucharDEF.png', progress: createPartTypeProgress('bit', 'obrona') },
+    mistrz_staminy: { title: "Mistrz Staminy", description: "Zbierz wszystkie Bity typu Wytrzymałość.", icon: 'img/PucharSTM.png', progress: createPartTypeProgress('bit', 'wytrzymalosc') },
+    mistrz_balansu: { title: "Mistrz Balansu", description: "Zbierz wszystkie Bity typu Balans.", icon: 'img/PucharBAL.png', progress: createPartTypeProgress('bit', 'balans') },
     mistrz_lewego_raila: {
-        title: "Mistrz Lewego Raila", description: "Posiadaj wszystkie lewoskrętne Blade'y.", icon: 'img/osiagniecie.png',
+        title: "Mistrz Lewego Raila", description: "Posiadaj wszystkie lewoskrętne Blade'y.", icon: 'img/PucharLewo.png',
         progress: () => {
             const lewoskretne = getMagazyn().filter(p => p.kierunek === 'lewy');
             if (lewoskretne.length === 0) return { current: 0, max: 1 };
@@ -1330,7 +1319,7 @@ const allAchievements = {
         }
     },
     czy_to_legalne: {
-        title: "Czy to jest legalne?", description: "Próbowałeś użyć legendarnej, zakazanej części...", icon: 'img/osiagniecie.png',
+        title: "Czy to jest legalne?", description: "Próbowałeś użyć legendarnej, zakazanej części...", icon: 'img/PucharEnigma.png',
         progress: () => {
             const trypioId = getMagazyn().find(p => p.nazwa === 'Trypio')?.id;
             if (!trypioId) return { current: 0, max: 1 };
@@ -1390,10 +1379,10 @@ function displayAchievements() {
     const container = document.getElementById('achievementsContainer');
     if (!container) return;
     container.innerHTML = '';
-    console.log("Wyświetlanie osiągnięć z paskami postępu...");
-    
+
     const achievementIds = Object.keys(allAchievements);
 
+    // Sortowanie (pozostaje bez zmian)
     achievementIds.sort((a, b) => {
         const progressA = allAchievements[a].progress ? allAchievements[a].progress() : { current: 0, max: 1 };
         const progressB = allAchievements[b].progress ? allAchievements[b].progress() : { current: 0, max: 1 };
@@ -1419,6 +1408,7 @@ function displayAchievements() {
         const card = document.createElement('div');
         card.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'}`;
 
+        // Przenosimy logikę paska postępu tutaj, aby umieścić go wewnątrz .achievement-info
         const progressBarHTML = isUnlocked ? '' : `
             <div class="achievement-progress-bar">
                 <div class="progress-fill" style="width: ${percentage}%;"></div>
@@ -1426,18 +1416,22 @@ function displayAchievements() {
             </div>
         `;
 
+        // === KLUCZOWA ZMIANA: Nowa struktura HTML z paskiem postępu pod opisem ===
         card.innerHTML = `
+            <div class="achievement-title">${achievement.title}</div>
             <div class="achievement-card-content">
                 <img src="${achievement.icon}" class="achievement-icon" alt="${achievement.title}">
                 <div class="achievement-info">
-                    <h4>${achievement.title}</h4>
-                    <p>${achievement.description}</p>
+                    <p class="achievement-description">${achievement.description}</p>
+                    ${progressBarHTML} 
                 </div>
             </div>
-            ${progressBarHTML} 
         `;
+        // === KONIEC ZMIANY STRUKTURY ===
+
         container.appendChild(card);
 
+        // Logika odblokowywania (bez zmian)
         if (isUnlocked) {
             const unlocked = getUnlockedAchievements();
             if (!unlocked[id]) {
