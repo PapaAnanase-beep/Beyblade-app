@@ -1289,7 +1289,7 @@ const allAchievements = {
     persona_v2: { title: "Persona v2", description: "Posiadaj Deck Persony z S2.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Dran', 'Hells', 'KnightMail', 'Wizard', 'SamuraiSaber']) },
 
     // --- Osiągnięcia Crossover ---
-    x_over_project: { title: "X-Over Project", description: "Posiadaj wszystkie części z X-Over Project.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'RockLeone', 'StormPegasis', 'VictoryValkyrie', 'XenoXcalibur']) },
+    x_over_project: { title: "X-Over Project", description: "Posiadaj wszystkie części z X-Over Project.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'Rock Leone', 'StormPegasis', 'VictoryValkyrie', 'XenoXcalibur']) },
     transformers_collection: { title: "Kolekcja: Transformers", description: "Posiadaj wszystkie części z serii Transformers.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Bumblebee', 'Megatron', 'Optimus Primal', 'Optimus Prime', 'Shockwave', 'Starscream']) },
     star_wars_collection: { title: "Kolekcja: Star Wars", description: "Posiadaj wszystkie części z serii Star Wars.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Chewbacca', 'Darth Vader', 'General Grievous', 'Luke Skywalker', 'Moff Gideon', 'Obi-Wan Kenobi', 'Stormtrooper', 'Mandalorian']) },
     marvel_collection: { title: "Kolekcja: Marvel", description: "Posiadaj wszystkie części z serii Marvel.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Captain America', 'Green Goblin', 'Iron Man', 'Miles Morales', 'Red Hulk', 'Spider-Man', 'Thanos', 'Venom']) },
@@ -1322,7 +1322,7 @@ const allAchievements = {
     sentymenalna_podroz: {
         title: "Sentymentalna Podróż", description: "Zbuduj i zapisz zestaw z częścią z klasycznej serii.", icon: 'img/osiagniecie.png',
         progress: () => {
-            const klasyki = ['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'StormPegasis', 'RockLeone', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'VictoryValkyrie', 'XenoXcalibur'];
+            const klasyki = ['DragoonStorm', 'DranzerSpiral', 'DrigerSlash', 'DracielShield', 'StormPegasis', 'Rock Leone', 'Lightning L-Drago (Upper Type)', 'Lightning L-Drago (Rapid-Hit Type)', 'VictoryValkyrie', 'XenoXcalibur'];
             const magazyn = getMagazyn();
             const nazwyCzesci = (set) => [set.bladeId, set.ratchetId, set.bitId].filter(Boolean).map(id => magazyn.find(p => p.id === id)?.nazwa).filter(Boolean);
             const isAchieved = getSavedDecks().some(deck => deck.sets.some(set => nazwyCzesci(set).some(czesc => klasyki.includes(czesc))));
@@ -4046,7 +4046,7 @@ window.addEventListener('load', function() {
   {
   "id": "59", "typ": "blade","kierunek": "lewy", "nazwa": "Lightning L-Drago (Upper Type)", "ilosc": 0, "img": "img/BladeLightningL_(Upper_Type).webp", "ATK": 55, "DEF": 25, "STM": 20, "waga": 34},
   {
-  "id": "60", "typ": "blade","kierunek": "prawy", "nazwa": "RockLeone", "ilosc": 0, "img": "img/BladeRockLeone.webp", "ATK": 30, "DEF": 55, "STM": 15, "waga": 29.8},
+  "id": "60", "typ": "blade","kierunek": "prawy", "nazwa": "Rock Leone", "ilosc": 0, "img": "img/BladeRock-Leone.webp", "ATK": 30, "DEF": 55, "STM": 15, "waga": 29.8},
   {
   "id": "61", "typ": "blade","kierunek": "prawy", "nazwa": "StormPegasis", "ilosc": 0, "img": "img/BladeStorm-Pegasis.webp", "ATK": 55, "DEF": 15, "STM": 30, "waga": 31},
   {
