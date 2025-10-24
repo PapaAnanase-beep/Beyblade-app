@@ -763,6 +763,7 @@ saved-deck-card {
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
+		<li><strong>v2.3.2:</strong> Możliwość dodawania Hurtowo części do magazynu</li>
 		<li><strong>v2.3.1:</strong> Aktuazlizacja walidacji decku dotycząca metalowych LockChipów</li>
 		<li><strong>v2.3.0:</strong> Dodano osiągnięcia</li>
 		<li><strong>v2.2.6:</strong> Dodano Nowe elemeny: <em>Operate, Heavy, Might, Emperor, Wolf, Hunt, Free, 0-60, 9-65,</em> statystyki uzupełnione częściowo</li>
@@ -906,13 +907,25 @@ saved-deck-card {
     <!-- Filtr Posiadania -->
     <div class="filtr-item">
         <label for="filterPosiadane">Pokaż części:</label>
-        <select id="filterPosiadane" onchange="wyswietlMagazyn()" aria-label="Filtr posiadanych części">
-            <option value="posiadane">Posiadane</option>
-            <option value="nieposiadane">Nieposiadane</option>
-            <option value="wszystkie_w_bazie">Wszystkie</option>
-        </select>
+ <select id="filterPosiadane" onchange="wyswietlMagazyn()" aria-label="Filtr posiadanych części">
+    <option value="posiadane">Posiadane</option>
+    <option value="nieposiadane">Nieposiadane</option>
+    <option value="wszystkie_w_bazie" selected>Wszystkie</option> <!-- "selected" jest teraz tutaj -->
+</select>
+
     </div>
 
+</div>
+<div style="text-align: center; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+    <button id="toggleBulkEditBtn" onclick="toggleBulkEditMode()">
+        Włącz Tryb Edycji Hurtowej
+    </button>
+    <button id="addAllButton" onclick="addAllPartsByOne()">
+        Dodaj Wszystko (+1)
+    </button>
+	 <button id="subtractAllButton" class="danger-btn" onclick="subtractAllPartsByOne()">
+        Odejmij Wszystko (-1)
+    </button>
 </div>
 
 <!-- === KONIEC POPRAWIONEGO KONTENERA FILTRÓW === -->
@@ -1035,6 +1048,7 @@ let sidebarExpanded = false;
 const sidebarWidthExpanded = 260;
 const sidebarWidthCollapsed = 50;
 let currentEditingDeckId = null;
+let isBulkEditMode = false;
 
 let sidebar, appContainer, sidebarToggleBtn, menuIcon, menuBtnText;
 let wynikiDivGenerator, placeholderActualImgGenerator;
@@ -1777,12 +1791,33 @@ function wyswietlMagazyn() {
         if (ilosc === 0) cardDiv.classList.add('part-not-owned');
         if (isBeta) cardDiv.classList.add('part-beta-item');
         const typNazwaFormatowana = czesc.typ.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const quantityControlsHTML = `
-            <div class="item-quantity-controls">
-                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', -1)" title="Zmniejsz ilość ${czesc.nazwa}" ${ilosc === 0 ? 'disabled' : ''}>-</button>
-                <span class="quantity-display" title="Aktualna ilość: ${ilosc}">${ilosc}</span>
-                <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', 1)" title="Zwiększ ilość ${czesc.nazwa}">+</button>
-            </div>`;
+      let quantityControlsHTML = '';
+// Sprawdzamy, czy tryb edycji hurtowej jest aktywny
+if (isBulkEditMode) {
+    quantityControlsHTML = `
+        <div class="item-quantity-controls" style="flex-direction: column; gap: 8px;">
+            <label for="qty-input-${czesc.id}" style="font-size: 0.8em; margin-bottom: 0;">Ilość:</label>
+            <input 
+                type="number"
+                id="qty-input-${czesc.id}"
+                class="bulk-quantity-input"
+                style="width: 80px; padding: 8px; text-align: center; margin: 0;"
+                value="${ilosc}"
+                min="0"
+                onchange="ustawIloscCzesci('${czesc.id}', this.value)"
+                onfocus="this.select()"
+            >
+        </div>`;
+} else {
+    // Jeśli tryb jest wyłączony, pokazujemy stare przyciski +/-
+    quantityControlsHTML = `
+        <div class="item-quantity-controls">
+            <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', -1)" title="Zmniejsz ilość ${czesc.nazwa}" ${ilosc === 0 ? 'disabled' : ''}>-</button>
+            <span class="quantity-display" title="Aktualna ilość: ${ilosc}">${ilosc}</span>
+            <button class="quantity-btn" onclick="zmienIloscCzesci('${czesc.id}', 1)" title="Zwiększ ilość ${czesc.nazwa}">+</button>
+        </div>`;
+}
+
         
         cardDiv.innerHTML = `${imgHTML}<h3>${nazwaDoWyswietlenia}${isBeta ? '<span class="beta-label"> BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>${statyString}${buttonHTML}${quantityControlsHTML}`;
         lista.appendChild(cardDiv);
@@ -1804,6 +1839,105 @@ function zmienIloscCzesci(idCzesci, zmiana) {
     if (aktywnaStronaId === 'magazyn') wyswietlMagazyn();
     if (aktywnaStronaId === 'deck') renderAvailablePartsList();
 	 checkAllAchievements();
+}
+function toggleBulkEditMode() {
+    isBulkEditMode = !isBulkEditMode; // Zmień stan
+    const btn = document.getElementById('toggleBulkEditBtn');
+
+    if (isBulkEditMode) {
+        btn.textContent = 'Wyłącz Tryb Edycji Hurtowej';
+        btn.style.backgroundColor = 'rgba(190, 50, 50, 0.7)'; // Czerwony kolor, by wskazać aktywny tryb
+    } else {
+        btn.textContent = 'Włącz Tryb Edycji Hurtowej';
+        btn.style.backgroundColor = ''; // Wróć do domyślnego stylu
+    }
+
+    // Prerenderuj magazyn, aby pokazać odpowiednie kontrolki
+    wyswietlMagazyn();
+}
+
+// Nowa funkcja do ustawiania konkretnej ilości z pola input
+function ustawIloscCzesci(idCzesci, nowaWartosc) {
+    const magazyn = getMagazyn();
+    const indexCzesci = magazyn.findIndex(c => c && c.id === idCzesci);
+    if (indexCzesci === -1) { return; }
+
+    let nowaIlosc = parseInt(nowaWartosc, 10);
+
+    // Walidacja - upewnij się, że ilość nie jest ujemna lub nie jest liczbą
+    if (isNaN(nowaIlosc) || nowaIlosc < 0) {
+        nowaIlosc = 0;
+        // Opcjonalnie: zaktualizuj pole input, jeśli użytkownik wpisał coś nieprawidłowego
+        const inputElement = document.getElementById(`qty-input-${idCzesci}`);
+        if (inputElement) inputElement.value = nowaIlosc;
+    }
+
+    const czesc = magazyn[indexCzesci];
+    if (czesc.ilosc === nowaIlosc) return; // Nic się nie zmieniło, nie rób nic
+
+    czesc.ilosc = nowaIlosc;
+    setMagazyn(magazyn);
+    checkAllAchievements(); // Sprawdź osiągnięcia po zmianie
+
+    // Nie ma potrzeby odświeżania całego magazynu, zmiana jest już widoczna
+    // Jeśli jednak chcesz, żeby np. sortowanie się zaktualizowało, możesz odkomentować poniższą linię:
+    // wyswietlMagazyn(); 
+}
+
+function addAllPartsByOne() {
+    
+
+    const magazyn = getMagazyn();
+    let iloscZmienionychCzesci = 0;
+
+    // Przejdź przez każdą część w magazynie i zwiększ jej ilość
+    magazyn.forEach(czesc => {
+        if (czesc) { // Upewnij się, że obiekt części istnieje
+            czesc.ilosc = (parseInt(czesc.ilosc, 10) || 0) + 1;
+            iloscZmienionychCzesci++;
+        }
+    });
+
+    setMagazyn(magazyn); // Zapisz zaktualizowany magazyn
+    checkAllAchievements(); // Sprawdź osiągnięcia po masowej zmianie
+
+    showNotification(`Zwiększono ilość dla ${iloscZmienionychCzesci} części o 1.`, 3000, 'success');
+
+    // Odśwież widok magazynu, aby pokazać nowe ilości
+    wyswietlMagazyn();
+}
+function subtractAllPartsByOne() {
+  
+
+    const magazyn = getMagazyn();
+    let iloscZmienionychCzesci = 0;
+
+    // Przechodzimy przez każdą część i modyfikujemy jej ilość.
+    magazyn.forEach(czesc => {
+        if (czesc) { // Upewnij się, że obiekt części istnieje
+            let obecnaIlosc = parseInt(czesc.ilosc, 10) || 0;
+            
+            // Odejmujemy 1, tylko jeśli ilość jest większa od 0.
+            if (obecnaIlosc > 0) {
+                czesc.ilosc = obecnaIlosc - 1;
+                iloscZmienionychCzesci++;
+            }
+        }
+    });
+
+    // Jeśli nic się nie zmieniło (np. wszystkie części miały 0), nie robimy nic więcej.
+    if (iloscZmienionychCzesci === 0) {
+        showNotification("Żadna część nie została zmodyfikowana (wszystkie miały ilość 0).", 3000, 'info');
+        return;
+    }
+
+    setMagazyn(magazyn); // Zapisz zaktualizowany magazyn
+    checkAllAchievements(); // Sprawdź osiągnięcia
+
+    showNotification(`Zmniejszono ilość dla ${iloscZmienionychCzesci} części o 1.`, 3000, 'success');
+
+    // Odśwież widok magazynu, aby pokazać nowe ilości
+    wyswietlMagazyn();
 }
 
 // =================================
