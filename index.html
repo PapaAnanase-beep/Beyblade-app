@@ -2713,17 +2713,15 @@ function handleDrop(event) {
         return;
     }
 
+    // --- Walidacja typu części (bez zmian, jest poprawna) ---
     const targetSet = currentDeckBeingBuilt.sets[setArrayIndex];
     const partActualType = draggedItemData.typ; 
-
     const normalizedSlotType = slotType.replace(/_/g, '-');
     
     let isTypeValid = false;
-    // Sprawdzamy, czy upuszczamy część 'blade' LUB 'ux-blade' na slot 'blade'
     if (normalizedSlotType === 'blade' && (partActualType === 'blade' || partActualType === 'ux-blade')) {
         isTypeValid = true;
     } else if (normalizedSlotType === partActualType) {
-        // Dla wszystkich innych typów (ratchet, bit, cx-*) reguła pozostaje bez zmian
         isTypeValid = true;
     }
 
@@ -2734,47 +2732,57 @@ function handleDrop(event) {
         draggedItemData = null;
         return;
     }
+
+    // =================================================================
+    // === NOWA WALIDACJA DUPLIKATÓW W CZASIE RZECZYWISTYM (handleDrop) ===
+    // =================================================================
+    const magazyn = getMagazyn();
+    const newPartId = draggedItemData.id;
+    const newPartDetails = magazyn.find(p => p.id === newPartId);
+
+    if (newPartDetails) {
+        // Sprawdzamy, czy upuszczana część musi być unikalna.
+        // Regule unikalności NIE podlegają tylko zwykłe Lock Chipy.
+        const isNewPartRegularLockChip = newPartDetails.typ === 'cx-lock-chip' && !newPartDetails.jestMetalowy;
+
+        // Jeśli część NIE JEST zwykłym Lock Chipem, musimy sprawdzić, czy już nie istnieje w decku.
+        if (!isNewPartRegularLockChip) {
+            let isAlreadyInDeck = false;
+            // Przechodzimy przez wszystkie zestawy w budowanym decku
+            for (const set of currentDeckBeingBuilt.sets) {
+                // Sprawdzamy wszystkie sloty w danym zestawie
+                const partIdsInSet = [set.bladeId, set.ratchetId, set.bitId, set.cx_lock_chipId, set.cx_main_bladeId, set.cx_assist_bladeId];
+                if (partIdsInSet.includes(newPartId)) {
+                    isAlreadyInDeck = true;
+                    break; // Znaleziono duplikat, przerywamy pętlę
+                }
+            }
+
+            if (isAlreadyInDeck) {
+                showNotification(`Błąd reguł: Część "${newPartDetails.nazwa}" jest już użyta w tym decku.`, 3500, 'warning');
+                draggedItemData = null; // Anuluj operację
+                return; // Zakończ funkcję handleDrop
+            }
+        }
+    }
+    // =================================================================
+    // === KONIEC NOWEJ WALIDACJI W CZASIE RZECZYWISTYM ===
+    // =================================================================
     
-    // --- OSTATECZNA POPRAWKA LOGIKI KLUCZA ID ---
-    // Definiujemy mapę kluczy bezpośrednio tutaj, dla maksymalnej jasności.
+    // Jeśli walidacja przeszła pomyślnie, kontynuujemy dodawanie części
     const keyMap = {
-        'blade': 'bladeId',
-        'ux-blade': 'bladeId', // Najważniejsza linijka: 'ux-blade' również mapuje na 'bladeId'
-        'rachet': 'ratchetId',
-        'bit': 'bitId',
-        'cx-lock-chip': 'cx_lock_chipId',
-        'cx-main-blade': 'cx_main_bladeId',
-        'cx-assist-blade': 'cx_assist_bladeId'
+        'blade': 'bladeId', 'ux-blade': 'bladeId', 'rachet': 'ratchetId', 'bit': 'bitId',
+        'cx-lock-chip': 'cx_lock_chipId', 'cx-main-blade': 'cx_main_bladeId', 'cx-assist-blade': 'cx_assist_bladeId'
     };
     const partIdKey = keyMap[partActualType];
-    // --- KONIEC OSTATECZNEJ POPRAWKI ---
     
     if (!partIdKey) {
-        // Ten błąd już się nie powinien pojawić po powyższej poprawce.
         console.error(`Błąd krytyczny: Nie znaleziono klucza ID dla typu "${partActualType}"`);
         draggedItemData = null;
         return;
     }
-
-    const newPartId = draggedItemData.id;
-    let isAlreadyInDeck = false;
-    currentDeckBeingBuilt.sets.forEach((set, idx) => {
-        Object.keys(set).forEach(key => {
-            if (key.endsWith('Id') && set[key] === newPartId) {
-                if (!(idx === setArrayIndex && key === partIdKey)) {
-                    isAlreadyInDeck = true;
-                }
-            }
-        });
-    });
-
-    if (isAlreadyInDeck) {
-        showNotification(`Część "${draggedItemData.nazwa}" jest już użyta w tym decku.`, 3500, 'warning');
-        draggedItemData = null;
-        return;
-    }
     
-    targetSet[partIdKey] = draggedItemData.id;
+    targetSet[partIdKey] = newPartId;
 
     const trybIndexKey = partIdKey.replace('Id', 'AktywnyTrybIndex');
     if (targetSet.hasOwnProperty(trybIndexKey)) {
@@ -2787,7 +2795,6 @@ function handleDrop(event) {
     
     draggedItemData = null;
 }
-
 
 function handleDragEnd(event) {
     event.target.classList.remove('dragging');
@@ -2918,52 +2925,79 @@ function saveCurrentDeck() {
         return;
     }
 
-    // Walidacja duplikatów i Clock Mirage (pozostaje bez zmian, bo jest poprawna)
+    // ==========================================================
+    // === OSTATECZNA, POPRAWIONA WALIDACJA DUPLIKATÓW (v3) ===
+    // ==========================================================
     const magazyn = getMagazyn();
-    const allPartIdsInDeck = new Set();
-    let duplicateFound = false;
+    let bladWalidacji = '';
 
+    // --- Krok 1: Walidacja Clock Mirage (bez zmian) ---
     for (const set of nonEmptySets) {
         if (set.seria === 'bx_ux' && set.bladeId === ID_CLOCK_MIRAGE && set.ratchetId) {
             const ratchetDetails = magazyn.find(p => p.id === set.ratchetId);
             if (ratchetDetails && !(ratchetDetails.nazwa.match(/-\d*5$/) || ratchetDetails.nazwa.match(/^M-\d*5$/))) {
-                showNotification(`Błąd w zestawie: Clock Mirage jest połączony z niekompatybilnym Ratchetem.`, 6000, 'error');
-                return;
-            }
-        }
-        const partIdsInSet = [set.bladeId, set.ratchetId, set.bitId, set.cx_lock_chipId, set.cx_main_bladeId, set.cx_assist_bladeId].filter(Boolean);
-        for (const partId of partIdsInSet) {
-            if (allPartIdsInDeck.has(partId)) {
-                duplicateFound = true;
+                bladWalidacji = `Błąd w zestawie: Clock Mirage jest połączony z niekompatybilnym Ratchetem.`;
                 break;
             }
-            allPartIdsInDeck.add(partId);
         }
-        if (duplicateFound) break;
     }
-    if (duplicateFound) {
-        showNotification(`Jedna z części jest użyta więcej niż raz w tym decku. Popraw konfigurację.`, 4000, 'error');
+    if (bladWalidacji) {
+        showNotification(bladWalidacji, 6000, 'error');
         return;
     }
-    
-    // --- POCZĄTEK KLUCZOWEJ POPRAWKI ---
-    
-    // Tworzymy nową, czystą wersję decku do zapisu.
-    // Używamy `map`, aby przetworzyć każdy zestaw.
-    const setsToSave = nonEmptySets.map(set => {
-        // Kopiujemy wszystkie właściwości zestawu, w tym ID części ORAZ `aktywnyTrybIndex`.
-        const cleanSet = { ...set };
+
+    // --- Krok 2: Uproszczona walidacja duplikatów ---
+    const czesciPodlegajaceReguleUnikalnosci = [];
+    nonEmptySets.forEach(set => {
+        const czesciWzestawie = [
+            set.bladeId, set.ratchetId, set.bitId, set.cx_lock_chipId, 
+            set.cx_main_bladeId, set.cx_assist_bladeId
+        ];
         
-        // Obliczamy i nadpisujemy statystyki, aby były aktualne w momencie zapisu.
-        // Znajdujemy indeks tego zestawu w oryginalnym obiekcie `currentDeckBeingBuilt`
+        czesciWzestawie.forEach(partId => {
+            if (!partId) return; // Pomiń puste sloty
+
+            const partDetails = magazyn.find(p => p.id === partId);
+            if (!partDetails) return; // Pomiń, jeśli część nie istnieje
+
+            // DODAJ DO LISTY TYLKO TE CZĘŚCI, KTÓRE MUSZĄ BYĆ UNIKALNE
+            // Ignorujemy zwykłe Lock Chipy (te, które nie mają flagi 'jestMetalowy')
+            const isRegularLockChip = partDetails.typ === 'cx-lock-chip' && !partDetails.jestMetalowy;
+
+            if (!isRegularLockChip) {
+                czesciPodlegajaceReguleUnikalnosci.push(partDetails);
+            }
+        });
+    });
+
+    // --- Krok 3: Sprawdzenie, czy na przefiltrowanej liście są duplikaty ---
+    const idList = czesciPodlegajaceReguleUnikalnosci.map(p => p.id);
+    const uniqueIds = new Set(idList);
+
+    if (uniqueIds.size < idList.length) {
+        // Znajdź pierwszy duplikat, aby go wyświetlić w komunikacie
+        const duplikat = idList.find((id, index) => idList.indexOf(id) !== index);
+        const nazwaDuplikatu = magazyn.find(p => p.id === duplikat)?.nazwa || 'Nieznana część';
+        bladWalidacji = `Błąd reguł: Część "${nazwaDuplikatu}" nie może się powtarzać w decku.`;
+    }
+
+    if (bladWalidacji) {
+        showNotification(bladWalidacji, 4000, 'error');
+        return;
+    }
+    // ==========================================================
+    // === KONIEC OSTATECZNEJ WALIDACJI ===
+    // ==========================================================
+
+    // Reszta funkcji zapisu pozostaje bez zmian
+    const setsToSave = nonEmptySets.map(set => {
+        const cleanSet = { ...set };
         const originalIndex = currentDeckBeingBuilt.sets.findIndex(s => s === set);
         if (originalIndex !== -1) {
             cleanSet.statystykiObliczone = updateDeckStatsForSetInBuilder(originalIndex + 1);
         }
-        
         return cleanSet;
     });
-    // --- KONIEC KLUCZOWEJ POPRAWKI ---
 
     let savedDecks = getSavedDecks();
     const finalDeckName = deckName || (currentEditingDeckId ? savedDecks.find(d => d.id === currentEditingDeckId)?.name : `Deck ${new Date().toLocaleTimeString('pl-PL')}`);
@@ -2971,12 +3005,11 @@ function saveCurrentDeck() {
     const deckToSave = {
         id: currentEditingDeckId || currentDeckBeingBuilt.id,
         name: finalDeckName,
-        sets: setsToSave, // Zapisujemy nową, czystą tablicę zestawów
+        sets: setsToSave,
         timestamp: currentEditingDeckId ? (savedDecks.find(d => d.id === currentEditingDeckId)?.timestamp || Date.now()) : Date.now(),
         lastModified: Date.now()
     };
     
-    // Logika aktualizacji lub dodawania nowego decku (bez zmian)
     if (currentEditingDeckId) {
         const deckIndex = savedDecks.findIndex(d => d.id === currentEditingDeckId);
         if (deckIndex > -1) {
@@ -2992,10 +3025,9 @@ function saveCurrentDeck() {
     }
 
     setSavedDecks(savedDecks);
+    checkAllAchievements();
     clearCurrentDeckForBuilder();
 }
-
-
 
 // ======================================================================
 // ======================================================================
@@ -4302,7 +4334,8 @@ window.addEventListener('load', function() {
     "ilosc": 0,
     "waga": 5.6,
     "img": "img/LockChipValkyrie.webp",
-    "id": "161"
+    "id": "161",
+	"jestMetalowy": true
   },
   {
     "typ": "cx-lock-chip",
@@ -4944,7 +4977,8 @@ window.addEventListener('load', function() {
     "ilosc": 0,
     "waga": 4.71,
     "img": "img/LockChipEmperor.webp",
-    "id": "211"
+    "id": "211",
+	"jestMetalowy": true
   },
     {
     "typ": "cx-lock-chip",
