@@ -335,8 +335,15 @@ saved-deck-card {
     .deck-part-slot .part-info-container { display: flex; align-items: center; gap: 8px; }
     .deck-part-slot img { width: 50px; height: 50px; object-fit: contain; }
     .deck-part-slot .remove-part-btn { background: none; border: none; color: #ff6b6b; font-size: 1.3em; cursor: pointer; padding: 5px; }
-    .tabs-container { display: flex; margin-bottom: 15px; border-bottom: 2px solid rgba(138, 43, 226, 0.3); }
-    .tab-button { padding: 10px 18px; cursor: pointer; background-color: rgba(55, 55, 65, 0.7); color: #ccc; border: none; border-radius: 6px 6px 0 0; font-family: 'Kode Mono', monospace; font-size: 0.95em; transition: all 0.2s; }
+.tabs-container {
+    display: flex;
+    flex-wrap: wrap; /* KLUCZOWA ZMIANA: Pozwala przyciskom zawijać się do nowej linii */
+    justify-content: center; /* Dodatkowo wycentruje przyciski, gdy się zawiną */
+    gap: 5px; /* Mały odstęp między przyciskami */
+    margin-bottom: 15px;
+    border-bottom: 2px solid rgba(138, 43, 226, 0.3);
+}
+.tab-button { padding: 10px 18px; cursor: pointer; background-color: rgba(55, 55, 65, 0.7); color: #ccc; border: none; border-radius: 6px 6px 0 0; font-family: 'Kode Mono', monospace; font-size: 0.95em; transition: all 0.2s; }
     .tab-button:hover { background-color: rgba(70, 70, 80, 0.8); color: #fff; }
     .tab-button.active { background-color: rgba(35,35,45,0.75); color: #a25ff0; border-bottom: 2px solid #a25ff0; }
     @media (max-width: 768px) { .deck-builder-container { flex-direction: column; } .available-parts-panel { width: 100%; max-height: 40vh; } }
@@ -678,6 +685,503 @@ saved-deck-card {
     filter: none;
     border: 2px solid rgba(170, 95, 240, 0.4);
 }
+    .poradnik-zakladka.card {
+        text-align: left; /* Wyrównaj tekst w kartach poradnika do lewej */
+    }
+    .poradnik-zakladka h3 {
+        text-align: center; /* Ale nagłówki wycentruj */
+        color: #a25ff0;
+        margin-bottom: 20px;
+    }
+    .poradnik-zakladka p, .poradnik-zakladka li {
+        line-height: 1.7;
+        font-size: 0.95em;
+        color: #ddd;
+    }
+    .poradnik-zakladka ul {
+        margin-left: 20px;
+        margin-bottom: 15px;
+    }
+    /* ===>>> STYLE DO WKLEJENIA W SEKCJI <style> <<<=== */
+
+.kategorie-bitow-lista {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column; /* Układa elementy jeden pod drugim */
+    gap: 15px; /* Odstęp między elementami listy */
+}
+
+.kategoria-item {
+    display: flex; /* Układa obrazek i tekst w jednej linii */
+    align-items: center; /* Wyrównuje obrazek i tekst w pionie */
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 3px solid #a25ff0; /* Dodaje akcent kolorystyczny */
+}
+
+.kategoria-item img {
+    width: 40px; /* **NAJWAŻNIEJSZE: Ustawia stały, mały rozmiar obrazka** */
+    height: 40px;
+    margin-right: 15px; /* Odstęp między obrazkiem a tekstem */
+    flex-shrink: 0; /* Zapobiega kurczeniu się obrazka */
+}
+
+.kategoria-item span {
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+/* ===>>> STYLE DO WKLEJENIA W SEKCJI <style> <<<=== */
+
+/* Główny kontener dla układu 3-kolumnowego */
+.trzy-kolumny-kontener {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Odstęp między kolumnami */
+    margin: 25px 0;
+    flex-wrap: wrap; /* Pozwala kolumnom spadać niżej na małych ekranach */
+}
+
+/* Styl pojedynczej kolumny */
+.kolumna {
+    flex: 1; /* Każda kolumna zajmuje tyle samo miejsca */
+    min-width: 280px; /* Minimalna szerokość, by tekst był czytelny */
+    max-width: 350px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden; /* Ukrywa wystające elementy (np. rogi obrazka) */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Nagłówek kolumny (obrazek + tytuł) */
+.kolumna-naglowek {
+    padding: 15px;
+    text-align: center;
+}
+
+.kolumna-naglowek img {
+    max-width: 120px; /* Rozmiar przykładowego obrazka */
+    margin-bottom: 10px;
+ 
+    background-color: rgba(0,0,0,0.3);
+}
+
+.kolumna-naglowek h5 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #fff;
+}
+
+/* Kolory tła dla nagłówków */
+.bx-kolor { background: linear-gradient(145deg, #274a8a, #1c3563); }
+.ux-kolor { background: linear-gradient(145deg, #8a2727, #631c1c); }
+.cx-kolor { background: linear-gradient(145deg, #6a278a, #4a1c63); }
+/* Treść kolumny (opisy) */
+.kolumna-tresc {
+    padding: 15px;
+    font-size: 0.9em;
+    line-height: 1.6;
+    flex-grow: 1; /* Sprawia, że treść rozpycha kolumnę na całą wysokość */
+}
+
+.kolumna-tresc p {
+    margin-bottom: 15px;
+}
+
+.kolumna-tresc p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* Styl dla kolumny w układzie porównawczym */
+.kolumna-porownawcza {
+    flex: 1; /* Każda kolumna zajmuje tyle samo miejsca */
+    min-width: 280px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-top: 4px solid #a25ff0; /* Akcent kolorystyczny na górze */
+}
+
+/* Styl dla nagłówka w kolumnie porównawczej */
+.kolumna-porownawcza h5 {
+    display: flex; /* Układa ikonkę i tekst w jednej linii */
+    align-items: center;
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+/* Styl dla małej ikonki w nagłówku */
+.kolumna-porownawcza h5 img {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.kolumna-porownawcza p {
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #ddd;
+    margin-bottom: 15px;
+}
+
+.kolumna-porownawcza p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* Kontener dla pojedynczego obrazka z podpisem */
+.poradnik-obrazek-z-podpisem {
+    text-align: center;      /* Centruje podpis pod obrazkiem */
+    max-width: 45%;          /* Domyślna maksymalna szerokość */
+    min-width: 200px;
+}
+
+/* Obrazek wewnątrz kontenera */
+.poradnik-obrazek-z-podpisem img {
+    width: 100%;             /* Obrazek dopasowuje się do szerokości kontenera */
+    border-radius: 8px;      /* Zaokrąglone rogi */
+    background-color: rgba(0,0,0,0.2);
+}
+
+/* Podpis pod obrazkiem */
+.podpis-obrazka {
+    font-size: 0.85em;       /* Mniejsza czcionka dla podpisu */
+    color: #bbb;
+    margin-top: 10px;        /* Odstęp od obrazka */
+    line-height: 1.4;
+}
+/* ===>>> STYLE DO WKLEJENIA W SEKCJI <style> <<<=== */
+
+/* Główny kontener na karty z launcherami */
+.launcher-cards-container {
+    display: flex;
+    flex-direction: column; /* Układa karty jedna pod drugą */
+    gap: 25px; /* Odstęp między kartami */
+    margin-top: 25px;
+}
+
+/* Pojedyncza karta launchera */
+.launcher-card {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex; /* Układa nagłówek i treść obok siebie */
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
+}
+
+.launcher-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Lewa część karty (obrazek + nazwa) */
+.launcher-header {
+    flex: 0 0 200px; /* Stała szerokość 200px */
+    padding: 20px;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.launcher-header img {
+    max-width: 120px;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+.launcher-header h5 {
+    margin: 0;
+    font-size: 1em;
+    color: #d1b3ff;
+}
+
+/* Prawa część karty (opisy) */
+.launcher-body {
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.launcher-body p {
+    font-size: 0.9em;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.launcher-body ul {
+    font-size: 0.85em;
+    line-height: 1.7;
+    padding-left: 20px;
+    margin: 0;
+}
+
+.launcher-body li {
+    margin-bottom: 8px;
+}
+
+.launcher-body li strong {
+    color: #a25ff0;
+}
+
+/* Responsywność dla mniejszych ekranów */
+@media (max-width: 768px) {
+    .launcher-card {
+        flex-direction: column; /* Na telefonach układamy w pionie */
+    }
+    .launcher-header {
+        flex-basis: auto; /* Szerokość dopasuje się automatycznie */
+    }
+}
+
+/* Kontener na przyciski L/R */
+.spin-switcher {
+    display: flex;
+    gap: 8px;
+    margin-top: 15px; /* Odstęp od nagłówka */
+    background-color: rgba(0,0,0,0.3);
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.spin-switcher button {
+    background-color: transparent;
+    border: 2px solid transparent;
+    color: #aaa;
+    font-family: 'Kode Mono', monospace;
+    font-weight: bold;
+    font-size: 0.9em;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.spin-switcher button:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+/* Styl dla aktywnego przycisku (L lub R) */
+.spin-switcher button.active {
+    background-color: #a25ff0;
+    color: #fff;
+    border-color: rgba(255,255,255,0.5);
+    box-shadow: 0 0 10px rgba(162, 95, 240, 0.5);
+}
+/* ===>>> STYLE DO WKLEJENIA W SEKCJI <style> <<<=== */
+
+/* Nowy styl dla kart akcesoriów */
+.akcesorium-card {
+    flex: 1; /* Każda kolumna zajmuje tyle samo miejsca */
+    min-width: 280px;
+    padding: 25px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border-top: 4px solid #a25ff0;
+    text-align: center; /* Wycentruj całą zawartość */
+    display: flex;
+    flex-direction: column; /* Układaj elementy (obraz, tytuł, tekst) w pionie */
+    align-items: center;  /* Wycentruj w poziomie */
+}
+
+/* Duży, czytelny obrazek na górze karty */
+.akcesorium-card img {
+    width: 150px;  /* **KLUCZOWA ZMIANA: Duży rozmiar obrazka** */
+    height: 150px;
+    object-fit: contain; /* Zachowaj proporcje obrazka */
+    margin-bottom: 20px; /* Odstęp od tytułu */
+}
+
+/* Tytuł pod obrazkiem */
+.akcesorium-card h5 {
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+/* Akapity z tekstem */
+.akcesorium-card p {
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #ddd;
+    margin-bottom: 15px;
+    text-align: left; /* Wyrównaj tekst w akapitach do lewej dla lepszej czytelności */
+}
+
+.akcesorium-card p:last-child {
+    margin-bottom: 0;
+}
+
+
+/* ===>>> STYLE DO WKLEJENIA W SEKCJI <style> <<<=== */
+
+/* Kontener na karty z punktacją */
+.punktacja-container {
+    display: grid;
+    /* Tworzy 2 kolumny na desktopie, 1 na mobilce */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 25px;
+}
+
+/* Pojedyncza karta punktacji */
+.punktacja-card {
+    background-color: rgba(45, 45, 55, 0.7);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Kolorowy nagłówek karty punktacji */
+.punktacja-header {
+    padding: 15px;
+    text-align: center;
+    position: relative;
+}
+
+.punktacja-header img {
+    max-width: 90px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+}
+
+.punktacja-header h4 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #fff;
+}
+
+/* Etykieta z punktami w rogu */
+.punktacja-header span {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0,0,0,0.4);
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.8em;
+    padding: 5px 8px;
+    border-radius: 6px;
+}
+
+/* Opis pod nagłówkiem */
+.punktacja-body {
+    padding: 15px;
+    background-color: rgba(30, 30, 40, 0.7);
+    flex-grow: 1; /* Rozpycha tło na całą dostępną wysokość */
+}
+
+.punktacja-body p {
+    margin: 0;
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #ccc;
+}
+    /* ===>>> NOWE STYLE DLA SEKCJI PUNKTACJI (2x2) <<<=== */
+
+    /* Kontener tworzący siatkę 2x2 */
+    .punktacja-grid-2x2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Zawsze dwie kolumny */
+        gap: 20px;
+        margin-top: 25px;
+    }
+
+    /* Pojedyncza karta w siatce */
+    .finish-card {
+        background-color: rgba(30, 30, 40, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+  
+.finish-card img {
+    width: 100%;
+    /* **KLUCZOWA ZMIANA:** Ograniczamy maksymalną wysokość obrazka */
+    max-height: 180px; 
+    /* Zmieniamy object-fit, aby obrazek był w pełni widoczny */
+    object-fit: contain; 
+    display: block;
+    /* Dodajemy tło, aby przezroczyste PNG wyglądały dobrze */
+    background-color: rgba(0, 0, 0, 0.2); 
+}
+
+
+    /* Kontener na opis pod obrazkiem */
+    .finish-card-body {
+        padding: 15px;
+        flex-grow: 1; /* Rozpycha tło na całą dostępną wysokość */
+    }
+
+    .finish-card-body p {
+        margin: 0;
+        font-size: 0.9em;
+        line-height: 1.6;
+        color: #ccc;
+    }
+    
+    /* Responsywność dla małych ekranów */
+    @media (max-width: 600px) {
+        .punktacja-grid-2x2 {
+            grid-template-columns: 1fr; /* Na telefonach jedna kolumna */
+        }
+    }
+    /* ===>>> KOMPLETNY ZESTAW STYLÓW DLA UKŁADU KOLUMNOWEGO (WKLEJ DO <style>) <<<=== */
+
+/* Główny kontener dla każdego układu kolumnowego */
+.kolumny-kontener {
+    display: flex;
+    align-items: flex-start; /* Domyślnie wyrównuje elementy do góry */
+    gap: 25px;
+    margin: 25px 0;
+    flex-wrap: wrap; /* Pozwala kolumnom spadać niżej na małych ekranach */
+}
+
+/* Uniwersalna klasa dla kolumny z obrazkiem (lewa strona) */
+.kolumna-obrazek {
+    flex: 1; /* Domyślnie zajmuje połowę miejsca */
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.kolumna-obrazek img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    background-color: rgba(0,0,0,0.2);
+}
+
+/* Uniwersalna klasa dla kolumny z tekstem (prawa strona) */
+.kolumna-tekst {
+    flex: 1; /* Domyślnie zajmuje połowę miejsca */
+    min-width: 250px;
+}
+
+/* Podpis pod obrazkiem w kolumnie */
+.podpis-obrazka {
+    font-size: 0.85em;
+    color: #bbb;
+    margin-top: 10px;
+    line-height: 1.4;
+    text-align: center;
+}
+
 
 
 </style>
@@ -704,7 +1208,8 @@ saved-deck-card {
     </div>
     <div class="sidebar-links">
         <a href="#" onclick="navigateTo('info', this)" title="Informacje i Instrukcja"><img src="info.png" alt="Info"><span>Info</span></a>
-        <a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="1.png" alt="Generator"><span>Generator</span></a>
+        <a href="#" onclick="navigateTo('poradnik', this)" title="Poradnik dla Początkujących"><img src="0.png" alt="Poradnik"><span>Poradnik</span></a>
+		<a href="#" onclick="navigateTo('generator', this)" title="Generator Zestawów"><img src="1.png" alt="Generator"><span>Generator</span></a>
         <a href="#" onclick="navigateTo('magazyn', this)" title="Mój Magazyn Części"><img src="2.png" alt="Magazyn"><span>Magazyn</span></a>
         <a href="#" onclick="navigateTo('licznikPunktow', this)" title="Licznik Punktów"><img src="3.png" alt="Licznik"><span>Licznik</span></a>
         <a href="#" onclick="navigateTo('deck', this)" title="Deck Generator"><img src="4.png" alt="Deck" class="menu-icon"><span>Deck Generator</span></a>
@@ -733,6 +1238,7 @@ saved-deck-card {
                 Witaj w aplikacji wspomagającej Twoje rozgrywki i zarządzanie kolekcją Beyblade! Oto kilka wskazówek, jak zacząć:
             </p>
             <ul style="text-align: left; margin-left: 20px; line-height: 1.8;">
+				<li><strong>Poradnik:</strong><img src="0.png" alt="tutorial Icon" class="inline-icon">Poradnik dla nowych Bladerów</li>
                 <li><strong>Generator Zestawów:</strong><img src="1.png" alt="Generator Icon" class="inline-icon">Wybierz serię i ilość, a aplikacja wylosuje dla Ciebie części z Twojego magazynu.</li>
                 <li><strong>Mój Magazyn:</strong><img src="2.png" alt="Magazyn Icon" class="inline-icon"> Tutaj zarządzasz swoją kolekcją części</li>
                 <li><strong>Licznik Punktów:</strong><img src="3.png" alt="Licznik Icon" class="inline-icon"> Prosty licznik do śledzenia wyników podczas rozgrywki</li>
@@ -763,6 +1269,7 @@ saved-deck-card {
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
+		<li><strong>v2.4.0:</strong> Dodano Poradnik dla nowcyh Bladerów</li>
 		<li><strong>v2.3.2:</strong> Możliwość dodawania Hurtowo części do magazynu</li>
 		<li><strong>v2.3.1:</strong> Aktuazlizacja walidacji decku dotycząca metalowych LockChipów</li>
 		<li><strong>v2.3.0:</strong> Dodano osiągnięcia</li>
@@ -983,60 +1490,379 @@ saved-deck-card {
         <p style="text-align: center;">Tutaj znajdziesz wszystkie swoje zapisane konfiguracje decków.</p>
         <div id="savedDecksContainer" style="margin-top: 20px;"></div>
     </section>
+    <!-- ================================================= -->
+    <!-- === NOWA PODSTRONA: PORADNIK DLA POCZĄTKUJĄCYCH === -->
+    <!-- ================================================= -->
+<!-- ================================================= -->
+<!-- === CAŁA POPRAWIONA SEKCJA PORADNIKA === -->
+<!-- ================================================= -->
+<section id="poradnik" class="page">
+    <h2>Poradnik dla Początkujących</h2>
+    <p style="text-align: center; margin-bottom: 25px;">Witaj w świecie Beyblade! Ten poradnik pomoże Ci zrozumieć podstawy.</p>
 
-    <section id="importexport" class="page">
-        <h2>Zarządzanie Danymi Aplikacji</h2>
-        <div class="action-button-container import-export-section">
-            <h4>Importuj lub Eksportuj Dane Magazynu Części</h4>
-            <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
-                Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową magazynu, lub wklej wcześniej zapisane dane, aby je przywrócić.
-            </p>
-            <button class="button-auto-width" onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn</button>
-            <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Dane magazynu JSON..." aria-label="Pole JSON magazynu"></textarea>
-            <button class="button-auto-width" onclick="importujDaneZPolaTekstowego()">Importuj Magazyn</button>
-        </div>
-        <div class="action-button-container import-export-section">
-            <h4>Importuj lub Eksportuj Zapisane Decki</h4>
-            <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
-                Skopiuj dane z pola poniżej, aby utworzyć kopię zapasową swoich decków, lub wklej wcześniej zapisane dane, aby je przywrócić.
-            </p>
-            <button class="button-auto-width" onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki</button>
-            <textarea id="poleDanychJsonDecki" rows="8" placeholder="Dane decków JSON..." aria-label="Pole JSON decków"></textarea>
-            <button class="button-auto-width" onclick="importujDeckiZPolaTekstowego()">Importuj Decki</button>
-        </div>
-        <div class="action-button-container">
-            <h4>Resetowanie Aplikacji</h4>
-            <p style="font-size:0.9em; color:#bbb; margin-bottom:10px;">
-                Ta operacja <strong>usunie wszystkie Twoje dane</strong> (magazyn części, zapisane decki, wyniki)
-                i przywróci aplikację do stanu początkowego z domyślną bazą części.
-            </p>
-            <button id="resetAppButton" class="button-auto-width danger-btn" onclick="wykonajPelnyResetAplikacji()" style="margin-top:10px;">
-                Resetuj Aplikację (Nieodwracalne)
-            </button>
-        </div>
-    </section>
+    <!-- Kontener na przyciski zakładek -->
+    <div class="tabs-container" id="poradnik-tabs">
+        <button class="tab-button active" onclick="pokazZakladkePoradnika('bity', this)">Bity</button>
+        <button class="tab-button" onclick="pokazZakladkePoradnika('rachety', this)">Ratchety</button>
+        <button class="tab-button" onclick="pokazZakladkePoradnika('ostrza', this)">Ostrza</button>
+        <button class="tab-button" onclick="pokazZakladkePoradnika('launchery', this)">Launchery</button>
+        <button class="tab-button" onclick="pokazZakladkePoradnika('arena', this)">Arena i Zasady</button>
+    </div>
 
-    <section id="osiagniecia" class="page">
-        <h2>Odblokowane Osiągnięcia</h2>
-        <p style="text-align: center; margin-bottom: 25px;">Odkrywaj aplikację i buduj potężne zestawy, aby zdobyć wszystkie odznaki!</p>
-        
-        <!-- Kontener, w którym JS wygeneruje karty osiągnięć -->
-        <div id="achievementsContainer">
-            <!-- Przykładowa struktura (generowana przez JS) -->
-            <!-- 
-            <div class="achievement-card unlocked">
-                <img src="img/achievements/kolekcjoner.png" class="achievement-icon">
-                <div class="achievement-info">
-                    <h4>Kolekcjoner</h4>
-                    <p>Posiadaj w magazynie co najmniej 50 unikalnych części.</p>
+    <!-- Kontener na treść zakładek -->
+    <div id="poradnik-content-container">
+
+        <!-- === SEKCJA BITY (POPRAWNIE ZAMKNIĘTA) === -->
+        <div id="poradnik-bity" class="poradnik-zakladka card active">
+            <h3>Czym jest Bit?</h3>
+            <p>Bit to końcówka która stanowi punkt kontaktu Beyblade'a z areną. Jego kształt i materiał decydują o sposobie poruszania się, prędkości, wytrzymałości i odporności na odrzucenie. To serce strategii każdego zestawu!</p>
+            <h4>Podział i Rodzaje Bitów</h4>
+            <p>Bity dzielą się na cztery główne kategorie, z których każda ma unikalny symbol i styl gry:</p>
+            <div class="kategorie-bitow-lista">
+                <div class="kategoria-item">
+                    <img src="img/attack.webp" alt="Symbol Ataku">
+                    <span><strong>Atakujące (Attack):</strong> Skupiają się na szybkim i agresywnym ruchu, aby jak najszybciej znokautować przeciwnika.</span>
                 </div>
-            </div> 
-            -->
+                <div class="kategoria-item">
+                    <img src="img/defence.webp" alt="Symbol Obrony">
+                    <span><strong>Obronne (Defence):</strong> Sstabilne i zaprojektowane, aby wytrzymać uderzenia i utrzymać się w centrum areny.</span>
+                </div>
+                <div class="kategoria-item">
+                    <img src="img/stamina.webp" alt="Symbol Wytrzymałości">
+                    <span><strong>Wytrzymałościowe (Stamina):</strong> Mają za zadanie kręcić się jak najdłużej, aby wygrać przez przetrwanie (Spin Finish).</span>
+                </div>
+                <div class="kategoria-item">
+                    <img src="img/balance.webp" alt="Symbol Balansu">
+                    <span><strong>Zbalansowane (Balance):</strong> Łączą w sobie cechy pozostałych typów. Są wszechstronne i potrafią dostosować się do różnych sytuacji.</span>
+                </div>
+            </div>
+            <h4>Lista Bitów Według Kategorii</h4>
+            <!-- Tu umieścimy dynamicznie generowaną listę -->
         </div>
-    </section>
 
+        <!-- === SEKCJA RACHETY (POPRAWNIE ZAMKNIĘTA) === -->
+        <div id="poradnik-rachety" class="poradnik-zakladka card" style="display: none;">
+            <h3>Czym jest Ratchet?</h3>
+            <p>Ratchet to kluczowy element konstrukcyjny, który łączy Ostrze (Blade) z Bitem. Odpowiada za dwie fundamentalne cechy Beyblade'a: jego <strong>wysokość</strong> oraz <strong>liczbę "zębów"</strong> wpływających na odporność na rozpad (Burst).</p>
+            <div class="kolumna-porownawcza">
+                <h4>Jak odczytywać oznaczenia?</h4>
+                <div class="kolumny-kontener">
+                 
+                    <div class="kolumna-tekst">
+                        <p>Nazwa Rachetu to jego kod DNA. Zawiera dwie kluczowe liczby:</p>
+                        <div class="punkt-z-ikona">
+                            <span class="cyfra-ikona">3</span>
+                            <div>
+                                <strong>Liczba zębów (np. "3")</strong>
+                                <p>Oznacza liczbę wypustek, które blokują się z Bitem. Generalnie, im więcej zębów (np. 5 lub 9), tym większa odporność na Burst, ale Bey może mieć trudność z ponownym "zaskoczeniem" po silnym uderzeniu.</p>
+                            </div>
+                        </div>
+                        <div class="punkt-z-ikona">
+                            <span class="cyfra-ikona">60</span>
+                            <div>
+                                <strong>Wysokość (np. "60")</strong>
+                                <p>Określa wysokość w milimetrach (60 = 6.0mm). Niskie Ratchety (np. 60) idealnie nadają się do ataków od dołu, podczas gdy wysokie (np. 80) pomagają destabilizować wyższych przeciwników.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h4>Wizualne odczytywanie wysokości</h4>
+                <p>Wysokość Rachetu można również szybko zidentyfikować, licząc pionowe wgłębienia w jego dolnej części:</p>
+                <ul class="lista-oznaczen">
+                    <li><strong>8 wgłębień</strong> (4 na stronę) = wysokość <strong>8.0mm</strong></li>
+                    <li><strong>7 wgłębień</strong> (3+4) = wysokość <strong>7.0mm</strong></li>
+                    <li><strong>6 wgłębień</strong> (3 na stronę) = wysokość <strong>6.0mm</strong></li>
+					 <li><strong>5 wgłębień</strong> (3+2) = wysokość <strong>5.0mm</strong></li>
+                    <li><strong>Wgłębienie poziome</strong> dodaje <strong>+0.5mm</strong> (np. 6 wgłębień pionowych + 1 poziome = 6.5mm). To cecha Ratchetów typu "Simple".</li>
+                </ul>
+            </div>
+            <div class="kolumna-porownawcza">
+                <h4 style="margin-top: 40px;">Podział Ratchetów</h4>
+                <p>Chociaż wszystkie Ratchety pełnią tę samą funkcję, dzielą się na trzy główne grupy konstrukcyjne:</p>
+                <div class="trzy-kolumny-kontener" style="margin-top: 15px;">
+                    <div class="kolumna">
+                        <div class="kolumna-naglowek bx-kolor"><h5>Standardowe</h5></div>
+                        <div class="kolumna-tresc">
+                            <p>Najbardziej podstawowy i wszechstronny typ. Zawsze mają "okrągłą" wysokość (np. 60, 70, 80).</p>
+                            <p><strong>Przykład:</strong> <em>3-60, 5-80, 1-60.</em></p>
+                        </div>
+                    </div>
+                    <div class="kolumna">
+                        <div class="kolumna-naglowek cx-kolor"><h5>Simple</h5></div>
+                        <div class="kolumna-tresc">
+                            <p>Posiadają dodatkowe poziome wgłębienie, co daje im "połówkową" wysokość (np. 65 = 6.5mm).</p>
+                            <p><strong>Ważne:</strong> Tylko z nimi kompatybilne jest ostrze <strong>ClockMirage</strong>!</p>
+                            <p><strong>Przykład:</strong> <em>9-65.</em></p>
+                        </div>
+                    </div>
+                    <div class="kolumna">
+                        <div class="kolumna-naglowek ux-kolor"><h5>Zintegrowane z Bitem</h5></div>
+                        <div class="kolumna-tresc">
+                            <p>Specjalne Ratchety, które mają na stałe wbudowaną końcówkę (Bit). Nie można ich rozdzielić.</p>
+                            <p><strong>Przykład:</strong> <em>Operate, Turbo.</em></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="poradnik-obrazek-z-podpisem" style="margin: 30px auto 0 auto; max-width: 300px;">
+                    <img src="img/rodzajerachet.png" alt="Zaczepy montażowe Ratchetów">
+                    <p class="podpis-obrazka">Zaczepy montażowe Ratchetów idąc od lewej <strong>Simple</strong>, <strong>Standardowy</strong>, <strong>Zintegrowany z Bitem</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- === SEKCJA OSTRZA (TERAZ JEST OSOBNYM BLOKIEM - PRAWIDŁOWO) === -->
+        <div id="poradnik-ostrza" class="poradnik-zakladka card" style="display: none;">
+            <h3>Czym jest Ostrze (Blade)?</h3>
+            <p>Ostrze to główna, metalowa część Beyblade'a, która odpowiada za zadawanie obrażeń i obronę. Jego kształt, waga i rozkład masy definiują podstawowy charakter Beyblade'a (atak, obrona, wytrzymałość, balans).</p>
+            <h4 style="text-align: center; margin-bottom: 20px;">Podział Ostrzy ze względu na budowę</h4>
+            <p>Ostrza w systemie Beyblade X dzielą się na trzy główne typy konstrukcyjne, które determinują ich unikalne właściwości i sposób montażu. Zrozumienie tych różnic jest kluczowe przy budowaniu własnych kombinacji.</p>
+            <div class="trzy-kolumny-kontener">
+                <div class="kolumna">
+                    <div class="kolumna-naglowek bx-kolor">
+                        <img src="img/Bx.webp" alt="Przykład Ostrza BX">
+                        <h5>Basic (BX)</h5>
+                    </div>
+                    <div class="kolumna-tresc">
+                        <p><strong>Budowa:</strong> Jednoczęściowe, metalowe zaczepy.</p>
+                        <p><strong>Charakterystyka:</strong> Ostrza BX oferują zbalansowane właściwości i przewidywalne zachowanie. Ich jednolita, solidna konstrukcja sprawia, że są bardzo wytrzymałe i stanowią fundament większości standardowych zestawów, takich jak <strong>Dran Sword</strong> czy <strong>Hells Scythe</strong>.</p>
+                        <p><strong>Montaż:</strong> Prosty, Blade + Rachet + Bit</p>
+                    </div>
+                </div>
+                <div class="kolumna">
+                    <div class="kolumna-naglowek ux-kolor">
+                        <img src="img/Ux.webp" alt="Przykład Ostrza UX">
+                        <h5>Unique(UX)</h5>
+                    </div>
+                    <div class="kolumna-tresc">
+                        <p><strong>Budowa:</strong> Jednoczęściowe, plastikowe zaczepy.</p>
+                        <p><strong>Charakterystyka:</strong> Plastikowe haki zamiast metalowych sprawiają że więcej masy można przenieść na rant Blade’a emblem (ozdoba centralna) w UX bywa zablokowany, w BX obraca się razem z bitem.</p>
+                        <p><strong>Montaż:</strong> Prosty, Blade + Rachet + Bit</p>
+                    </div>
+                </div>
+                <div class="kolumna">
+                    <div class="kolumna-naglowek cx-kolor">
+                        <img src="img/Cx.webp" alt="Przykład Ostrza CX">
+                        <h5>Custom(CX)</h5>
+                    </div>
+                    <div class="kolumna-tresc">
+                        <p><strong>Budowa:</strong> Trzy elementy składowe </p>
+                        <p><strong>Charakterystyka:</strong> Ostrza CX takie jak <strong>Dran Brave Jaggy</strong>, wprowadzają rewolucyjną możliwość personalizacji jak i dostosowania dysku pod swój styl pojedynkowania się</p>
+                        <p><strong>Montaż:</strong> wieloetapowy proces składania Blade(Lockchip + Main Blade + Assist Blade)+ Rachet + Bit.</p>
+                    </div>
+                </div>
+            </div>
+            <h4 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">Prawo- czy Lewoskrętne? Klucz do strategii</h4>
+            <p>Kierunek obrotu ostrza to jedna z jego fundamentalnych cech. Większość Beyblade'ów jest prawoskrętna, ale istnieją specjalne, lewoskrętne ostrza, które mogą całkowicie zmienić dynamikę pojedynku.</p>
+            <div class="kolumny-kontener">
+                <div class="kolumna-porownawcza">
+                    <h5><img src="img/prawo.png" alt="Symbol Prawoskrętności"> Prawoskrętne (Right-Spin)</h5>
+                    <p><strong>Kierunek obrotu:</strong> Zgodny z ruchem wskazówek zegara.</p>
+                    <p><strong>Charakterystyka:</strong> To standardowy i najczęściej spotykany typ rotacji. Zdecydowana większość ostrzy, takich jak <strong>Dran Sword</strong> czy <strong>Hells Scythe</strong>, kręci się w prawo. W walce dwóch prawoskrętnych Beyblade'ów dochodzi do wielu uderzeń "odpychających", które często prowadzą do nokautów przez Over Finish lub Xtreme Finish.</p>
+                </div>
+                <div class="kolumna-porownawcza">
+                    <h5><img src="img/lewo.png" alt="Symbol Lewoskrętności"> Lewoskrętne (Left-Spin)</h5>
+                    <p><strong>Kierunek obrotu:</strong> Przeciwny do ruchu wskazówek zegara.</p>
+                    <p><strong>Charakterystyka:</strong> Lewoskrętne ostrza, takie jak <strong>Cobalt Dragoon</strong>, są rzadsze i stanowią potężny element taktyczny. W starciu z prawoskrętnym przeciwnikiem dochodzi do czołowych, niezwykle silnych uderzeń, które mogą prowadzić do szybkiego Burst Finish. Dodatkowo, mogą one "kraść" energię kinetyczną przeciwnika, co zwiększa ich własną wytrzymałość.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- === SEKCJA LAUNCHERY === -->
+        <div id="poradnik-launchery" class="poradnik-zakladka card" style="display: none;">
+            <h3>Czym jest Launcher?</h3>
+            <p>Launcher (wyrzutnia) to urządzenie służące do wprawienia Beyblade'a w ruch obrotowy. Siła, stabilność i rodzaj launchera mają ogromny wpływ na wynik pojedynku, często decydując o nim już na starcie.</p>
+      
+  
+    <h4 style="text-align: center; margin-top: 40px;">Rodzaje Launcherów</h4>
+  
+    <div class="launcher-cards-container">
+
+    <div class="launcher-card">
+        <div class="launcher-header">
+            <!-- Dodajemy ID do obrazka i nagłówka -->
+            <img id="winder-launcher-img" src="img/winder.png" alt="Winder Launcher">
+            <h5 id="winder-launcher-title">Winder Launcher (Prawoskrętny)</h5>
+            <!-- NOWE PRZYCISKI DO ZMIANY OBROTÓW -->
+            <div class="spin-switcher">
+                <button id="winder-l-btn" onclick="zmienLauncher('winder', 'l')">L</button>
+                <button id="winder-r-btn" class="active" onclick="zmienLauncher('winder', 'r')">R</button>
+            </div>
+        </div>
+        <div class="launcher-body">
+            <p><strong>Jak działa:</strong> Do środka wkładasz plastikową zębatkę (ripcord), a następnie gwałtownie ją wyciągasz. To najpopularniejszy typ wyrzutni w Beyblade X.</p>
+            <ul>
+                <li><strong>Zalety:</strong> Potencjalnie najwyższa siła startu (RPM), idealna do agresywnych zagrań.</li>
+                <li><strong>Wady:</strong> Trudniejsza kontrola nad mocą. Zbyt silne pociągnięcie może prowadzić do samonokautu.</li>
+                <li><strong>Kiedy używać:</strong> Gdy chcesz uzyskać maksymalną prędkość startową dla kombinacji ofensywnych.</li>
+            </ul>
+        </div>
     </div>
     
+    <div class="launcher-card">
+        <div class="launcher-header">
+            <!-- Dodajemy ID do obrazka i nagłówka -->
+            <img id="string-launcher-img" src="img/string.png" alt="String Launcher">
+            <h5 id="string-launcher-title">String Launcher (Prawoskrętny)</h5>
+            <!-- NOWE PRZYCISKI DO ZMIANY OBROTÓW -->
+            <div class="spin-switcher">
+                <button id="string-l-btn" onclick="zmienLauncher('string', 'l')">L</button>
+                <button id="string-r-btn" class="active" onclick="zmienLauncher('string', 'r')">R</button>
+            </div>
+        </div>
+        <div class="launcher-body">
+            <p><strong>Jak działa:</strong> Zamiast zębatki, używa linki, którą pociągasz, aby rozkręcić mechanizm. Zapewnia płynniejszy start.</p>
+            <ul>
+                <li><strong>Zalety:</strong> Znacznie lepsza kontrola nad siłą startu. Ułatwia wykonanie precyzyjnego "soft launch" (delikatnego startu).</li>
+                <li><strong>Wady:</strong> Zazwyczaj niższa maksymalna prędkość obrotowa w porównaniu do Windera.</li>
+                <li><strong>Kiedy używać:</strong> Idealny do strategii defensywnych i wytrzymałościowych, gdzie precyzja jest ważniejsza od surowej siły.</li>
+            </ul>
+        </div>
+    </div>
+    
+
+<div class="launcher-card">
+    <div class="launcher-header">
+        <img src="img/hold.png" alt="Hold Launcher">
+        <h5>Hold Launcher</h5>
+    </div>
+    <div class="launcher-body">
+        <p><strong>Jak działa:</strong> Unikalny dla Beyblade X typ wyrzutni zintegrowanej z uchwytem (gripem). Beyblade jest "trzymany" w specjalnym mechanizmie, co pozwala na start pod różnymi kątami.</p>
+        <ul>
+            <li><strong>Zalety:</strong> Daje ogromną kontrolę nad kątem i momentem startu. Pozwala na niestandardowe, strategiczne zagrania, takie jak start z pochyleniem.</li>
+            <li><strong>Wady:</strong> Może oferować nieco mniejszą moc w porównaniu do dedykowanego, mocnego Windera. Wymaga przyzwyczajenia.</li>
+            <li><strong>Kiedy używać:</strong> Gdy Twoja strategia opiera się na precyzyjnym umiejscowieniu Beyblade'a na arenie lub chcesz zaskoczyć przeciwnika nietypowym startem.</li>
+        </ul>
+    </div>
+</div>
+
+
+        <!-- KARTA 3: Proto Launcher -->
+        <div class="launcher-card">
+            <div class="launcher-header">
+                <img src="img/proto.png" alt="Proto Launcher">
+                <h5>Proto Launcher (startowy)</h5>
+            </div>
+            <div class="launcher-body">
+                <p><strong>Jak działa:</strong> Maksymalnie uproszczona, mała wyrzutnia, często dołączana do niektórych zestawów jako podstawowe akcesorium.</p>
+                <ul>
+                    <li><strong>Zalety:</strong> Mały, lekki i prosty w obsłudze.</li>
+                    <li><strong>Wady:</strong> Bardzo niska moc i kontrola. Powszechnie uważany za najgorszy typ wyrzutni, niezalecany do poważniejszych rozgrywek.</li>
+                    <li><strong>Kiedy używać:</strong> Wyłącznie jako rozwiązanie tymczasowe, gdy nie masz dostępu do lepszej wyrzutni.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <h4 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">Akcesoria do Launcherów</h4>
+    <p>Oprócz samych wyrzutni, istnieją również dodatki, które mogą znacząco poprawić komfort i precyzję startu.</p>
+
+<!-- Używamy tego samego kontenera co dla launcherów -->
+<div class="launcher-cards-container">
+
+    <!-- KARTA 1: BATTLE PASS (W STYLU LAUNCHERA) -->
+    <div class="launcher-card">
+        <div class="launcher-header">
+            <img src="img/pass.png" alt="Battle Pass" style="width: 150px; height: auto;">
+            <h5>Battle Pass</h5>
+        </div>
+        <div class="launcher-body">
+            <p><strong>Czym jest:</strong> To cyfrowe urządzenie, które montuje się na launcherze w celu śledzenia statystyk i mocy startu. Nie jest wymagane do samej gry, ale stanowi ciekawy dodatek.</p>
+            <p><strong>Funkcje:</strong> Rejestruje siłę Twojego pociągnięcia i synchronizuje dane z aplikacją mobilną, pozwalając zdobywać punkty i porównywać wyniki z innymi graczami na całym świecie.</p>
+        </div>
+    </div>
+
+    <!-- KARTA 2: GRIP (W STYLU LAUNCHERA) -->
+    <div class="launcher-card">
+        <div class="launcher-header">
+            <img src="img/grip.png" alt="Grip" style="width: 150px; height: auto;">
+            <h5>Grip (Uchwyt)</h5>
+        </div>
+        <div class="launcher-body">
+            <p><strong>Czym jest:</strong> Ergonomiczny uchwyt, do którego montuje się launcher (Winder lub String). Poprawia stabilność i komfort trzymania wyrzutni.</p>
+            <p><strong>Funkcje:</strong> Zapewnia pewniejszy chwyt, co przekłada się na bardziej stabilny i powtarzalny start. Jest to szczególnie przydatne podczas intensywnych treningów i turniejów, ponieważ zmniejsza zmęczenie dłoni.</p>
+        </div>
+    </div>
+
+</div>
+<!-- ===>>> KONIEC ZAKTUALIZOWANEGO KODU <<<=== -->
+
+</div>
+
+            </div>
+
+<div id="poradnik-arena" class="poradnik-zakladka card" style="display: none;">
+    
+               <div class="kolumna-porownawcza">
+
+   <h3>Arena (Beystadium X)</h3>
+<div class="kolumny-kontener" style="align-items: center;">
+
+    <!-- Lewa kolumna: Obrazek Areny -->
+    <div class="kolumna-obrazek" style="flex: 1.2;">
+        <img src="img/arena.png" alt="Arena Beyblade X">
+    </div>
+
+    <!-- Prawa kolumna: Opis Stref -->
+    <div class="kolumna-tekst" style="flex: 1;">
+        <p>Oficjalna arena Beyblade X to nie tylko pole bitwy, ale kluczowy element taktyczny. Jej unikalna budowa wymusza dynamiczne starcia.</p>
+        <ul class="lista-oznaczen">
+                <li><strong>Battle Zone:</strong> Główne pole walki w centrum areny.</li>
+                <li><strong>Xtreme Line:</strong> Zewnętrzny tor z zębatkami, który gwałtownie przyspiesza Beyblade'y, aktywując potężny "Xtreme Dash".</li>
+                <li><strong>Over Zone (Pocket):</strong> wyznaczone „kieszenie” lub obszary, zwykle po bokach frontu areny. Wejście tam to często warunek „over finish”.</li>
+				<li><strong>Xtreme Zone (Pocket):</strong> Specjalna strefa wrzucenie tam przeciwnika daje najwięcej punktów.</li>
+
+            </ul>
+        </div>
+    </div> <!-- <<< WAŻNE: Tutaj zamykamy kontener z opisem areny -->
+</div>           
+		   <div class="kolumna-porownawcza">
+
+    <!-- === SEKCJA 2: ZASADY PUNKTACJI (TERAZ JEST OSOBNO, PONIŻEJ) === -->
+    <h3>Podstawowe Zasady Punktacji</h3>
+    <p>W standardowej walce wygrywa gracz, który jako pierwszy zdobędzie 4 punkty. Punkty przyznawane są za cztery rodzaje "finishów":</p>
+    
+    <div class="punktacja-grid-2x2">
+
+        <!-- Karta 1: Spin Finish -->
+        <div class="finish-card">
+            <img src="img/spin_finish.png" alt="Spin Finish - 1 Punkt">
+            <div class="finish-card-body">
+                <p>Twój Beyblade kręci się dłużej niż Beyblade przeciwnika, który zatrzymał się na arenie.</p>
+            </div>
+        </div>
+
+        <!-- Karta 2: Over Finish -->
+        <div class="finish-card">
+            <img src="img/over_finish.png" alt="Over Finish - 2 Punkty">
+            <div class="finish-card-body">
+                <p>Wyrzucasz Beyblade'a przeciwnika z areny do jednej z "kieszeni" (Over Zone).</p>
+            </div>
+        </div>
+
+        <!-- Karta 3: Burst Finish -->
+        <div class="finish-card">
+            <img src="img/burst_finish.png" alt="Burst Finish - 2 Punkty">
+            <div class="finish-card-body">
+                <p>"Rozbijasz" Beyblade'a przeciwnika na elementy (Blade, Ratchet, Bit).</p>
+            </div>
+        </div>
+
+        <!-- Karta 4: Xtreme Finish -->
+        <div class="finish-card">
+            <img src="img/xtreme_finish.png" alt="Xtreme Finish - 3 Punkty">
+            <div class="finish-card-body">
+                <p>Wyrzucasz Beyblade'a przeciwnika poza arenę przez Xtreme Pocket".</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+<!-- ===>>> KONIEC POPRAWIONEJ SEKCJI <<<=== -->
+
+</section>
+
 
 <script>
 // =================================
@@ -1457,6 +2283,35 @@ function displayAchievements() {
 // =================================
 let scores = { player1: 0, player2: 0 };
 let playerNames = { player1: "Gracz 1", player2: "Gracz 2" };
+/* ===>>> FUNKCJA JS DO WKLEJENIA W SEKCJI <script> <<<=== */
+
+function zmienLauncher(typ, kierunek) {
+    // Definiujemy elementy, które będziemy zmieniać
+    const imgElement = document.getElementById(`${typ}-launcher-img`);
+    const titleElement = document.getElementById(`${typ}-launcher-title`);
+    const lButton = document.getElementById(`${typ}-l-btn`);
+    const rButton = document.getElementById(`${typ}-r-btn`);
+
+    if (!imgElement || !titleElement || !lButton || !rButton) {
+        console.error(`Błąd: Nie znaleziono elementów dla typu launchera: ${typ}`);
+        return;
+    }
+
+    // Aktualizujemy przyciski
+    lButton.classList.remove('active');
+    rButton.classList.remove('active');
+
+    // Ustalamy ścieżkę do obrazka i nowy tytuł
+    if (kierunek === 'l') {
+        imgElement.src = `img/${typ}l.png`; // np. 'img//winderl_launcher.png'
+        titleElement.textContent = `${typ.charAt(0).toUpperCase() + typ.slice(1)} Launcher (Lewoskrętny)`;
+        lButton.classList.add('active');
+    } else { // Domyślnie prawoskrętny
+        imgElement.src = `img/${typ}.png`; // np. 'img/poradnik/winder_launcher.png'
+        titleElement.textContent = `${typ.charAt(0).toUpperCase() + typ.slice(1)} Launcher (na ${typ === 'winder' ? 'zębatkę' : 'linkę'})`;
+        rButton.classList.add('active');
+    }
+}
 
 function displayScores() {
     const scoreP1 = document.getElementById('scorePlayer1');
@@ -1663,8 +2518,12 @@ function navigateTo(pageId, clickedLinkElement) {
     // ==================================================
     
     if (pageId === 'magazyn') {
-        wyswietlMagazyn(); 
-    } else if (pageId === 'deck') {
+        wyswietlMagazyn();
+} else if (pageId === 'poradnik') { // <<<--- NOWY BLOK
+    wygenerujListeBitowPoradnik();
+    // Upewnij się, że domyślna zakładka jest pokazywana poprawnie
+    pokazZakladkePoradnika('bity', document.querySelector('#poradnik-tabs .tab-button'));
+} else if (pageId === 'deck') {
         if (!currentEditingDeckId) {
              initializeOrResetCurrentDeck();
         }
@@ -4068,7 +4927,123 @@ window.addEventListener('load', function() {
         sidebarToggleBtn.addEventListener('click', toggleSidebar);
     }
 });
+    function pokazZakladkePoradnika(zakladkaId, kliknietyPrzycisk) {
+        // Ukryj wszystkie zakładki
+        document.querySelectorAll('.poradnik-zakladka').forEach(zakladka => {
+            zakladka.style.display = 'none';
+            zakladka.classList.remove('active');
+        });
+    
+        // Usuń klasę 'active' ze wszystkich przycisków
+        document.querySelectorAll('#poradnik-tabs .tab-button').forEach(przycisk => {
+            przycisk.classList.remove('active');
+        });
+    
+        // Pokaż wybraną zakładkę
+        const aktywnaZakladka = document.getElementById(`poradnik-${zakladkaId}`);
+        if (aktywnaZakladka) {
+            aktywnaZakladka.style.display = 'block';
+            aktywnaZakladka.classList.add('active');
+        }
+    
+        // Dodaj klasę 'active' do klikniętego przycisku
+        if (kliknietyPrzycisk) {
+            kliknietyPrzycisk.classList.add('active');
+        }
+    }
+  function wygenerujListeBitowPoradnik() {
+    const kontener = document.querySelector('#poradnik-bity h4:last-of-type');
+    if (!kontener) return;
 
+    let listaDiv = document.getElementById('lista-bitow-poradnik-div');
+    if (!listaDiv) {
+        listaDiv = document.createElement('div');
+        listaDiv.id = 'lista-bitow-poradnik-div';
+        kontener.parentNode.insertBefore(listaDiv, kontener.nextSibling);
+    }
+    listaDiv.innerHTML = '';
+
+    const magazyn = getMagazyn();
+    const bity = magazyn.filter(p => p.typ === 'bit' || p.integrujeBit === true);
+
+    // ===>>> KLUCZOWA ZMIANA #1: Tworzymy "słownik" do tłumaczenia nazw <<<===
+    // Mapuje polskie nazwy z bazy danych na angielskie nazwy plików obrazków.
+    const nazwyPlikowIkon = {
+        'atak': 'attack',
+        'obrona': 'defence',
+        'wytrzymalosc': 'stamina',
+        'balans': 'balance'
+    };
+
+    // Obiekt do wyświetlania skrótów (ATK, DEF) pozostaje bez zmian.
+    const kategorie = { 'atak': 'ATK', 'obrona': 'DEF', 'wytrzymalosc': 'STM', 'balans': 'BAL' };
+
+    // Budujemy przyciski filtrów, używając nowego słownika
+    const przyciskiKategoriiHTML = `
+        <div class="tabs-container" style="margin: 20px 0;">
+            ${Object.keys(kategorie).map(kat =>
+                `<button class="tab-button" onclick="filtrujBityPoradnik('${kat}')">
+                    <img src="img/${nazwyPlikowIkon[kat]}.webp" class="inline-icon" alt="${kategorie[kat]}"> ${kategorie[kat]}
+                </button>`
+            ).join('')}
+             <button class="tab-button active" onclick="filtrujBityPoradnik('wszystkie')">Wszystkie</button>
+        </div>`;
+    listaDiv.innerHTML += przyciskiKategoriiHTML;
+
+    // Tworzenie tabeli (bez zmian)
+    const tabela = document.createElement('table');
+    tabela.style.width = '100%';
+    tabela.style.borderCollapse = 'collapse';
+    tabela.innerHTML = `
+        <thead>
+            <tr style="border-bottom: 2px solid rgba(255,255,255,0.2);">
+                <th style="padding: 8px; text-align: left;">Nazwa</th>
+                <th style="padding: 8px; text-align: left;">Skrót</th>
+                <th style="padding: 8px; text-align: center;">Typ</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-bitow-poradnik-cialo"></tbody>`;
+    listaDiv.appendChild(tabela);
+
+    // Wypełnianie tabeli danymi
+    const tbody = document.getElementById('tabela-bitow-poradnik-cialo');
+    bity.sort((a,b) => a.nazwa.localeCompare(b.nazwa)).forEach(bit => {
+        const row = document.createElement('tr');
+        row.dataset.kategoria = bit.rodzaj;
+        row.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+        
+        let typIkona = 'N/A';
+        // ===>>> KLUCZOWA ZMIANA #2: Używamy "słownika" do zbudowania poprawnej ścieżki <<<===
+        if (bit.rodzaj && nazwyPlikowIkon[bit.rodzaj]) {
+            const nazwaPliku = nazwyPlikowIkon[bit.rodzaj]; // np. 'attack'
+            typIkona = `<img src="img/${nazwaPliku}.webp" class="inline-icon" title="${bit.rodzaj}">`;
+        }
+
+        row.innerHTML = `
+            <td style="padding: 8px;">${bit.nazwa} ${bit.integrujeBit ? '<em style="color:#a25ff0;">(Ratchet)</em>' : ''}</td>
+            <td style="padding: 8px;">${bit.skroconaNazwa || 'B/D'}</td>
+            <td style="padding: 8px; text-align: center;">${typIkona}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    filtrujBityPoradnik('wszystkie');
+}
+
+
+    function filtrujBityPoradnik(kategoria) {
+        document.querySelectorAll('#tabela-bitow-poradnik-cialo tr').forEach(row => {
+            if (kategoria === 'wszystkie' || row.dataset.kategoria === kategoria) {
+                row.style.display = 'table-row';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        // Podświetl aktywny przycisk
+        document.querySelectorAll('#lista-bitow-poradnik-div .tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`#lista-bitow-poradnik-div .tab-button[onclick="filtrujBityPoradnik('${kategoria}')"]`).classList.add('active');
+    }
+    
 
 </script>
 
@@ -4324,53 +5299,53 @@ window.addEventListener('load', function() {
   {
   "id": "125", "typ": "rachet", "nazwa": "6-80", "ilosc": 0, "img": "img/Ratchet6-80.webp", "ATK": 14, "DEF": 6, "STM": 10, "waga": 6.9 },
   {
-  "id": "126", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Ball", "ilosc": 0, "img": "img/BitBall.webp", "ATK":15, "DEF": 25, "STM": 50, "waga": 2.1, "DASH": 10, "BURST_RES": 30},
+  "id": "126", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Ball", "skroconaNazwa": "B", "ilosc": 0, "img": "img/BitBall.webp", "ATK":15, "DEF": 25, "STM": 50, "waga": 2.1, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "127", "typ": "bit","rodzaj": "atak", "nazwa": "Cyclone", "ilosc": 0, "img": "img/BitCyclone.webp", "ATK": 40, "DEF": 5, "STM": 10, "waga":2.1, "DASH": 45, "BURST_RES": 80},
+  "id": "127", "typ": "bit","rodzaj": "atak", "nazwa": "Cyclone", "skroconaNazwa": "C", "ilosc": 0, "img": "img/BitCyclone.webp", "ATK": 40, "DEF": 5, "STM": 10, "waga":2.1, "DASH": 45, "BURST_RES": 80},
   {
-  "id": "128", "typ": "bit","rodzaj": "obrona", "nazwa": "Dot", "ilosc": 0, "img": "img/BitDot.webp", "ATK": 10, "DEF": 55, "STM": 25, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  "id": "128", "typ": "bit","rodzaj": "obrona", "nazwa": "Dot", "skroconaNazwa": "D", "ilosc": 0, "img": "img/BitDot.webp", "ATK": 10, "DEF": 55, "STM": 25, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "129", "typ": "bit","rodzaj": "balans", "nazwa": "Elevate", "ilosc": 0, "img": "img/BitElevate.webp", "ATK": 30, "DEF": 15, "STM": 20, "waga": 3.2, "DASH": 35, "BURST_RES": 30},
+  "id": "129", "typ": "bit","rodzaj": "balans", "nazwa": "Elevate", "skroconaNazwa": "E", "ilosc": 0, "img": "img/BitElevate.webp", "ATK": 30, "DEF": 15, "STM": 20, "waga": 3.2, "DASH": 35, "BURST_RES": 30},
   {
-  "id": "130", "typ": "bit","rodzaj": "atak", "nazwa": "Flat", "ilosc": 0, "img": "img/BitFlat.webp", "ATK": 40, "DEF": 15, "STM": 10, "waga": 2.2, "DASH": 35, "BURST_RES": 80},
+  "id": "130", "typ": "bit","rodzaj": "atak", "nazwa": "Flat", "skroconaNazwa": "F", "ilosc": 0, "img": "img/BitFlat.webp", "ATK": 40, "DEF": 15, "STM": 10, "waga": 2.2, "DASH": 35, "BURST_RES": 80},
   {
-  "id": "131", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Gear Ball", "ilosc": 0, "img": "img/BitGearBall.webp", "ATK": 10, "DEF": 15, "STM": 45, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
+  "id": "131", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Gear Ball", "skroconaNazwa": "GB", "ilosc": 0, "img": "img/BitGearBall.webp", "ATK": 10, "DEF": 15, "STM": 45, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
   {
-  "id": "132", "typ": "bit","rodzaj": "atak", "nazwa": "Gear Flat", "ilosc": 0, "img": "img/BitGearFlat.webp", "ATK": 50, "DEF": 5, "STM": 5, "waga": 2.3, "DASH": 40, "BURST_RES": 80},
+  "id": "132", "typ": "bit","rodzaj": "atak", "nazwa": "Gear Flat", "skroconaNazwa": "GF", "ilosc": 0, "img": "img/BitGearFlat.webp", "ATK": 50, "DEF": 5, "STM": 5, "waga": 2.3, "DASH": 40, "BURST_RES": 80},
   {
-  "id": "133", "typ": "bit","rodzaj": "obrona", "nazwa": "Gear Needle", "ilosc": 0, "img": "img/BitGearNeedle.webp", "ATK": 20, "DEF": 40, "STM": 10, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
+  "id": "133", "typ": "bit","rodzaj": "obrona", "nazwa": "Gear Needle", "skroconaNazwa": "GN", "ilosc": 0, "img": "img/BitGearNeedle.webp", "ATK": 20, "DEF": 40, "STM": 10, "waga": 2.0, "DASH": 30, "BURST_RES": 30},
   {
-  "id": "134", "typ": "bit","rodzaj": "balans", "nazwa": "Gear Point", "ilosc": 0, "img": "img/BitGearPoint.webp", "ATK": 30, "DEF": 25, "STM": 15, "waga": 2.3, "DASH": 30, "BURST_RES": 80},
+  "id": "134", "typ": "bit","rodzaj": "balans", "nazwa": "Gear Point", "skroconaNazwa": "GP", "ilosc": 0, "img": "img/BitGearPoint.webp", "ATK": 30, "DEF": 25, "STM": 15, "waga": 2.3, "DASH": 30, "BURST_RES": 80},
   {
-  "id": "135", "typ": "bit","rodzaj": "obrona", "nazwa": "High Needle", "ilosc": 0, "img": "img/BitHighNeedle.webp", "ATK": 15, "DEF": 55, "STM": 20, "waga": 2.2, "DASH": 10, "BURST_RES": 30},
+  "id": "135", "typ": "bit","rodzaj": "obrona", "nazwa": "High Needle", "skroconaNazwa": "HN", "ilosc": 0, "img": "img/BitHighNeedle.webp", "ATK": 15, "DEF": 55, "STM": 20, "waga": 2.2, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "136", "typ": "bit","rodzaj": "balans", "nazwa": "High Taper", "ilosc": 0, "img": "img/BitHighTaper.webp", "ATK": 30, "DEF": 25, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "136", "typ": "bit","rodzaj": "balans", "nazwa": "High Taper", "skroconaNazwa": "HT", "ilosc": 0, "img": "img/BitHighTaper.webp", "ATK": 30, "DEF": 25, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "137", "typ": "bit","rodzaj": "atak", "nazwa": "Low Flat", "ilosc": 0, "img": "img/BitLowFlat.webp", "ATK": 45, "DEF": 5, "STM": 10, "waga": 2.1, "DASH": 40, "BURST_RES": 80},
+  "id": "137", "typ": "bit","rodzaj": "atak", "nazwa": "Low Flat", "skroconaNazwa": "LF", "ilosc": 0, "img": "img/BitLowFlat.webp", "ATK": 45, "DEF": 5, "STM": 10, "waga": 2.1, "DASH": 40, "BURST_RES": 80},
   {
-  "id": "138", "typ": "bit","rodzaj": "balans", "nazwa": "Merge", "ilosc": 0, "img": "img/BitMerge.webp", "ATK": 50, "DEF": 20, "STM": 10, "waga": 3.4, "DASH": 20, "BURST_RES": 80},
+  "id": "138", "typ": "bit","rodzaj": "balans", "nazwa": "Merge", "skroconaNazwa": "M", "ilosc": 0, "img": "img/BitMerge.webp", "ATK": 50, "DEF": 20, "STM": 10, "waga": 3.4, "DASH": 20, "BURST_RES": 80},
   {
-  "id": "139", "typ": "bit","rodzaj": "obrona", "nazwa": "Needle", "ilosc": 0, "img": "img/BitNeedle.webp", "ATK": 10, "DEF": 50, "STM": 30, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  "id": "139", "typ": "bit","rodzaj": "obrona", "nazwa": "Needle", "skroconaNazwa": "N", "ilosc": 0, "img": "img/BitNeedle.webp", "ATK": 10, "DEF": 50, "STM": 30, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "140", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Orb", "ilosc": 0, "img": "img/BitOrb.webp", "ATK": 10, "DEF": 30, "STM": 50, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
+  "id": "140", "typ": "bit","rodzaj": "wytrzymalosc", "nazwa": "Orb", "skroconaNazwa": "O", "ilosc": 0, "img": "img/BitOrb.webp", "ATK": 10, "DEF": 30, "STM": 50, "waga": 2.0, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "141", "typ": "bit","rodzaj": "balans", "nazwa": "Point", "ilosc": 0, "img": "img/BitPoint.webp", "ATK": 25, "DEF": 25, "STM": 25, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "141", "typ": "bit","rodzaj": "balans", "nazwa": "Point", "skroconaNazwa": "P", "ilosc": 0, "img": "img/BitPoint.webp", "ATK": 25, "DEF": 25, "STM": 25, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "142", "typ": "bit","rodzaj": "atak", "nazwa": "Quake", "ilosc": 0, "img": "img/BitQuake.webp", "ATK": 55, "DEF": 15, "STM": 5, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "142", "typ": "bit","rodzaj": "atak", "nazwa": "Quake", "skroconaNazwa": "Q", "ilosc": 0, "img": "img/BitQuake.webp", "ATK": 55, "DEF": 15, "STM": 5, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "143", "typ": "bit","rodzaj": "atak", "nazwa": "Rush", "ilosc": 0, "img": "img/BitRush.webp", "ATK": 40, "DEF": 10, "STM": 20, "waga": 2.1, "DASH": 30, "BURST_RES": 80},
+  "id": "143", "typ": "bit","rodzaj": "atak", "nazwa": "Rush", "skroconaNazwa": "R", "ilosc": 0, "img": "img/BitRush.webp", "ATK": 40, "DEF": 10, "STM": 20, "waga": 2.1, "DASH": 30, "BURST_RES": 80},
   {
-  "id": "144", "typ": "bit","rodzaj": "obrona", "nazwa": "Spike", "ilosc": 0, "img": "img/BitSpike.webp", "ATK": 10, "DEF": 45, "STM": 35, "waga": 2, "DASH": 10, "BURST_RES": 30},
+  "id": "144", "typ": "bit","rodzaj": "obrona", "nazwa": "Spike", "skroconaNazwa": "S", "ilosc": 0, "img": "img/BitSpike.webp", "ATK": 10, "DEF": 45, "STM": 35, "waga": 2, "DASH": 10, "BURST_RES": 30},
   {
-  "id": "145", "typ": "bit","rodzaj": "balans", "nazwa": "Taper", "ilosc": 0, "img": "img/BitTaper.webp", "ATK": 35, "DEF": 20, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
+  "id": "145", "typ": "bit","rodzaj": "balans", "nazwa": "Taper", "skroconaNazwa": "T", "ilosc": 0, "img": "img/BitTaper.webp", "ATK": 35, "DEF": 20, "STM": 20, "waga": 2.2, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "146", "typ": "bit","rodzaj": "balans", "nazwa": "Trans Point", "ilosc": 0, "img": "img/BitTransPoint.webp", "ATK": 35, "DEF": 25, "STM": 25, "waga": 2.4, "DASH": 15, "BURST_RES": 80},
+  "id": "146", "typ": "bit","rodzaj": "balans", "nazwa": "Trans Point", "skroconaNazwa": "TP", "ilosc": 0, "img": "img/BitTransPoint.webp", "ATK": 35, "DEF": 25, "STM": 25, "waga": 2.4, "DASH": 15, "BURST_RES": 80},
   {
-  "id": "147", "typ": "bit","rodzaj": "balans", "nazwa": "Unite", "ilosc": 0, "img": "img/BitUnite.webp", "ATK": 25, "DEF": 25, "STM": 30, "waga": 2.1, "DASH": 25, "BURST_RES": 80},
+  "id": "147", "typ": "bit","rodzaj": "balans", "nazwa": "Unite", "skroconaNazwa": "U", "ilosc": 0, "img": "img/BitUnite.webp", "ATK": 25, "DEF": 25, "STM": 30, "waga": 2.1, "DASH": 25, "BURST_RES": 80},
   {
-  "id": "148", "typ": "bit","rodzaj": "atak", "nazwa": "Accel", "ilosc": 0, "img": "img/BitAccel.webp", "ATK": 40, "DEF": 10, "STM": 10, "waga": 2.6, "DASH": 40, "BURST_RES": 80},
+  "id": "148", "typ": "bit","rodzaj": "atak", "nazwa": "Accel", "skroconaNazwa": "A", "ilosc": 0, "img": "img/BitAccel.webp", "ATK": 40, "DEF": 10, "STM": 10, "waga": 2.6, "DASH": 40, "BURST_RES": 80},
   {
-  "id": "149", "typ": "bit","rodzaj": "obrona", "nazwa": "Bound Spike", "ilosc": 0, "img": "img/BitBoundSpike.webp", "ATK": 5, "DEF": 60, "STM": 30, "waga": 2.0, "DASH": 5, "BURST_RES": 30},
+  "id": "149", "typ": "bit","rodzaj": "obrona", "nazwa": "Bound Spike", "skroconaNazwa": "BS", "ilosc": 0, "img": "img/BitBoundSpike.webp", "ATK": 5, "DEF": 60, "STM": 30, "waga": 2.0, "DASH": 5, "BURST_RES": 30},
   {
     "typ": "cx-lock-chip",
     "nazwa": "Dran",
@@ -4781,6 +5756,7 @@ window.addEventListener('load', function() {
     "id": "188",
     "typ": "bit","rodzaj": "atak",
     "nazwa": "Gear Rush",
+	"skroconaNazwa": "GR",
     "ilosc": 0,
     "img": "img/BitGearRush.webp",
     "ATK": 45,
@@ -4794,6 +5770,7 @@ window.addEventListener('load', function() {
     "id": "189",
     "typ": "bit","rodzaj": "balans",
     "nazwa": "Kick",
+	"skroconaNazwa": "K",
     "ilosc": 0,
     "img": "img/BitKick.webp",
     "ATK": 35,
@@ -4807,7 +5784,8 @@ window.addEventListener('load', function() {
     "id": "190",
     "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Low Orb",
-    "ilosc": 0,
+    "skroconaNazwa": "LO",
+	"ilosc": 0,
     "img": "img/BitLowOrb.webp",
     "ATK": 5,
     "DEF": 25,
@@ -4820,7 +5798,8 @@ window.addEventListener('load', function() {
     "id": "191",
     "typ": "bit","rodzaj": "balans",
     "nazwa": "Trans Kick",
-    "ilosc": 0,
+    "skroconaNazwa": "TK",
+	"ilosc": 0,
     "img": "img/BitTransKick.webp",
     "ATK": 35,
     "DEF": 30,
@@ -4833,6 +5812,7 @@ window.addEventListener('load', function() {
     "id": "192",
     "typ": "bit","rodzaj": "atak",
     "nazwa": "Vortex",
+	"skroconaNazwa": "V",
     "ilosc": 0,
     "img": "img/BitVortex.webp",
     "ATK": 45,
@@ -4846,7 +5826,8 @@ window.addEventListener('load', function() {
     "id": "193_wallball", 
     "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Wall Ball",
-    "ilosc": 0,
+    "skroconaNazwa": "WB",
+	"ilosc": 0,
     "img": "img/BitWallBall.webp",
     "ATK": 15,
     "DEF": 30,
@@ -4859,6 +5840,7 @@ window.addEventListener('load', function() {
     "id": "193_wedge", 
     "typ": "bit","rodzaj": "obrona",
     "nazwa": "Wedge",
+	"skroconaNazwa": "W",
     "ilosc": 0,
     "img": "img/BitWedge.webp",
     "ATK": 5,
@@ -4872,6 +5854,7 @@ window.addEventListener('load', function() {
     "id": "194",
     "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Disk Ball",
+	"skroconaNazwa": "DB",
     "ilosc": 0,
     "img": "img/BitDiskBall.webp",
     "ATK": 15,
@@ -4885,7 +5868,8 @@ window.addEventListener('load', function() {
     "id": "195",
     "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Free Ball",
-    "ilosc": 0,
+    "skroconaNazwa": "FB",
+	"ilosc": 0,
     "img": "img/BitFreeBall.webp",
     "ATK": 10,
     "DEF": 25,
@@ -4898,7 +5882,8 @@ window.addEventListener('load', function() {
     "id": "196",
     "typ": "bit","rodzaj": "wytrzymalosc",
     "nazwa": "Glide",
-    "ilosc": 0,
+    "skroconaNazwa": "G",
+	"ilosc": 0,
     "img": "img/BitGlide.webp",
     "ATK": 20,
     "DEF": 10,
@@ -4911,7 +5896,8 @@ window.addEventListener('load', function() {
     "id": "197",
     "typ": "bit","rodzaj": "balans",
     "nazwa": "Hexa",
-    "ilosc": 0,
+    "skroconaNazwa": "H",
+	"ilosc": 0,
     "img": "img/BitHexa.webp",
     "ATK": 30,
     "DEF": 35,
@@ -4924,7 +5910,8 @@ window.addEventListener('load', function() {
     "id": "198",
     "typ": "bit","rodzaj": "atak",
     "nazwa": "Level",
-    "ilosc": 0,
+    "skroconaNazwa": "L",
+	"ilosc": 0,
     "img": "img/BitLevel.webp",
     "ATK": 40,
     "DEF": 5,
@@ -4937,6 +5924,7 @@ window.addEventListener('load', function() {
     "id": "199",
     "typ": "bit","rodzaj": "atak",
     "nazwa": "Low Rush",
+	"skroconaNazwa": "LR",
     "ilosc": 0,
     "img": "img/BitLowRush.webp",
     "ATK": 45,
@@ -4950,7 +5938,8 @@ window.addEventListener('load', function() {
     "id": "200",
     "typ": "bit","rodzaj": "obrona",
     "nazwa": "Metal Needle",
-    "ilosc": 0,
+    "skroconaNazwa": "MN",
+	"ilosc": 0,
     "img": "img/BitMetalNeedle.webp",
     "ATK": 8,
     "DEF": 57,
@@ -4963,7 +5952,8 @@ window.addEventListener('load', function() {
     "id": "201",
     "typ": "bit","rodzaj": "atak",
     "nazwa": "Rubber Accel",
-    "ilosc": 0,
+    "skroconaNazwa": "RA",
+	"ilosc": 0,
     "img": "img/BitRubberAccel.webp",
     "ATK": 60,
     "DEF": 17,
@@ -4976,7 +5966,8 @@ window.addEventListener('load', function() {
     "id": "202",
     "typ": "bit","rodzaj": "atak",
     "nazwa": "Under Flat",
-    "ilosc": 0,
+    "skroconaNazwa": "UF",
+	"ilosc": 0,
     "img": "img/BitUnderFlat.webp",
     "ATK": 55,
     "DEF": 5,
@@ -4989,7 +5980,8 @@ window.addEventListener('load', function() {
     "id": "203",
     "typ": "bit","rodzaj": "obrona",
     "nazwa": "Under Needle",
-    "ilosc": 0,
+    "skroconaNazwa": "UN",
+	"ilosc": 0,
     "img": "img/BitUnderNeedle.webp",
     "ATK": 10,
     "DEF": 60,
@@ -5002,7 +5994,8 @@ window.addEventListener('load', function() {
     "id": "204",
     "typ": "bit","rodzaj": "balans",
     "nazwa": "Zap",
-    "ilosc": 0,
+    "skroconaNazwa": "Z",
+	"ilosc": 0,
     "img": "img/BitZap.webp",
     "ATK": 30,
     "DEF": 20,
@@ -5015,6 +6008,7 @@ window.addEventListener('load', function() {
     "id": "205",
     "typ": "rachet",
     "nazwa": "Turbo",
+	"skroconaNazwa": "Tr",
 	"rodzaj": "atak",
     "ilosc": 0,
     "img": "img/RatchetBitTurbo.webp",
@@ -5052,6 +6046,7 @@ window.addEventListener('load', function() {
     "id": "208",
     "typ": "rachet",
     "nazwa": "Operate",
+	"skroconaNazwa": "Op",
 	"rodzaj": "balans",
     "ilosc": 0,
     "img": "img/RachetBitOperate.webp",
