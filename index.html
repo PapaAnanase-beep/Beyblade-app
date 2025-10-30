@@ -1217,7 +1217,6 @@ saved-deck-card {
         <a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
 		<a href="#" onclick="navigateTo('osiagniecia', this)" title="Osiągnięcia"><img src="osiagniecie.png" alt="Osiągnięcia"><span>Osiągnięcia</span></a>
 
-    </a>
     </div>
 </div>
 
@@ -1269,6 +1268,7 @@ saved-deck-card {
     <div class="card info-panel">
         <h4>Patch Notes:</h4>
         <ul class="info-list">
+		<li><strong>v2.4.1:</strong> Poprawki graficzne i logiczne deck buildera oraz dodanie trybów w <em>Turn</em></li>
 		<li><strong>v2.4.0:</strong> Dodano Poradnik dla nowcyh Bladerów</li>
 		<li><strong>v2.3.2:</strong> Możliwość dodawania Hurtowo części do magazynu</li>
 		<li><strong>v2.3.1:</strong> Aktuazlizacja walidacji decku dotycząca metalowych LockChipów</li>
@@ -1534,7 +1534,7 @@ saved-deck-card {
                 </div>
                 <div class="kategoria-item">
                     <img src="img/defence.webp" alt="Symbol Obrony">
-                    <span><strong>Obronne (Defence):</strong> Stabilne i zaprojektowane, aby wytrzymać uderzenia i utrzymać się w centrum areny.</span>
+                    <span><strong>Obronne (Defence):</strong> Sstabilne i zaprojektowane, aby wytrzymać uderzenia i utrzymać się w centrum areny.</span>
                 </div>
                 <div class="kategoria-item">
                     <img src="img/stamina.webp" alt="Symbol Wytrzymałości">
@@ -1545,32 +1545,36 @@ saved-deck-card {
                     <span><strong>Zbalansowane (Balance):</strong> Łączą w sobie cechy pozostałych typów. Są wszechstronne i potrafią dostosować się do różnych sytuacji.</span>
                 </div>
             </div>
+      <!-- ========================================================= -->
+<!-- ===>>> OSTATECZNA, POPRAWIONA STRUKTURA ZAKŁADEK <<<=== -->
+<!-- ========================================================= -->
+
             <h4>Lista Bitów Według Kategorii</h4>
             <!-- Tu umieścimy dynamicznie generowaną listę -->
-        </div>
+        </div> <!-- ZAMKNIĘCIE SEKCJI #poradnik-bity -->
 
-        <!-- === SEKCJA RACHETY (POPRAWNIE ZAMKNIĘTA) === -->
+        <!-- === SEKCJA RACHETY (TERAZ POPRAWNIE JAKO OSOBNY ELEMENT) === -->
         <div id="poradnik-rachety" class="poradnik-zakladka card" style="display: none;">
             <h3>Czym jest Ratchet?</h3>
             <p>Ratchet to kluczowy element konstrukcyjny, który łączy Ostrze (Blade) z Bitem. Odpowiada za dwie fundamentalne cechy Beyblade'a: jego <strong>wysokość</strong> oraz <strong>liczbę "zębów"</strong> wpływających na odporność na rozpad (Burst).</p>
-            <div class="kolumna-porownawcza">
+            
+            <div class="kolumna-porownawcza" style="margin-bottom: 25px;">
                 <h4>Jak odczytywać oznaczenia?</h4>
                 <div class="kolumny-kontener">
-                 
                     <div class="kolumna-tekst">
                         <p>Nazwa Rachetu to jego kod DNA. Zawiera dwie kluczowe liczby:</p>
                         <div class="punkt-z-ikona">
                             <span class="cyfra-ikona">3</span>
                             <div>
                                 <strong>Liczba zębów (np. "3")</strong>
-                                <p>Oznacza liczbę wypustek, które blokują się z Bitem. Generalnie, im więcej zębów (np. 5 lub 9), tym większa odporność na Burst, ale Bey może mieć trudność z ponownym "zaskoczeniem" po silnym uderzeniu.</p>
+                                <p>Oznacza liczbę wypustek, które blokują się z Bitem. Generalnie, im więcej zębów (np. 5 lub 9), tym większa odporność na Burst.</p>
                             </div>
                         </div>
                         <div class="punkt-z-ikona">
                             <span class="cyfra-ikona">60</span>
                             <div>
                                 <strong>Wysokość (np. "60")</strong>
-                                <p>Określa wysokość w milimetrach (60 = 6.0mm). Niskie Ratchety (np. 60) idealnie nadają się do ataków od dołu, podczas gdy wysokie (np. 80) pomagają destabilizować wyższych przeciwników.</p>
+                                <p>Określa wysokość w milimetrach (60 = 6.0mm). Niskie Ratchety (np. 60) idealnie nadają się do ataków od dołu.</p>
                             </div>
                         </div>
                     </div>
@@ -1581,33 +1585,33 @@ saved-deck-card {
                     <li><strong>8 wgłębień</strong> (4 na stronę) = wysokość <strong>8.0mm</strong></li>
                     <li><strong>7 wgłębień</strong> (3+4) = wysokość <strong>7.0mm</strong></li>
                     <li><strong>6 wgłębień</strong> (3 na stronę) = wysokość <strong>6.0mm</strong></li>
-					 <li><strong>5 wgłębień</strong> (3+2) = wysokość <strong>5.0mm</strong></li>
-                    <li><strong>Wgłębienie poziome</strong> dodaje <strong>+0.5mm</strong> (np. 6 wgłębień pionowych + 1 poziome = 6.5mm). To cecha Ratchetów typu "Simple".</li>
+					<li><strong>5 wgłębień</strong> (3+2) = wysokość <strong>5.0mm</strong></li>
+                    <li><strong>Wgłębienie poziome</strong> dodaje <strong>+0.5mm</strong>. To cecha Ratchetów typu "Simple".</li>
                 </ul>
             </div>
+
             <div class="kolumna-porownawcza">
-                <h4 style="margin-top: 40px;">Podział Ratchetów</h4>
+                <h4 style="margin-top: 0;">Podział Ratchetów</h4>
                 <p>Chociaż wszystkie Ratchety pełnią tę samą funkcję, dzielą się na trzy główne grupy konstrukcyjne:</p>
                 <div class="trzy-kolumny-kontener" style="margin-top: 15px;">
                     <div class="kolumna">
                         <div class="kolumna-naglowek bx-kolor"><h5>Standardowe</h5></div>
                         <div class="kolumna-tresc">
-                            <p>Najbardziej podstawowy i wszechstronny typ. Zawsze mają "okrągłą" wysokość (np. 60, 70, 80).</p>
-                            <p><strong>Przykład:</strong> <em>3-60, 5-80, 1-60.</em></p>
+                            <p>Najbardziej podstawowy i wszechstronny typ.</p>
+                            <p><strong>Przykład:</strong> <em>3-60, 5-80.</em></p>
                         </div>
                     </div>
                     <div class="kolumna">
                         <div class="kolumna-naglowek cx-kolor"><h5>Simple</h5></div>
                         <div class="kolumna-tresc">
-                            <p>Posiadają dodatkowe poziome wgłębienie, co daje im "połówkową" wysokość (np. 65 = 6.5mm).</p>
-                            <p><strong>Ważne:</strong> Tylko z nimi kompatybilne jest ostrze <strong>ClockMirage</strong>!</p>
+                            <p>Posiadają "połówkową" wysokość (np. 65 = 6.5mm) i są kompatybilne z ostrzem <strong>ClockMirage</strong>.</p>
                             <p><strong>Przykład:</strong> <em>9-65.</em></p>
                         </div>
                     </div>
                     <div class="kolumna">
                         <div class="kolumna-naglowek ux-kolor"><h5>Zintegrowane z Bitem</h5></div>
                         <div class="kolumna-tresc">
-                            <p>Specjalne Ratchety, które mają na stałe wbudowaną końcówkę (Bit). Nie można ich rozdzielić.</p>
+                            <p>Mają na stałe wbudowaną końcówkę (Bit). Nie można ich rozdzielić.</p>
                             <p><strong>Przykład:</strong> <em>Operate, Turbo.</em></p>
                         </div>
                     </div>
@@ -1617,7 +1621,11 @@ saved-deck-card {
                     <p class="podpis-obrazka">Zaczepy montażowe Ratchetów idąc od lewej <strong>Simple</strong>, <strong>Standardowy</strong>, <strong>Zintegrowany z Bitem</strong></p>
                 </div>
             </div>
-        </div>
+        </div> <!-- ZAMKNIĘCIE SEKCJI #poradnik-rachety -->
+
+        <!-- === SEKCJA OSTRZA (TERAZ POPRAWNIE JAKO SĄSIAD) === -->
+        <div id="poradnik-ostrza" class="poradnik-zakladka card" style="display: none;">
+
 
         <!-- === SEKCJA OSTRZA (TERAZ JEST OSOBNYM BLOKIEM - PRAWIDŁOWO) === -->
         <div id="poradnik-ostrza" class="poradnik-zakladka card" style="display: none;">
@@ -1792,16 +1800,11 @@ saved-deck-card {
             <p><strong>Funkcje:</strong> Zapewnia pewniejszy chwyt, co przekłada się na bardziej stabilny i powtarzalny start. Jest to szczególnie przydatne podczas intensywnych treningów i turniejów, ponieważ zmniejsza zmęczenie dłoni.</p>
         </div>
     </div>
-
 </div>
-<!-- ===>>> KONIEC ZAKTUALIZOWANEGO KODU <<<=== -->
-
 </div>
-
-            </div>
 
 <div id="poradnik-arena" class="poradnik-zakladka card" style="display: none;">
-    
+
                <div class="kolumna-porownawcza">
 
    <h3>Arena (Beystadium X)</h3>
@@ -1824,13 +1827,14 @@ saved-deck-card {
             </ul>
         </div>
     </div> <!-- <<< WAŻNE: Tutaj zamykamy kontener z opisem areny -->
-</div>           
-		   <div class="kolumna-porownawcza">
+</div>
+    <div class="kolumna-porownawcza">
+
 
     <!-- === SEKCJA 2: ZASADY PUNKTACJI (TERAZ JEST OSOBNO, PONIŻEJ) === -->
     <h3>Podstawowe Zasady Punktacji</h3>
     <p>W standardowej walce wygrywa gracz, który jako pierwszy zdobędzie 4 punkty. Punkty przyznawane są za cztery rodzaje "finishów":</p>
-    
+
     <div class="punktacja-grid-2x2">
 
         <!-- Karta 1: Spin Finish -->
@@ -1869,7 +1873,7 @@ saved-deck-card {
 </div>
 </div>
 <!-- ===>>> KONIEC POPRAWIONEJ SEKCJI <<<=== -->
-
+        </div>   </div>
 </section>
 
 
@@ -1898,6 +1902,36 @@ let currentDeckBeingBuilt = {};
 let currentlyActiveSetIndexInBuilder = 0;
 let imageHideTimeouts = { player1: null, player2: null };
 let fullscreenOverlayHideTimeout = null;
+let deckViewMode = localStorage.getItem("deckViewMode") || "list";
+
+function toggleDeckView() {
+  deckViewMode = (deckViewMode === "list") ? "drag" : "list";
+  localStorage.setItem("deckViewMode", deckViewMode);
+  renderDeckBuilderAndParts(currentDeckBeingBuilt);
+}
+
+
+function renderDeckBuilder() {
+  const container = document.getElementById("deck-builder");
+  if (!container) {
+    console.warn("⚠️ Brak kontenera #deck-builder — pomijam renderowanie (np. po dropie)");
+    return;
+  }container.innerHTML = "";
+  
+  if (deckViewMode === 'list') {
+    renderDeckList(container);
+  } else {
+    renderDeckDrag(container);
+  }
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  // aktualizacja danych po przeciągnięciu
+  // ...
+  renderDeckBuilder(); // zachowuje wybrany tryb
+}
+
 
 function initializeOrResetCurrentDeck(deckData = null) {
     const defaultSetStructure = () => ({
@@ -2617,20 +2651,21 @@ function wyswietlMagazyn() {
         let statyString = '';
         let isBeta = false;
         
-        let buttonHTML = '';
-        const aktywnyIndex = czesc.aktywnyTrybIndex || 0;
-        const aktywnyTryb = (czesc.maTryby && Array.isArray(czesc.tryby)) ? czesc.tryby[aktywnyIndex] : null;
+     // ===>>> NOWA LOGIKA: ETYKIETA INFORMACYJNA O TRYBIE <<<===
+    let infoHTML = ''; // Zmieniamy nazwę zmiennej dla jasności
+    const aktywnyIndex = czesc.aktywnyTrybIndex || 0;
+    const aktywnyTryb = (czesc.maTryby && Array.isArray(czesc.tryby)) ? czesc.tryby[aktywnyIndex] : null;
 
-        if (czesc.maTryby && czesc.tryby && czesc.tryby.length > 1 && aktywnyTryb) {
-            buttonHTML = `
-                <div style="margin-top: 10px;">
-                    <button class="mode-switch-btn" onclick="przelaczTrybMagazynu('${czesc.id}')" title="Zmień tryb: ${aktywnyTryb.nazwaTrybu}">
-                        ${aktywnyTryb.nazwaTrybu} 🔄
-                    </button>
-                </div>
-            `;
-        }
-        
+    if (czesc.maTryby && czesc.tryby && czesc.tryby.length > 1 && aktywnyTryb) {
+        // Tworzymy prostą etykietę zamiast przycisku
+        infoHTML = `
+            <div class="mode-info-label" title="Ten tryb będzie domyślnie użyty w Deck Builderze. Możesz go tam zmienić.">
+                <span>Tryb w Builderze:</span> <strong>${aktywnyTryb.nazwaTrybu}</strong>
+            </div>
+        `;
+    }
+    // ===>>> KONIEC NOWEJ LOGIKI <<<===
+         
         const obrazekDoWyswietlenia = aktywnyTryb?.img || czesc.img;
         const nazwaDoWyswietlenia = aktywnyTryb ? `${czesc.nazwa} <span style="color:#a25ff0;">(${aktywnyTryb.nazwaTrybu})</span>` : czesc.nazwa;
         
@@ -2687,7 +2722,8 @@ if (isBulkEditMode) {
 }
 
         
-        cardDiv.innerHTML = `${imgHTML}<h3>${nazwaDoWyswietlenia}${isBeta ? '<span class="beta-label"> BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>${statyString}${buttonHTML}${quantityControlsHTML}`;
+        cardDiv.innerHTML = `${imgHTML}<h3>${nazwaDoWyswietlenia}${isBeta ? '<span class="beta-label"> BETA</span>' : ''}</h3><p style="font-size:0.8em; color:#bbb; margin-top:-10px; margin-bottom:8px;"><em>${typNazwaFormatowana}</em></p>${statyString}${infoHTML}${quantityControlsHTML}`;
+
         lista.appendChild(cardDiv);
     });
 }
@@ -3422,13 +3458,15 @@ function renderAvailablePartsList() {
         const partItem = document.createElement('div');
         partItem.className = 'available-part-item';
         partItem.draggable = true;
-        partItem.dataset.partData = JSON.stringify({
-            id: czesc.id,
-            typ: czesc.typ,
-            nazwa: nazwa,
-            img: obrazek,
-            aktywnyTrybIndex: aktywnyIndex
-        });
+       // ===>>> POPRAWKA: Przekazujemy aktywnyTrybIndex do danych części <<<===
+partItem.dataset.partData = JSON.stringify({
+    id: czesc.id,
+    typ: czesc.typ,
+    nazwa: nazwa,
+    img: obrazek,
+    aktywnyTrybIndex: aktywnyIndex // KLUCZOWA ZMIANA
+});
+
 
         let modeSwitcherHTML = '';
         if (czesc.maTryby && czesc.tryby.length > 1) {
@@ -3437,7 +3475,7 @@ function renderAvailablePartsList() {
                     class="mode-switch-btn"
                     style="margin-left: auto; flex-shrink: 0;"
                     onclick="event.stopPropagation(); przelaczTrybNaLiscie('${czesc.id}', event)">
-                    Zmień Tryb 🔄
+                     🔄
                 </button>
             `;
         }
@@ -3697,11 +3735,12 @@ function handleDragEnter(event) {
 function handleDragLeave(event) {
     event.currentTarget.classList.remove('drag-over-target');
 }
+// ===>>> OSTATECZNA I POPRAWNA WERSJA FUNKCJI handleDrop <<<===
 function handleDrop(event) {
     event.preventDefault();
     event.currentTarget.classList.remove('drag-over-target');
 
-    if (!draggedItemData) { return; }
+    if (!draggedItemData) return;
 
     const dropZone = event.currentTarget;
     const setArrayIndex = parseInt(dropZone.dataset.setIndex);
@@ -3711,8 +3750,7 @@ function handleDrop(event) {
         draggedItemData = null;
         return;
     }
-
-    // --- Walidacja typu części (bez zmian, jest poprawna) ---
+    
     const targetSet = currentDeckBeingBuilt.sets[setArrayIndex];
     const partActualType = draggedItemData.typ; 
     const normalizedSlotType = slotType.replace(/_/g, '-');
@@ -3732,66 +3770,32 @@ function handleDrop(event) {
         return;
     }
 
-    // =================================================================
-    // === NOWA WALIDACJA DUPLIKATÓW W CZASIE RZECZYWISTYM (handleDrop) ===
-    // =================================================================
     const magazyn = getMagazyn();
     const newPartId = draggedItemData.id;
     const newPartDetails = magazyn.find(p => p.id === newPartId);
-
-    if (newPartDetails) {
-        // Sprawdzamy, czy upuszczana część musi być unikalna.
-        // Regule unikalności NIE podlegają tylko zwykłe Lock Chipy.
-        const isNewPartRegularLockChip = newPartDetails.typ === 'cx-lock-chip' && !newPartDetails.jestMetalowy;
-
-        // Jeśli część NIE JEST zwykłym Lock Chipem, musimy sprawdzić, czy już nie istnieje w decku.
-        if (!isNewPartRegularLockChip) {
-            let isAlreadyInDeck = false;
-            // Przechodzimy przez wszystkie zestawy w budowanym decku
-            for (const set of currentDeckBeingBuilt.sets) {
-                // Sprawdzamy wszystkie sloty w danym zestawie
-                const partIdsInSet = [set.bladeId, set.ratchetId, set.bitId, set.cx_lock_chipId, set.cx_main_bladeId, set.cx_assist_bladeId];
-                if (partIdsInSet.includes(newPartId)) {
-                    isAlreadyInDeck = true;
-                    break; // Znaleziono duplikat, przerywamy pętlę
-                }
-            }
-
-            if (isAlreadyInDeck) {
-                showNotification(`Błąd reguł: Część "${newPartDetails.nazwa}" jest już użyta w tym decku.`, 3500, 'warning');
-                draggedItemData = null; // Anuluj operację
-                return; // Zakończ funkcję handleDrop
-            }
-        }
-    }
-    // =================================================================
-    // === KONIEC NOWEJ WALIDACJI W CZASIE RZECZYWISTYM ===
-    // =================================================================
-    
-    // Jeśli walidacja przeszła pomyślnie, kontynuujemy dodawanie części
-    const keyMap = {
-        'blade': 'bladeId', 'ux-blade': 'bladeId', 'rachet': 'ratchetId', 'bit': 'bitId',
-        'cx-lock-chip': 'cx_lock_chipId', 'cx-main-blade': 'cx_main_bladeId', 'cx-assist-blade': 'cx_assist_bladeId'
-    };
-    const partIdKey = keyMap[partActualType];
-    
-    if (!partIdKey) {
-        console.error(`Błąd krytyczny: Nie znaleziono klucza ID dla typu "${partActualType}"`);
+    if (!newPartDetails) {
+        showNotification("Nie znaleziono części w magazynie.", 3000, 'error');
         draggedItemData = null;
         return;
     }
-    
-    targetSet[partIdKey] = newPartId;
 
-    const trybIndexKey = partIdKey.replace('Id', 'AktywnyTrybIndex');
-    if (targetSet.hasOwnProperty(trybIndexKey)) {
-        targetSet[trybIndexKey] = draggedItemData.aktywnyTrybIndex || 0;
+    const partIdKey = getPartIdKeyForSlot(normalizedSlotType, targetSet.seria);
+    if (!partIdKey) {
+        showNotification("Nieprawidłowy typ slotu – brak klucza ID.", 3000, 'error');
+        draggedItemData = null;
+        return;
     }
 
-    console.log(`Zaktualizowano zestaw ${setArrayIndex + 1} po dropie:`, JSON.parse(JSON.stringify(targetSet)));
+    // ✅ Zapisz ID części
+    targetSet[partIdKey] = newPartId;
+
+    // ✅ ZAWSZE nadpisz tryb, nawet jeśli wcześniej nie istniał
+    const trybIndexKey = partIdKey.replace('Id', 'AktywnyTrybIndex');
+    targetSet[trybIndexKey] = draggedItemData.aktywnyTrybIndex ?? 0;
+
+    console.log(`Zaktualizowano zestaw ${setArrayIndex + 1}:`, JSON.parse(JSON.stringify(targetSet)));
 
     renderActiveDeckSetSlots();
-    
     draggedItemData = null;
 }
 
@@ -5057,7 +5061,6 @@ window.addEventListener('load', function() {
 </script>
 
 <!-- Domyślna Baza Danych JSON -->
-</script>
 <script id="domyslnaBazaDanychJson" type="application/json">
 [
   {
@@ -5731,16 +5734,30 @@ window.addEventListener('load', function() {
     "img": "img/AssistBladeSlash.webp",
     "id": "184"
   },
-  {
+    {
+    "id": "185",
     "typ": "cx-assist-blade",
     "nazwa": "Turn",
     "ilosc": 0,
-    "ATK": 10,
-    "DEF": 10,
-    "STM": 20,
-    "waga": 5.8,
-    "img": "img/AssistBladeTurn.webp",
-    "id": "185"
+    "maTryby": true,
+    "tryby": [
+      {
+        "nazwaTrybu": "Stamina",
+        "img": "img/AssistBladeTurn.webp",
+        "ATK": 10,
+        "DEF": 10,
+        "STM": 20,
+        "waga": 5.9
+      },
+      {
+        "nazwaTrybu": "Attack",
+        "img": "img/AssistBladeTurn2.webp",
+        "ATK": 15,
+        "DEF": 10,
+        "STM": 15,
+        "waga": 5.9
+      }
+    ]
   },
   {
     "typ": "cx-assist-blade",
@@ -6036,7 +6053,7 @@ window.addEventListener('load', function() {
     "BURST_RES": 30
     },
     {
-      "nazwaTrybu": "Atak",
+      "nazwaTrybu": "Attack",
      
       "ATK": 55,
     "DEF": 20,
@@ -6063,7 +6080,7 @@ window.addEventListener('load', function() {
 	 "maTryby": true,
   "tryby": [
     {
-      "nazwaTrybu": "obrona",
+      "nazwaTrybu": "Defence",
       
     "ATK": 20,
     "DEF": 50,
@@ -6073,7 +6090,7 @@ window.addEventListener('load', function() {
     "BURST_RES": 30
     },
     {
-      "nazwaTrybu": "atak",
+      "nazwaTrybu": "Attack",
      
     "ATK": 50,
     "DEF": 35,
@@ -6148,15 +6165,6 @@ window.addEventListener('load', function() {
     "id": "216"
   }
 ]
-
-
-
-
 </script>
-
-
 </body>
 </html>
-
-
-
