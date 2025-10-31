@@ -1490,6 +1490,47 @@ saved-deck-card {
         <p style="text-align: center;">Tutaj znajdziesz wszystkie swoje zapisane konfiguracje decków.</p>
         <div id="savedDecksContainer" style="margin-top: 20px;"></div>
     </section>
+	<!-- ============================================= -->
+<!-- ===            SEKCJA OSIĄGNIĘĆ           === -->
+<!-- ============================================= -->
+<section id="osiagniecia" class="page">
+    <h2>Moje Osiągnięcia</h2>
+    <p style="text-align: center;">Śledź swoje postępy i odblokowuj kolejne cele!</p>
+    <div id="achievementsContainer" style="margin-top: 20px;">
+        <!-- Karty osiągnięć będą generowane przez JavaScript -->
+    </div>
+</section>
+
+<!-- ============================================= -->
+<!-- ===           SEKCJA DANE                 === -->
+<!-- ============================================= -->
+<section id="importexport" class="page">
+    <h2>Zarządzanie Danymi</h2>
+    <div class="card">
+        <h3>Magazyn Części</h3>
+        <p>Skopiuj ten tekst, aby zrobić kopię zapasową swojego magazynu, lub wklej dane, aby je przywrócić.</p>
+        <textarea id="poleDanychJsonMagazyn" rows="8" placeholder="Wklej tutaj dane JSON magazynu..."></textarea>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top:10px;">
+            <button onclick="eksportujDaneDoPolaTekstowego()">Eksportuj Magazyn</button>
+            <button onclick="importujDaneZPolaTekstowego()" class="danger-btn">Importuj Magazyn</button>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Zapisane Decki</h3>
+        <p>Skopiuj ten tekst, aby zrobić kopię zapasową swoich decków, lub wklej dane, aby je przywrócić.</p>
+        <textarea id="poleDanychJsonDecki" rows="8" placeholder="Wklej tutaj dane JSON decków..."></textarea>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top:10px;">
+            <button onclick="eksportujDeckiDoPolaTekstowego()">Eksportuj Decki</button>
+            <button onclick="importujDeckiZPolaTekstowego()" class="danger-btn">Importuj Decki</button>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Reset Aplikacji</h3>
+        <p style="color: #ff8b8b;"><strong>OSTRZEŻENIE:</strong> Ta operacja usunie <strong>WSZYSTKIE</strong> Twoje dane (magazyn, decki, wyniki) i przywróci aplikację do stanu początkowego. Tej akcji nie można cofnąć!</p>
+        <button onclick="wykonajPelnyResetAplikacji()" class="danger-btn" style="margin-top: 10px; background-color: #d92d2d;">Resetuj Aplikację</button>
+    </div>
+</section>
+
     <!-- ================================================= -->
     <!-- === NOWA PODSTRONA: PORADNIK DLA POCZĄTKUJĄCYCH === -->
     <!-- ================================================= -->
@@ -1623,11 +1664,11 @@ saved-deck-card {
             </div>
         </div> <!-- ZAMKNIĘCIE SEKCJI #poradnik-rachety -->
 
-        <!-- === SEKCJA OSTRZA (TERAZ POPRAWNIE JAKO SĄSIAD) === -->
-        <div id="poradnik-ostrza" class="poradnik-zakladka card" style="display: none;">
+    <!-- ========================================================= -->
+    <!-- ===>>> POPRAWNY KOD DLA POZOSTAŁYCH ZAKŁADEK <<<=== -->
+    <!-- ========================================================= -->
 
-
-        <!-- === SEKCJA OSTRZA (TERAZ JEST OSOBNYM BLOKIEM - PRAWIDŁOWO) === -->
+        <!-- === SEKCJA OSTRZA === -->
         <div id="poradnik-ostrza" class="poradnik-zakladka card" style="display: none;">
             <h3>Czym jest Ostrze (Blade)?</h3>
             <p>Ostrze to główna, metalowa część Beyblade'a, która odpowiada za zadawanie obrażeń i obronę. Jego kształt, waga i rozkład masy definiują podstawowy charakter Beyblade'a (atak, obrona, wytrzymałość, balans).</p>
@@ -1641,7 +1682,7 @@ saved-deck-card {
                     </div>
                     <div class="kolumna-tresc">
                         <p><strong>Budowa:</strong> Jednoczęściowe, metalowe zaczepy.</p>
-                        <p><strong>Charakterystyka:</strong> Ostrza BX oferują zbalansowane właściwości i przewidywalne zachowanie. Ich jednolita, solidna konstrukcja sprawia, że są bardzo wytrzymałe i stanowią fundament większości standardowych zestawów, takich jak <strong>Dran Sword</strong> czy <strong>Hells Scythe</strong>.</p>
+                        <p><strong>Charakterystyka:</strong> Ostrza BX oferują zbalansowane właściwości i przewidywalne zachowanie. Stanowią fundament większości standardowych zestawów, takich jak <strong>Dran Sword</strong> czy <strong>Hells Scythe</strong>.</p>
                         <p><strong>Montaż:</strong> Prosty, Blade + Rachet + Bit</p>
                     </div>
                 </div>
@@ -1652,7 +1693,7 @@ saved-deck-card {
                     </div>
                     <div class="kolumna-tresc">
                         <p><strong>Budowa:</strong> Jednoczęściowe, plastikowe zaczepy.</p>
-                        <p><strong>Charakterystyka:</strong> Plastikowe haki zamiast metalowych sprawiają że więcej masy można przenieść na rant Blade’a emblem (ozdoba centralna) w UX bywa zablokowany, w BX obraca się razem z bitem.</p>
+                        <p><strong>Charakterystyka:</strong> Plastikowe haki zamiast metalowych sprawiają, że więcej masy można przenieść na rant Blade’a. Emblem (ozdoba centralna) w UX bywa zablokowany.</p>
                         <p><strong>Montaż:</strong> Prosty, Blade + Rachet + Bit</p>
                     </div>
                 </div>
@@ -1662,9 +1703,9 @@ saved-deck-card {
                         <h5>Custom(CX)</h5>
                     </div>
                     <div class="kolumna-tresc">
-                        <p><strong>Budowa:</strong> Trzy elementy składowe </p>
-                        <p><strong>Charakterystyka:</strong> Ostrza CX takie jak <strong>Dran Brave Jaggy</strong>, wprowadzają rewolucyjną możliwość personalizacji jak i dostosowania dysku pod swój styl pojedynkowania się</p>
-                        <p><strong>Montaż:</strong> wieloetapowy proces składania Blade(Lockchip + Main Blade + Assist Blade)+ Rachet + Bit.</p>
+                        <p><strong>Budowa:</strong> Trzy elementy składowe.</p>
+                        <p><strong>Charakterystyka:</strong> Ostrza CX, takie jak <strong>Dran Brave Jaggy</strong>, wprowadzają rewolucyjną możliwość personalizacji i dostosowania dysku pod swój styl gry.</p>
+                        <p><strong>Montaż:</strong> Wieloetapowy proces składania: Blade (Lockchip + Main Blade + Assist Blade) + Ratchet + Bit.</p>
                     </div>
                 </div>
             </div>
@@ -1673,17 +1714,123 @@ saved-deck-card {
             <div class="kolumny-kontener">
                 <div class="kolumna-porownawcza">
                     <h5><img src="img/prawo.png" alt="Symbol Prawoskrętności"> Prawoskrętne (Right-Spin)</h5>
-                    <p><strong>Kierunek obrotu:</strong> Zgodny z ruchem wskazówek zegara.</p>
-                    <p><strong>Charakterystyka:</strong> To standardowy i najczęściej spotykany typ rotacji. Zdecydowana większość ostrzy, takich jak <strong>Dran Sword</strong> czy <strong>Hells Scythe</strong>, kręci się w prawo. W walce dwóch prawoskrętnych Beyblade'ów dochodzi do wielu uderzeń "odpychających", które często prowadzą do nokautów przez Over Finish lub Xtreme Finish.</p>
+                    <p><strong>Kierunek obrotu:</strong> Zgodny z ruchem wskazówek zegara. To standardowy i najczęściej spotykany typ rotacji. W walce dwóch prawoskrętnych Beyblade'ów dochodzi do wielu uderzeń "odpychających".</p>
                 </div>
                 <div class="kolumna-porownawcza">
                     <h5><img src="img/lewo.png" alt="Symbol Lewoskrętności"> Lewoskrętne (Left-Spin)</h5>
-                    <p><strong>Kierunek obrotu:</strong> Przeciwny do ruchu wskazówek zegara.</p>
-                    <p><strong>Charakterystyka:</strong> Lewoskrętne ostrza, takie jak <strong>Cobalt Dragoon</strong>, są rzadsze i stanowią potężny element taktyczny. W starciu z prawoskrętnym przeciwnikiem dochodzi do czołowych, niezwykle silnych uderzeń, które mogą prowadzić do szybkiego Burst Finish. Dodatkowo, mogą one "kraść" energię kinetyczną przeciwnika, co zwiększa ich własną wytrzymałość.</p>
+                    <p><strong>Kierunek obrotu:</strong> Przeciwny do ruchu wskazówek zegara. W starciu z prawoskrętnym przeciwnikiem dochodzi do czołowych, niezwykle silnych uderzeń, a także "kradzieży" energii kinetycznej.</p>
                 </div>
             </div>
         </div>
 
+        <!-- === SEKCJA LAUNCHERY === -->
+        <div id="poradnik-launchery" class="poradnik-zakladka card" style="display: none;">
+            <h3>Czym jest Launcher?</h3>
+            <p>Launcher (wyrzutnia) to urządzenie służące do wprawienia Beyblade'a w ruch obrotowy. Siła, stabilność i rodzaj launchera mają ogromny wpływ na wynik pojedynku, często decydując o nim już na starcie.</p>
+            <h4 style="text-align: center; margin-top: 40px;">Rodzaje Launcherów</h4>
+            <div class="launcher-cards-container">
+                <div class="launcher-card">
+                    <div class="launcher-header">
+                        <img id="winder-launcher-img" src="img/winder.png" alt="Winder Launcher">
+                        <h5 id="winder-launcher-title">Winder Launcher (Prawoskrętny)</h5>
+                        <div class="spin-switcher">
+                            <button id="winder-l-btn" onclick="zmienLauncher('winder', 'l')">L</button>
+                            <button id="winder-r-btn" class="active" onclick="zmienLauncher('winder', 'r')">R</button>
+                        </div>
+                    </div>
+                    <div class="launcher-body">
+                        <p><strong>Jak działa:</strong> Do środka wkładasz plastikową zębatkę (ripcord), a następnie gwałtownie ją wyciągasz. To najpopularniejszy typ wyrzutni.</p>
+                        <ul>
+                            <li><strong>Zalety:</strong> Potencjalnie najwyższa siła startu (RPM).</li>
+                            <li><strong>Wady:</strong> Trudniejsza kontrola nad mocą.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="launcher-card">
+                    <div class="launcher-header">
+                        <img id="string-launcher-img" src="img/string.png" alt="String Launcher">
+                        <h5 id="string-launcher-title">String Launcher (Prawoskrętny)</h5>
+                        <div class="spin-switcher">
+                            <button id="string-l-btn" onclick="zmienLauncher('string', 'l')">L</button>
+                            <button id="string-r-btn" class="active" onclick="zmienLauncher('string', 'r')">R</button>
+                        </div>
+                    </div>
+                    <div class="launcher-body">
+                        <p><strong>Jak działa:</strong> Używa linki, którą pociągasz, aby rozkręcić mechanizm. Zapewnia płynniejszy start.</p>
+                        <ul>
+                            <li><strong>Zalety:</strong> Znacznie lepsza kontrola nad siłą startu.</li>
+                            <li><strong>Wady:</strong> Zazwyczaj niższa maksymalna prędkość.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="launcher-card">
+                    <div class="launcher-header">
+                        <img src="img/hold.png" alt="Hold Launcher">
+                        <h5>Hold Launcher</h5>
+                    </div>
+                    <div class="launcher-body">
+                        <p><strong>Jak działa:</strong> Unikalny typ wyrzutni zintegrowanej z uchwytem (gripem), co pozwala na start pod różnymi kątami.</p>
+                        <ul>
+                            <li><strong>Zalety:</strong> Ogromna kontrola nad kątem i momentem startu.</li>
+                            <li><strong>Wady:</strong> Może oferować nieco mniejszą moc.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <h4 style="text-align: center; margin-top: 40px; margin-bottom: 20px;">Akcesoria do Launcherów</h4>
+            <div class="launcher-cards-container">
+                <div class="launcher-card">
+                    <div class="launcher-header"><img src="img/pass.png" alt="Battle Pass" style="width: 150px; height: auto;"><h5>Battle Pass</h5></div>
+                    <div class="launcher-body"><p>To cyfrowe urządzenie, które montuje się na launcherze w celu śledzenia statystyk i mocy startu. Rejestruje siłę pociągnięcia i synchronizuje dane z aplikacją mobilną.</p></div>
+                </div>
+                <div class="launcher-card">
+                    <div class="launcher-header"><img src="img/grip.png" alt="Grip" style="width: 150px; height: auto;"><h5>Grip (Uchwyt)</h5></div>
+                    <div class="launcher-body"><p>Ergonomiczny uchwyt, do którego montuje się launcher. Poprawia stabilność i komfort trzymania wyrzutni, co przekłada się na bardziej stabilny i powtarzalny start.</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === SEKCJA ARENA I ZASADY === -->
+        <div id="poradnik-arena" class="poradnik-zakladka card" style="display: none;">
+            <div class="kolumna-porownawcza">
+                <h3>Arena (Beystadium X)</h3>
+                <div class="kolumny-kontener" style="align-items: center;">
+                    <div class="kolumna-obrazek" style="flex: 1.2;"><img src="img/arena.png" alt="Arena Beyblade X"></div>
+                    <div class="kolumna-tekst" style="flex: 1;">
+                        <p>Oficjalna arena Beyblade X to nie tylko pole bitwy, ale kluczowy element taktyczny. Jej unikalna budowa wymusza dynamiczne starcia.</p>
+                        <ul class="lista-oznaczen">
+                            <li><strong>Battle Zone:</strong> Główne pole walki w centrum areny.</li>
+                            <li><strong>Xtreme Line:</strong> Zewnętrzny tor z zębatkami, który gwałtownie przyspiesza Beyblade'y.</li>
+                            <li><strong>Over Zone (Pocket):</strong> Boczne "kieszenie", do których wpadnięcie kończy walkę.</li>
+                            <li><strong>Xtreme Zone (Pocket):</strong> Specjalna strefa, do której wrzucenie przeciwnika daje najwięcej punktów.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="kolumna-porownawcza">
+                <h3>Podstawowe Zasady Punktacji</h3>
+                <p>W standardowej walce wygrywa gracz, który jako pierwszy zdobędzie 4 punkty. Punkty przyznawane są za cztery rodzaje "finishów":</p>
+                <div class="punktacja-grid-2x2">
+                    <div class="finish-card">
+                        <img src="img/spin_finish.png" alt="Spin Finish - 1 Punkt">
+                        <div class="finish-card-body"><p>Twój Beyblade kręci się dłużej niż Beyblade przeciwnika.</p></div>
+                    </div>
+                    <div class="finish-card">
+                        <img src="img/over_finish.png" alt="Over Finish - 2 Punkty">
+                        <div class="finish-card-body"><p>Wyrzucasz Beyblade'a przeciwnika do jednej z "kieszeni" (Over Zone).</p></div>
+                    </div>
+                    <div class="finish-card">
+                        <img src="img/burst_finish.png" alt="Burst Finish - 2 Punkty">
+                        <div class="finish-card-body"><p>"Rozbijasz" Beyblade'a przeciwnika na elementy (Blade, Ratchet, Bit).</p></div>
+                    </div>
+                    <div class="finish-card">
+                        <img src="img/xtreme_finish.png" alt="Xtreme Finish - 3 Punkty">
+                        <div class="finish-card-body"><p>Wyrzucasz Beyblade'a przeciwnika poza arenę przez "Xtreme Pocket".</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
         <!-- === SEKCJA LAUNCHERY === -->
         <div id="poradnik-launchery" class="poradnik-zakladka card" style="display: none;">
             <h3>Czym jest Launcher?</h3>
@@ -1872,8 +2019,10 @@ saved-deck-card {
     </div>
 </div>
 </div>
+
 <!-- ===>>> KONIEC POPRAWIONEJ SEKCJI <<<=== -->
         </div>   </div>
+		
 </section>
 
 
