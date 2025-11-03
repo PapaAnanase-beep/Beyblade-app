@@ -2800,19 +2800,27 @@ function wyswietlMagazyn() {
         let statyString = '';
         let isBeta = false;
         
-     // ===>>> NOWA LOGIKA: ETYKIETA INFORMACYJNA O TRYBIE <<<===
-    let infoHTML = ''; // Zmieniamy nazwę zmiennej dla jasności
+   
+    // ===>>> OSTATECZNA POPRAWKA: INTERAKTYWNY PRZYCISK W MAGAZYNIE <<<===
+    let infoHTML = '';
     const aktywnyIndex = czesc.aktywnyTrybIndex || 0;
     const aktywnyTryb = (czesc.maTryby && Array.isArray(czesc.tryby)) ? czesc.tryby[aktywnyIndex] : null;
-
-    if (czesc.maTryby && czesc.tryby && czesc.tryby.length > 1 && aktywnyTryb) {
-        // Tworzymy prostą etykietę zamiast przycisku
+    
+    if (czesc.maTryby && czesc.tryby && czesc.tryby.length > 1) {
+        const nazwaTrybu = aktywnyTryb?.nazwaTrybu || 'Błąd Trybu';
         infoHTML = `
-            <div class="mode-info-label" title="Ten tryb będzie domyślnie użyty w Deck Builderze. Możesz go tam zmienić.">
-                <span>Tryb w Builderze:</span> <strong>${aktywnyTryb.nazwaTrybu}</strong>
+            <div style="margin-top: 10px;">
+                <button 
+                    class="mode-switch-btn" 
+                    onclick="przelaczTrybMagazynu('${czesc.id}')"
+                    title="Zmień aktywny tryb dla tej części. Aktualny: ${nazwaTrybu}">
+                    Zmień Tryb 🔄
+                </button>
             </div>
         `;
     }
+    // ===>>> KONIEC OSTATECZNEJ POPRAWKI <<<===
+
     // ===>>> KONIEC NOWEJ LOGIKI <<<===
          
         const obrazekDoWyswietlenia = aktywnyTryb?.img || czesc.img;
