@@ -2022,7 +2022,7 @@ saved-deck-card {
 </div>
 
 <!-- ===>>> KONIEC POPRAWIONEJ SEKCJI <<<=== -->
-        </div>   </div>
+         </div>
 		
 </section>
 
@@ -2252,7 +2252,26 @@ const allAchievements = {
     z_piekla_rodem: { title: "Z Piekła Rodem", description: "Posiadaj Wszystkie Hells.", icon: 'img/PucharHells.png', progress: createCollectionProgress(['HellsScythe', 'HellsChain', 'HellsHammer', 'Hells']) },
     bractwo_rycerskie: { title: "Bractwo Rycerskie", description: "Posiadaj Wszystkie Knight.", icon: 'img/PucharKnight.png', progress: createCollectionProgress(['KnightShield', 'KnightLance', 'KnightMail']) },
     dojo: { title: "Dojo", description: "Posiadaj Każdego Samuraja i Shinobi.", icon: 'img/PucharDojo.png', progress: createCollectionProgress(['SamuraiCalibur', 'SamuraiSaber', 'SamuraiSteel', 'ShinobiKnife', 'ShinobiShadow']) },
+stajnia: {
+    title: "Stajnia",
+    description: "Posiadaj wszystkie Konie.",
+    icon: 'img/osiagniecie.png', // Możesz podmienić na 'img/PucharKonie.png'
+    progress: createCollectionProgress(['StormPegasis', 'UnicornSting', 'AeroPegasus', 'Pegasus'])
+},
 
+sharknado: {
+    title: "Sharknado",
+    description: "Posiadaj wszystkie Rekiny.",
+    icon: 'img/osiagniecie.png', // Możesz podmienić na 'img/PucharRekin.png'
+    progress: createCollectionProgress(['GillShark', 'SharkEdge', 'SharkScale'])
+},
+
+ornitolog: {
+    title: "Ornitolog",
+    description: "Posiadaj wszystkie Ptaki.",
+    icon: 'img/osiagniecie.png', // Możesz podmienić na 'img/PucharPtak.png'
+    progress: createCollectionProgress(['CrimsonGaruda', 'PhoenixRudder', 'PhoenixWing', 'PhoenixFeather'])
+},
     // --- Osiągnięcia Specjalne (Persony) ---
     og_persona: { title: "OG Persona", description: "Posiadaj Deck Persony z S1.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['DranDagger', 'WizardArrow', 'KnightLance', 'HellsScythe']) },
     persona_v2: { title: "Persona v2", description: "Posiadaj Deck Persony z S2.", icon: 'img/osiagniecie.png', progress: createCollectionProgress(['Dran', 'Hells', 'KnightMail', 'Wizard', 'SamuraiSaber']) },
@@ -5404,7 +5423,7 @@ window.addEventListener('load', function() {
      {
   "id": "86", "typ": "blade","kierunek": "prawy", "nazwa": "Optimus Prime", "ilosc": 0, "img": "img/BladeOptimus_Prime.webp", "ATK": 22, "DEF": 55, "STM": 23, "waga": 33.3},
    {
-  "id": "87", "typ": "ublade","kierunek": "prawy", "nazwa": "Shockwave", "ilosc": 0, "img": "img/BladeShockwave.webp", "ATK": 32, "DEF": 18, "STM": 50, "waga": 34.7},
+  "id": "87", "typ": "blade","kierunek": "prawy", "nazwa": "Shockwave", "ilosc": 0, "img": "img/BladeShockwave.webp", "ATK": 32, "DEF": 18, "STM": 50, "waga": 34.7},
    {
   "id": "88", "typ": "blade","kierunek": "prawy", "nazwa": "Starscream", "ilosc": 0, "img": "img/BladeStarscream.webp", "ATK": 18, "DEF": 27, "STM": 55, "waga": 29.5},
   
