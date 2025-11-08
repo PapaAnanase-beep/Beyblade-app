@@ -2958,183 +2958,205 @@ saved-deck-card {
                 showNotification('Wyniki losowania wyczyszczone.', 2000, 'info');
             }
 
-            function LOSUJ() {
-                if (!wynikiDivGenerator) { showNotification("Błąd: Element wyników generatora nie istnieje.", 3000, 'error'); return; }
-                if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'none';
-                wynikiDivGenerator.innerHTML = '';
-                ostatnioWylosowaneZestawyGlobalnie = [];
+           function LOSUJ() {
+    if (!wynikiDivGenerator) {
+        showNotification("Błąd: Element wyników generatora nie istnieje.", 3000, 'error');
+        return;
+    }
+    if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'none';
+    wynikiDivGenerator.innerHTML = '';
+    ostatnioWylosowaneZestawyGlobalnie = [];
 
-                const iloscZestawowDoWylosowania = parseInt(document.getElementById('ilosc')?.value) || 1;
-                let wybranaSeria = document.getElementById('seriaLosowania')?.value; // Używamy 'let' zamiast 'const'
+    const iloscZestawowDoWylosowania = parseInt(document.getElementById('ilosc')?.value) || 1;
+    let wybranaSeria = document.getElementById('seriaLosowania')?.value;
 
-                if (!wybranaSeria) {
-                    showNotification("Błąd: Nie wybrano serii.", 3000, 'warning');
-                    if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
-                    return;
-                }
+    if (!wybranaSeria) {
+        showNotification("Błąd: Nie wybrano serii.", 3000, 'warning');
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        return;
+    }
 
-                const magazyn = getMagazyn();
-                if (!magazyn || magazyn.length === 0) {
-                    wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty! Dodaj części w zakładce "Magazyn".</p></div>';
-                    if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
-                    return;
-                }
+    const magazyn = getMagazyn();
+    if (!magazyn || magazyn.length === 0) {
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Magazyn jest pusty! Dodaj części w zakładce "Magazyn".</p></div>';
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+        return;
+    }
 
-                const dostepneCzesciDoLosowania = { blade: [], 'ux-blade': [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': [] };
-                magazyn.forEach(czesc => {
-                    const ilosc = parseInt(czesc.ilosc) || 0;
-                    if (ilosc > 0 && dostepneCzesciDoLosowania.hasOwnProperty(czesc.typ)) {
-                        for (let j = 0; j < ilosc; j++) {
-                            dostepneCzesciDoLosowania[czesc.typ].push({ ...czesc, _uniqueDragId: `${czesc.id}_instance_${j}_${Date.now()}_${Math.random()}` });
-                        }
-                    }
-                });
+    const dostepneCzesciDoLosowania = {
+        blade: [], 'ux-blade': [], rachet: [], bit: [], 'cx-lock-chip': [], 'cx-main-blade': [], 'cx-assist-blade': []
+    };
+    magazyn.forEach(czesc => {
+        const ilosc = parseInt(czesc.ilosc) || 0;
+        if (ilosc > 0 && dostepneCzesciDoLosowania.hasOwnProperty(czesc.typ)) {
+            for (let j = 0; j < ilosc; j++) {
+                dostepneCzesciDoLosowania[czesc.typ].push({ ...czesc, _uniqueDragId: `${czesc.id}_instance_${j}_${Date.now()}_${Math.random()}` });
+            }
+        }
+    });
 
-                const wylosowaneZestawyFragment = document.createDocumentFragment();
+    const wylosowaneZestawyFragment = document.createDocumentFragment();
+    const serieDoWyboru = ['bx_ux', 'cx'];
 
-                // --- NOWA LOGIKA LOSOWANIA 'ALL' ---
-                const serieDoWyboru = ['bx_ux', 'cx'];
+    for (let i = 0; i < iloscZestawowDoWylosowania; i++) {
+        let seriaDoWylosowania = (wybranaSeria === 'all') ? serieDoWyboru[Math.floor(Math.random() * serieDoWyboru.length)] : wybranaSeria;
 
-                for (let i = 0; i < iloscZestawowDoWylosowania; i++) {
-                    let seriaDoWylosowania = wybranaSeria;
-                    if (wybranaSeria === 'all') {
-                        // Losuj serię dla każdego zestawu indywidualnie
-                        seriaDoWylosowania = serieDoWyboru[Math.floor(Math.random() * serieDoWyboru.length)];
-                    }
+        // Sprawdzenie, czy w ogóle można zbudować cokolwiek z tej serii
+        let czyMoznaZbudowac = (seria) => {
+            if (seria === 'bx_ux') {
+                return (dostepneCzesciDoLosowania.blade.length + dostepneCzesciDoLosowania['ux-blade'].length) > 0 &&
+                       dostepneCzesciDoLosowania.rachet.length > 0 &&
+                       (dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit));
+            } else if (seria === 'cx') {
+                return dostepneCzesciDoLosowania['cx-lock-chip'].length > 0 &&
+                       dostepneCzesciDoLosowania['cx-main-blade'].length > 0 &&
+                       dostepneCzesciDoLosowania['cx-assist-blade'].length > 0 &&
+                       dostepneCzesciDoLosowania.rachet.length > 0 &&
+                       (dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit));
+            }
+            return false;
+        };
 
-                    // Sprawdzenie dostępności części dla wylosowanej serii (uproszczone)
-                    let czyMoznaZbudowac = false;
-                    if (seriaDoWylosowania === 'bx_ux') {
-                        const maBlade = (dostepneCzesciDoLosowania.blade.length + dostepneCzesciDoLosowania['ux-blade'].length) > 0;
-                        const maRatchet = dostepneCzesciDoLosowania.rachet.length > 0;
-                        const maBit = dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit);
-                        czyMoznaZbudowac = maBlade && maRatchet && maBit;
-                    } else if (seriaDoWylosowania === 'cx') {
-                        czyMoznaZbudowac = dostepneCzesciDoLosowania['cx-lock-chip'].length > 0 &&
-                                           dostepneCzesciDoLosowania['cx-main-blade'].length > 0 &&
-                                           dostepneCzesciDoLosowania['cx-assist-blade'].length > 0 &&
-                                           dostepneCzesciDoLosowania.rachet.length > 0 &&
-                                           (dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit));
-                    }
-
-                    if (!czyMoznaZbudowac && wybranaSeria === 'all') {
-                        // Jeśli w trybie 'all' nie da się zbudować jednego typu, spróbuj drugi
-                        const innaSeria = seriaDoWylosowania === 'bx_ux' ? 'cx' : 'bx_ux';
-                        // Sprawdź ponownie dla drugiej serii
-                        if (innaSeria === 'bx_ux') {
-                             const maBlade = (dostepneCzesciDoLosowania.blade.length + dostepneCzesciDoLosowania['ux-blade'].length) > 0;
-                             const maRatchet = dostepneCzesciDoLosowania.rachet.length > 0;
-                             const maBit = dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit);
-                             if (maBlade && maRatchet && maBit) seriaDoWylosowania = innaSeria; else continue; // Pomiń, jeśli żadnej nie da się zbudować
-                        } else if (innaSeria === 'cx') {
-                             if (dostepneCzesciDoLosowania['cx-lock-chip'].length > 0 && dostepneCzesciDoLosowania['cx-main-blade'].length > 0 && dostepneCzesciDoLosowania['cx-assist-blade'].length > 0 && dostepneCzesciDoLosowania.rachet.length > 0 && (dostepneCzesciDoLosowania.bit.length > 0 || dostepneCzesciDoLosowania.rachet.some(r => r.integrujeBit))) {
-                                 seriaDoWylosowania = innaSeria;
-                             } else continue;
-                        }
-                    } else if (!czyMoznaZbudowac) {
-                        showNotification(`Niewystarczająca ilość części w magazynie do wylosowania zestawu ${seriaDoWylosowania.toUpperCase()}.`, 4000, 'warning');
-                        break; // Przerwij pętlę, jeśli wybrano konkretną serię i brakuje części
-                    }
-
-                    // Reszta logiki losowania (pozostaje taka sama)
-                    let wylosowanyZestawCzesci = {};
-                    let czyZestawKompletny = true;
-                    let wylosowanoSpecjalnyRatchet = false;
-
-                    const losujCzescZPulli = (typCzesci, filtrKompatybilnosci = null) => {
-                        let pulaFiltrwana = [...(dostepneCzesciDoLosowania[typCzesci] || [])];
-                        if (filtrKompatybilnosci) pulaFiltrwana = pulaFiltrwana.filter(filtrKompatybilnosci);
-                        if (pulaFiltrwana.length > 0) {
-                            const randomIndex = Math.floor(Math.random() * pulaFiltrwana.length);
-                            const wylosowanaCzescZKopii = pulaFiltrwana[randomIndex];
-                            const indexWOryginalnejPuli = dostepneCzesciDoLosowania[typCzesci].findIndex(c => c._uniqueDragId === wylosowanaCzescZKopii._uniqueDragId);
-                            if (indexWOryginalnejPuli > -1) {
-                                const finalnieWylosowanaCzesc = dostepneCzesciDoLosowania[typCzesci].splice(indexWOryginalnejPuli, 1)[0];
-                                if (finalnieWylosowanaCzesc.maTryby && Array.isArray(finalnieWylosowanaCzesc.tryby) && finalnieWylosowanaCzesc.tryby.length > 0) {
-                                    const wylosowanyTrybIndex = Math.floor(Math.random() * finalnieWylosowanaCzesc.tryby.length);
-                                    const wylosowanyTryb = finalnieWylosowanaCzesc.tryby[wylosowanyTrybIndex];
-                                    const czescZTrybem = { ...finalnieWylosowanaCzesc };
-                                    delete czescZTrybem.tryby;
-                                    Object.assign(czescZTrybem, wylosowanyTryb);
-                                    czescZTrybem.aktywnyTrybIndex = wylosowanyTrybIndex;
-                                    czescZTrybem.nazwa = `${finalnieWylosowanaCzesc.nazwa} (${wylosowanyTryb.nazwaTrybu})`;
-                                    return czescZTrybem;
-                                }
-                                return finalnieWylosowanaCzesc;
-                            }
-                        }
-                        return null;
-                    };
-
-                    if (seriaDoWylosowania === 'bx_ux') {
-                        const pulaBlade = [...dostepneCzesciDoLosowania.blade, ...dostepneCzesciDoLosowania['ux-blade']];
-                        if (pulaBlade.length > 0) {
-                            const losowyIndex = Math.floor(Math.random() * pulaBlade.length);
-                            const wybranyBlade = pulaBlade[losowyIndex];
-                            wylosowanyZestawCzesci.blade = losujCzescZPulli(wybranyBlade.typ, c => c._uniqueDragId === wybranyBlade._uniqueDragId);
-                        } else { wylosowanyZestawCzesci.blade = null; }
-                        // ... reszta logiki dla bx_ux
-                         if (wylosowanyZestawCzesci.blade && String(wylosowanyZestawCzesci.blade.id) === ID_CLOCK_MIRAGE) {
-                            wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet', czesc => typeof czesc.nazwa === 'string' && (czesc.nazwa.match(/-\d*5$/) || czesc.nazwa.match(/^M-\d*5$/)));
-                            if (!wylosowanyZestawCzesci.rachet) czyZestawKompletny = false;
-                        } else if (wylosowanyZestawCzesci.blade) {
-                            wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
-                        } else { czyZestawKompletny = false; }
-                        if (wylosowanyZestawCzesci.rachet) {
-                            if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
-                                wylosowanoSpecjalnyRatchet = true; wylosowanyZestawCzesci.bit = null;
-                            } else { wylosowanyZestawCzesci.bit = losujCzescZPulli('bit'); }
-                        } else if (czyZestawKompletny) { czyZestawKompletny = false; wylosowanyZestawCzesci.bit = null; }
-                        if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) {
-                            czyZestawKompletny = false;
-                        }
-
-                    } else if (seriaDoWylosowania === 'cx') {
-                        // ... logika dla cx
-                        wylosowanyZestawCzesci.cx_lock_chip = losujCzescZPulli('cx-lock-chip');
-                        wylosowanyZestawCzesci.cx_main_blade = losujCzescZPulli('cx-main-blade');
-                        wylosowanyZestawCzesci.cx_assist_blade = losujCzescZPulli('cx-assist-blade');
-                        wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
-                        if (wylosowanyZestawCzesci.rachet) {
-                            if (String(wylosowanyZestawCzesci.rachet.id) === "205" || wylosowanyZestawCzesci.rachet.integrujeBit === true) {
-                                wylosowanoSpecjalnyRatchet = true; wylosowanyZestawCzesci.bit = null;
-                            } else { wylosowanyZestawCzesci.bit = losujCzescZPulli('bit'); }
-                        } else { wylosowanyZestawCzesci.bit = null; czyZestawKompletny = false; }
-                        if (!wylosowanyZestawCzesci.cx_lock_chip || !wylosowanyZestawCzesci.cx_main_blade || !wylosowanyZestawCzesci.cx_assist_blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit && wylosowanyZestawCzesci.rachet)) {
-                            czyZestawKompletny = false;
-                        }
-                    }
-
-                    if (czyZestawKompletny) {
-                        const czesciDoStatystyk = {};
-                        for (const key in wylosowanyZestawCzesci) {
-                            if (wylosowanyZestawCzesci[key]) {
-                                const { _uniqueDragId, ...resztaCzesci } = wylosowanyZestawCzesci[key];
-                                czesciDoStatystyk[key] = resztaCzesci;
-                            } else { czesciDoStatystyk[key] = null; }
-                        }
-                        const statystykiZestawu = obliczSumeStatystykZestawu(czesciDoStatystyk, seriaDoWylosowania);
-                        const idUnikalnyZestawu = `wylosowany-${Date.now()}-${i}-${Math.random().toString(16).slice(2)}`;
-                        const pelnyZestaw = { idZestawu: idUnikalnyZestawu, seria: seriaDoWylosowania, czesci: czesciDoStatystyk, statystyki: statystykiZestawu };
-                        ostatnioWylosowaneZestawyGlobalnie.push(pelnyZestaw);
-                        const kartaHTML = generujHTMLDlaKartyZestawu(pelnyZestaw, i);
-                        const tempDiv = document.createElement('div'); tempDiv.innerHTML = kartaHTML.trim();
-                        wylosowaneZestawyFragment.appendChild(tempDiv.firstChild);
-                    } else {
-                         if (wybranaSeria !== 'all') { // Pokaż ostrzeżenie tylko jeśli nie losujemy z 'all'
-                            showNotification(`Nie udało się wylosować kompletu dla zestawu #${i + 1}.`, 3500, 'warning');
-                        }
-                    }
-                }
-
-                if (wylosowaneZestawyFragment.childNodes.length > 0) {
-                    wynikiDivGenerator.appendChild(wylosowaneZestawyFragment);
-                    showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów)!`, 2500, 'success');
+        if (!czyMoznaZbudowac(seriaDoWylosowania)) {
+            if (wybranaSeria === 'all') { // Jeśli w trybie 'all' pierwszy los się nie uda, spróbuj drugiej serii
+                const innaSeria = seriaDoWylosowania === 'bx_ux' ? 'cx' : 'bx_ux';
+                if (czyMoznaZbudowac(innaSeria)) {
+                    seriaDoWylosowania = innaSeria;
                 } else {
-                    wynikiDivGenerator.innerHTML = '<div class="card"><p>Nie udało się wylosować żadnego kompletnego zestawu z dostępnych części.</p></div>';
-                    if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+                    showNotification(`Niewystarczająca ilość części w magazynie, by losować zestawy.`, 4000, 'warning');
+                    break;
+                }
+            } else {
+                showNotification(`Niewystarczająca ilość części w magazynie do wylosowania zestawu ${seriaDoWylosowania.toUpperCase()}.`, 4000, 'warning');
+                break;
+            }
+        }
+
+        let wylosowanyZestawCzesci = {};
+        let czyZestawKompletny = true;
+        let wylosowanoSpecjalnyRatchet = false;
+        const maxProb = 10; // Maksymalna liczba prób znalezienia kompatybilnej części
+
+        const losujCzescZPulli = (typCzesci, filtrKompatybilnosci = null) => {
+            let pulaFiltrwana = [...(dostepneCzesciDoLosowania[typCzesci] || [])];
+            if (filtrKompatybilnosci) pulaFiltrwana = pulaFiltrwana.filter(filtrKompatybilnosci);
+
+            if (pulaFiltrwana.length > 0) {
+                const randomIndex = Math.floor(Math.random() * pulaFiltrwana.length);
+                const wylosowanaCzescZKopii = pulaFiltrwana[randomIndex];
+                const indexWOryginalnejPuli = dostepneCzesciDoLosowania[typCzesci].findIndex(c => c._uniqueDragId === wylosowanaCzescZKopii._uniqueDragId);
+                if (indexWOryginalnejPuli > -1) {
+                    const finalnieWylosowanaCzesc = dostepneCzesciDoLosowania[typCzesci].splice(indexWOryginalnejPuli, 1)[0];
+                    if (finalnieWylosowanaCzesc.maTryby && Array.isArray(finalnieWylosowanaCzesc.tryby) && finalnieWylosowanaCzesc.tryby.length > 0) {
+                        const wylosowanyTrybIndex = Math.floor(Math.random() * finalnieWylosowanaCzesc.tryby.length);
+                        const wylosowanyTryb = finalnieWylosowanaCzesc.tryby[wylosowanyTrybIndex];
+                        const czescZTrybem = { ...finalnieWylosowanaCzesc };
+                        delete czescZTrybem.tryby;
+                        Object.assign(czescZTrybem, wylosowanyTryb);
+                        czescZTrybem.aktywnyTrybIndex = wylosowanyTrybIndex;
+                        czescZTrybem.nazwa = `${finalnieWylosowanaCzesc.nazwa} (${wylosowanyTryb.nazwaTrybu})`;
+                        return czescZTrybem;
+                    }
+                    return finalnieWylosowanaCzesc;
                 }
             }
+            return null;
+        };
+        
+        // --- START NOWEJ LOGIKI LOSOWANIA ZESTAWU BX/UX ---
+        if (seriaDoWylosowania === 'bx_ux') {
+            let probaLosowania = 0;
+            while (probaLosowania < maxProb) {
+                const pulaBlade = [...dostepneCzesciDoLosowania.blade, ...dostepneCzesciDoLosowania['ux-blade']];
+                if (pulaBlade.length === 0) { czyZestawKompletny = false; break; }
+
+                const losowyIndexBlade = Math.floor(Math.random() * pulaBlade.length);
+                const potencjalnyBlade = pulaBlade[losowyIndexBlade];
+
+                if (potencjalnyBlade.id === ID_CLOCK_MIRAGE) {
+                    const pulaKompatybilnychRatchetow = dostepneCzesciDoLosowania.rachet.filter(r => r.nazwa.match(/-\d*5$/) || r.nazwa.match(/^M-\d*5$/));
+                    if (pulaKompatybilnychRatchetow.length > 0) {
+                        wylosowanyZestawCzesci.blade = losujCzescZPulli(potencjalnyBlade.typ, c => c._uniqueDragId === potencjalnyBlade._uniqueDragId);
+                        wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet', r => r.nazwa.match(/-\d*5$/) || r.nazwa.match(/^M-\d*5$/));
+                        break; // Znaleziono kompatybilny zestaw, przerwij pętlę prób
+                    }
+                } else {
+                    wylosowanyZestawCzesci.blade = losujCzescZPulli(potencjalnyBlade.typ, c => c._uniqueDragId === potencjalnyBlade._uniqueDragId);
+                    wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
+                    break; // Wylosowano standardowy blade, przerwij pętlę prób
+                }
+                probaLosowania++;
+            }
+            
+            if (!wylosowanyZestawCzesci.blade || !wylosowanyZestawCzesci.rachet) {
+                czyZestawKompletny = false;
+            } else {
+                if (wylosowanyZestawCzesci.rachet.integrujeBit === true) {
+                    wylosowanoSpecjalnyRatchet = true;
+                    wylosowanyZestawCzesci.bit = null;
+                } else {
+                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+                    if (!wylosowanyZestawCzesci.bit) czyZestawKompletny = false;
+                }
+            }
+        }
+        // --- KONIEC NOWEJ LOGIKI DLA BX/UX ---
+
+        else if (seriaDoWylosowania === 'cx') {
+            wylosowanyZestawCzesci.cx_lock_chip = losujCzescZPulli('cx-lock-chip');
+            wylosowanyZestawCzesci.cx_main_blade = losujCzescZPulli('cx-main-blade');
+            wylosowanyZestawCzesci.cx_assist_blade = losujCzescZPulli('cx-assist-blade');
+            wylosowanyZestawCzesci.rachet = losujCzescZPulli('rachet');
+            
+            if (wylosowanyZestawCzesci.rachet) {
+                if (wylosowanyZestawCzesci.rachet.integrujeBit === true) {
+                    wylosowanoSpecjalnyRatchet = true;
+                    wylosowanyZestawCzesci.bit = null;
+                } else {
+                    wylosowanyZestawCzesci.bit = losujCzescZPulli('bit');
+                }
+            } else {
+                czyZestawKompletny = false;
+            }
+
+            if (!wylosowanyZestawCzesci.cx_lock_chip || !wylosowanyZestawCzesci.cx_main_blade || !wylosowanyZestawCzesci.cx_assist_blade || !wylosowanyZestawCzesci.rachet || (!wylosowanoSpecjalnyRatchet && !wylosowanyZestawCzesci.bit)) {
+                czyZestawKompletny = false;
+            }
+        }
+
+        if (czyZestawKompletny) {
+            const czesciDoStatystyk = {};
+            for (const key in wylosowanyZestawCzesci) {
+                if (wylosowanyZestawCzesci[key]) {
+                    const { _uniqueDragId, ...resztaCzesci } = wylosowanyZestawCzesci[key];
+                    czesciDoStatystyk[key] = resztaCzesci;
+                } else {
+                    czesciDoStatystyk[key] = null;
+                }
+            }
+            const statystykiZestawu = obliczSumeStatystykZestawu(czesciDoStatystyk, seriaDoWylosowania);
+            const idUnikalnyZestawu = `wylosowany-${Date.now()}-${i}-${Math.random().toString(16).slice(2)}`;
+            const pelnyZestaw = { idZestawu: idUnikalnyZestawu, seria: seriaDoWylosowania, czesci: czesciDoStatystyk, statystyki: statystykiZestawu };
+            ostatnioWylosowaneZestawyGlobalnie.push(pelnyZestaw);
+            const kartaHTML = generujHTMLDlaKartyZestawu(pelnyZestaw, i);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = kartaHTML.trim();
+            wylosowaneZestawyFragment.appendChild(tempDiv.firstChild);
+        } else {
+            if (wybranaSeria !== 'all') {
+                showNotification(`Nie udało się wylosować kompletu dla zestawu #${i + 1}.`, 3500, 'warning');
+            }
+        }
+    }
+
+    if (wylosowaneZestawyFragment.childNodes.length > 0) {
+        wynikiDivGenerator.appendChild(wylosowaneZestawyFragment);
+        showNotification(`Wylosowano ${ostatnioWylosowaneZestawyGlobalnie.length} zestaw(ów)!`, 2500, 'success');
+    } else {
+        wynikiDivGenerator.innerHTML = '<div class="card"><p>Nie udało się wylosować żadnego kompletnego zestawu z dostępnych części.</p></div>';
+        if (placeholderActualImgGenerator) placeholderActualImgGenerator.style.display = 'block';
+    }
+}
 
             // =================================
             // Zapisywanie Wylosowanych Zestawów
