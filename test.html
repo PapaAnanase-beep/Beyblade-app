@@ -1293,10 +1293,29 @@ saved-deck-card {
         <a href="#" onclick="navigateTo('galeriaDeckow', this)" title="Moje Zapisane Decki"><img src="5.png" alt="Galeria"><span>Moje Decki</span></a>
         <a href="#" onclick="navigateTo('importexport', this)" title="Ustawienia"><img src="6.png" alt="Import/Eksport"><span>Dane</span></a>
         <a href="#" onclick="navigateTo('osiagniecia', this)" title="Osiągnięcia"><img src="osiagniecie.png" alt="Osiągnięcia"><span>Osiągnięcia</span></a>
-<a href="#" onclick="navigateTo('konto', this)" title="Konto">
-    <img src="https://static.wikia.nocookie.net/beyblade/images/e/ee/Balance_logo_Beyblade_X.png/revision/latest?cb=20240905153034" alt="Konto">
-    <span>Konto</span>
-</a>   
+    <!-- ============================================= -->
+    <!-- === SEKCJA KONTO W SIDEBARZE (NOWA) === -->
+    <!-- ============================================= -->
+    <div class="sidebar-account-section">
+        <a href="#" onclick="toggleAccountSubmenu(this)" title="Konto">
+            <img src="img/user.png" alt="Konto"><span>Konto</span>
+        </a>
+        <div class="sidebar-submenu" id="account-submenu">
+            <!-- --- WIDOK GDY UŻYTKOWNIK JEST WYLOGOWANY (DOMYŚLNY) --- -->
+            <div id="logged-out-view">
+                <button class="submenu-button" onclick="showAuthPopup('login')">Zaloguj się</button>
+                <button class="submenu-button" onclick="showAuthPopup('register')">Utwórz konto</button>
+            </div>
+            <!-- --- WIDOK GDY UŻYTKOWNIK JEST ZALOGOWANY (UKRYTY) --- -->
+            <div id="logged-in-view" style="display: none;">
+                <p id="user-email-display">Zalogowano jako:</p>
+                <button class="submenu-button" onclick="syncData()">Synchronizuj dane</button>
+                <p id="last-sync-display">Ostatnia synch.: Nigdy</p>
+                <button class="submenu-button danger" onclick="logoutUser()">Wyloguj</button>
+            </div>
+        </div>
+    </div>
+    		
    </div>
 </div>
 
@@ -1955,6 +1974,25 @@ saved-deck-card {
             // =================================
             // Konfiguracja i Zmienne Globalne
             // =================================
+			    // =================================
+    // === Inicjalizacja Firebase (NOWE) ===
+    // =================================
+    const firebaseConfig = {
+      apiKey: "TWOJ_API_KEY", // <--- PODMIEŃ
+      authDomain: "TWOJ-PROJEKT-ID.firebaseapp.com", // <--- PODMIEŃ
+      projectId: "TWOJ-PROJEKT-ID", // <--- PODMIEŃ
+      storageBucket: "TWOJ-PROJEKT-ID.appspot.com", // <--- PODMIEŃ
+      messagingSenderId: "TWOJ_SENDER_ID", // <--- PODMIEŃ
+      appId: "TWOJ_APP_ID" // <--- PODMIEŃ
+    };
+
+    // Inicjalizacja aplikacji Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let currentUser = null;
+    let currentAuthMode = 'login'; // 'login' lub 'register'
+
             const ACHIEVEMENTS_KEY = 'beybladeAchievementsAnanas_v1';
             const ID_CLOCK_MIRAGE = "206";
             let sidebarExpanded = false;
@@ -2670,9 +2708,7 @@ saved-deck-card {
                     displayAchievements();
                 } else if (pageId === 'licznikPunktow') {
                     loadScoresFromLocalStorage();
-                }else if (pageId === 'turnieje') {
-					loadTurnieje();
-				}
+      
                 if (sidebarExpanded && window.innerWidth < 768) {
                     toggleSidebar();
                 }
@@ -5653,6 +5689,223 @@ async function exportUserCloudData() {
     a.download = "BX_user_data_backup.json";
     a.click();
 }
+    // =============================================
+    // === FUNKCJE SYSTEMU KONTA I FIREBASE (NOWE) ===
+    // =============================================
+
+    function toggleAccountSubmenu(element) {
+        const submenu = document.getElementById('account-submenu');
+        submenu.classList.toggle('expanded');
+        element.classList.toggle('active-link'); // Podświetla główny przycisk "Konto"
+    }
+
+    function showAuthPopup(mode) {
+        currentAuthMode = mode;
+        const overlay = document.getElementById('auth-overlay');
+        const title = document.getElementById('auth-title');
+        const button = document.getElementById('auth-submit-button');
+        const errorMessage = document.getElementById('auth-error-message');
+
+        errorMessage.style.display = 'none'; // Ukryj błędy przy otwieraniu
+
+        if (mode === 'login') {
+            title.textContent = 'Zaloguj się';
+            button.textContent = 'Zaloguj się';
+        } else {
+            title.textContent = 'Utwórz konto';
+            button.textContent = 'Zarejestruj się';
+        }
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.classList.add('visible'), 10);
+    }
+
+    function hideAuthPopup() {
+        const overlay = document.getElementById('auth-overlay');
+        overlay.classList.remove('visible');
+        setTimeout(() => overlay.style.display = 'none', 300);
+    }
+
+    function handleAuth() {
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        const errorMessage = document.getElementById('auth-error-message');
+        errorMessage.style.display = 'none';
+
+        if (!email || !password) {
+            errorMessage.textContent = 'Wypełnij oba pola.';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        if (currentAuthMode === 'login') {
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    console.log("Zalogowano pomyślnie:", userCredential.user.email);
+                    hideAuthPopup();
+                })
+                .catch(error => {
+                    errorMessage.textContent = getFriendlyAuthError(error);
+                    errorMessage.style.display = 'block';
+                });
+        } else {
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    console.log("Utworzono konto i zalogowano:", userCredential.user.email);
+                    hideAuthPopup();
+                })
+                .catch(error => {
+                    errorMessage.textContent = getFriendlyAuthError(error);
+                    errorMessage.style.display = 'block';
+                });
+        }
+    }
+    
+    function logoutUser() {
+        auth.signOut().then(() => {
+            console.log("Użytkownik wylogowany.");
+            showNotification("Wylogowano pomyślnie.", 2000, 'info');
+        });
+    }
+
+    // Nasłuchiwacz zmian stanu autentykacji
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = user;
+            updateUIForUser(user);
+            fetchDataFromFirestore();
+        } else {
+            currentUser = null;
+            updateUIForUser(null);
+            // Opcjonalnie: wyczyść dane lokalne po wylogowaniu
+            // if (confirm("Czy chcesz wyczyścić lokalne dane (magazyn, decki) po wylogowaniu?")) {
+            //     wykonajWyczyszczenieDanych();
+            // }
+        }
+    });
+
+    function updateUIForUser(user) {
+        const loggedInView = document.getElementById('logged-in-view');
+        const loggedOutView = document.getElementById('logged-out-view');
+        
+        if (user) {
+            document.getElementById('user-email-display').textContent = `Zalogowano jako: ${user.email}`;
+            loggedInView.style.display = 'block';
+            loggedOutView.style.display = 'none';
+        } else {
+            loggedInView.style.display = 'none';
+            loggedOutView.style.display = 'block';
+            document.getElementById('last-sync-display').textContent = "Ostatnia synch.: Nigdy";
+        }
+    }
+
+    function syncData() {
+        if (!currentUser) {
+            showNotification("Musisz być zalogowany, aby synchronizować dane.", 3000, 'warning');
+            return;
+        }
+
+        const magazyn = getMagazyn();
+        const decks = getSavedDecks();
+
+        showNotification("Rozpoczynam synchronizację...", 2000, 'info');
+
+        db.collection('userData').doc(currentUser.uid).set({
+            magazyn: JSON.stringify(magazyn),
+            decks: JSON.stringify(decks),
+            lastSync: firebase.firestore.FieldValue.serverTimestamp()
+        })
+        .then(() => {
+            showNotification("Dane zsynchronizowane z chmurą!", 3000, 'success');
+            const syncTime = new Date().toLocaleString('pl-PL');
+            document.getElementById('last-sync-display').textContent = `Ostatnia synch.: ${syncTime}`;
+            localStorage.setItem(`lastSync_${currentUser.uid}`, syncTime);
+        })
+        .catch(error => {
+            console.error("Błąd synchronizacji:", error);
+            showNotification("Błąd synchronizacji z chmurą.", 4000, 'error');
+        });
+    }
+
+    function fetchDataFromFirestore() {
+        if (!currentUser) return;
+
+        showNotification("Sprawdzam dane w chmurze...", 1500, 'info');
+
+        db.collection('userData').doc(currentUser.uid).get().then(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                
+                const localMagazyn = getMagazyn();
+                const localDecks = getSavedDecks();
+                
+                // Sprawdzamy czy są jakiekolwiek dane lokalnie
+                const hasLocalData = localMagazyn.some(p => p.ilosc > 0) || localDecks.length > 0;
+
+                const importData = () => {
+                    try {
+                        let importedSomething = false;
+                        if (data.magazyn) {
+                            const cloudMagazyn = JSON.parse(data.magazyn);
+                            setMagazyn(cloudMagazyn);
+                            importedSomething = true;
+                        }
+                        if (data.decks) {
+                            const cloudDecks = JSON.parse(data.decks);
+                            setSavedDecks(cloudDecks);
+                            importedSomething = true;
+                        }
+                        
+                        if(importedSomething) {
+                            const syncTime = data.lastSync?.toDate().toLocaleString('pl-PL') || 'Niedawno';
+                            document.getElementById('last-sync-display').textContent = `Ostatnia synch.: ${syncTime}`;
+                            localStorage.setItem(`lastSync_${currentUser.uid}`, syncTime);
+
+                            showNotification("Dane pomyślnie zaimportowane z chmury!", 3000, 'success');
+                            // Odśwież widoki, jeśli są aktywne
+                            if (document.querySelector('#magazyn.active')) wyswietlMagazyn();
+                            if (document.querySelector('#galeriaDeckow.active')) displaySavedDecks();
+                        }
+                    } catch (e) {
+                        showNotification("Błąd przetwarzania danych z chmury.", 4000, 'error');
+                    }
+                };
+
+                if (hasLocalData) {
+                     if (confirm("Znaleziono dane w chmurze. Czy chcesz je zaimportować, NADPISUJĄC swoje obecne lokalne dane (magazyn i decki)?")) {
+                        importData();
+                    }
+                } else {
+                    // Jeśli nie ma danych lokalnych, importujemy automatycznie
+                    importData();
+                }
+            } else {
+                console.log("Brak danych w chmurze dla tego użytkownika. Możesz je zapisać, używając przycisku 'Synchronizuj dane'.");
+            }
+        }).catch(error => {
+            console.error("Błąd pobierania danych:", error);
+            showNotification("Nie udało się pobrać danych z chmury.", 3000, 'error');
+        });
+
+        const localSyncTime = localStorage.getItem(`lastSync_${currentUser.uid}`);
+        if(localSyncTime) {
+            document.getElementById('last-sync-display').textContent = `Ostatnia synch.: ${localSyncTime}`;
+        }
+    }
+    
+    function getFriendlyAuthError(error) {
+        switch (error.code) {
+            case 'auth/wrong-password':
+                return 'Nieprawidłowe hasło. Spróbuj ponownie.';
+            case 'auth/user-not-found':
+                return 'Nie znaleziono użytkownika o tym adresie e-mail.';
+            case 'auth/email-already-in-use':
+                return 'Ten adres e-mail jest już zajęty.';
+            case 'auth/weak-password':
+                return 'Hasło jest zbyt słabe. Powinno mieć co najmniej 6 znaków.';
+            default:
+                return 'Wystąpił nieznany błąd. Spróbuj ponownie.';
+        }
+    }
 
         </script>
 
@@ -6787,4 +7040,18 @@ async function exportUserCloudData() {
              
             ]
         </script>
+		<!-- ============================================= -->
+<!-- === POP-UP LOGOWANIA/REJESTRACJI (NOWY) === -->
+<!-- ============================================= -->
+<div id="auth-overlay" style="display: none;">
+    <div id="auth-popup">
+        <button id="close-auth-popup" onclick="hideAuthPopup()">×</button>
+        <h3 id="auth-title">Logowanie</h3>
+        <input type="email" id="auth-email" placeholder="Adres e-mail" autocomplete="email">
+        <input type="password" id="auth-password" placeholder="Hasło" autocomplete="current-password">
+        <div id="auth-error-message" style="display:none; color: #ff6b6b; margin-bottom: 10px;"></div>
+        <button id="auth-submit-button" onclick="handleAuth()">Zaloguj się</button>
+    </div>
+</div>
+
 </html>
