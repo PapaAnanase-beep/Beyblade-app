@@ -1006,13 +1006,13 @@ saved-deck-card {
     color: #fff;
 }
 
-/* Akapity z tekstem */
+
 .akcesorium-card p {
     font-size: 0.9em;
     line-height: 1.6;
     color: #ddd;
     margin-bottom: 15px;
-    text-align: left; /* Wyrównaj tekst w akapitach do lewej dla lepszej czytelności */
+    text-align: left;
 }
 
 .akcesorium-card p:last-child {
@@ -3744,7 +3744,7 @@ saved-deck-card {
                 event.currentTarget.classList.remove('drag-over-target');
             }
             // ===>>> OSTATECZNA I POPRAWNA WERSJA FUNKCJI handleDrop <<<===
-           function handleDrop(event) {
+      function handleDrop(event) {
     event.preventDefault();
     event.currentTarget.classList.remove('drag-over-target');
 
@@ -3752,7 +3752,7 @@ saved-deck-card {
 
     const dropZone = event.currentTarget;
     const setArrayIndex = parseInt(dropZone.dataset.setIndex);
-    const slotType = dropZone.dataset.slotType;
+    const slotType = dropZone.dataset.slotType; // np. 'rachet', 'blade'
     const magazyn = getMagazyn();
 
     if (isNaN(setArrayIndex) || !currentDeckBeingBuilt.sets[setArrayIndex]) {
@@ -3761,83 +3761,69 @@ saved-deck-card {
     }
 
     const targetSet = currentDeckBeingBuilt.sets[setArrayIndex];
-    const partActualType = draggedItemData.typ;
-    const normalizedSlotType = slotType.replace(/_/g, '-');
+    const draggedPartType = draggedItemData.typ;
 
-    // --- POCZĄTEK NOWEJ LOGIKI WALIDACJI DLA CLOCK MIRAGE ---
+    // --- POCZĄTEK NOWEJ, POPRAWIONEJ LOGIKI WALIDACJI ---
 
-    // SCENARIUSZ 1: Upuszczamy RATCHET do zestawu, w którym MOŻE BYĆ ClockMirage
-    if (normalizedSlotType === 'rachet' && targetSet.bladeId === ID_CLOCK_MIRAGE) {
-        const upuszczanyRatchet = magazyn.find(p => p.id === draggedItemData.id);
-        const czyRatchetKompatybilny = upuszczanyRatchet && (upuszczanyRatchet.nazwa.match(/-\d*5$/) || upuszczanyRatchet.nazwa.match(/^M-\d*5$/));
+    // Definicje pomocnicze dla czytelności
+    const isBladeClockMirage = (part) => part && (part.typ === 'ux-blade' || part.typ === 'blade') && part.nazwa === 'ClockMirage';
+    const isRachetSimple = (part) => part && part.typ === 'rachet' && part.nazwa.endsWith('5');
 
-        if (!czyRatchetKompatybilny) {
-            showNotification('Błąd: Ten Ratchet nie jest kompatybilny z ClockMirage. Użyj Racheta "Simple" (np. 9-65).', 5000, 'error');
-            draggedItemData = null; // Zresetuj, aby zakończyć operację
+    // SCENARIUSZ 1: Upuszczamy RATCHET do zestawu, w którym może być ClockMirage
+    if (draggedPartType === 'rachet') {
+        const bladeInSet = targetSet.bladeId ? magazyn.find(p => p.id === targetSet.bladeId) : null;
+        if (bladeInSet && isBladeClockMirage(bladeInSet) && !isRachetSimple(draggedItemData)) {
+            showNotification(`Błąd: Do ostrza '${bladeInSet.nazwa}' pasują tylko ratchety 'Simple' (z '5' w nazwie).`, 5000, 'error');
+            draggedItemData = null;
             return; // Zablokuj upuszczenie
         }
     }
 
-    // SCENARIUSZ 2: Upuszczamy BLADE (który może być ClockMirage) do zestawu, w którym JEST JUŻ Ratchet
-    if ((normalizedSlotType === 'blade' || normalizedSlotType === 'ux-blade') && draggedItemData.id === ID_CLOCK_MIRAGE && targetSet.ratchetId) {
-        const istniejacyRatchet = magazyn.find(p => p.id === targetSet.ratchetId);
-        const czyIstniejacyRatchetKompatybilny = istniejacyRatchet && (istniejacyRatchet.nazwa.match(/-\d*5$/) || istniejacyRatchet.nazwa.match(/^M-\d*5$/));
-
-        if (!czyIstniejacyRatchetKompatybilny) {
-            showNotification(`Błąd: Nie można tu umieścić ClockMirage. W zestawie jest już niekompatybilny Ratchet "${istniejacyRatchet.nazwa}".`, 5000, 'error');
-            draggedItemData = null; // Zresetuj
+    // SCENARIUSZ 2: Upuszczamy BLADE (który może być ClockMirage) do zestawu, w którym jest już Ratchet
+    if (draggedPartType === 'blade' || draggedPartType === 'ux-blade') {
+        const rachetInSet = targetSet.ratchetId ? magazyn.find(p => p.id === targetSet.ratchetId) : null;
+        if (rachetInSet && isBladeClockMirage(draggedItemData) && !isRachetSimple(rachetInSet)) {
+            showNotification(`Błąd: Nie można tu umieścić ClockMirage. W zestawie jest niekompatybilny Ratchet "${rachetInSet.nazwa}".`, 5000, 'error');
+            draggedItemData = null;
             return; // Zablokuj upuszczenie
         }
     }
     // --- KONIEC NOWEJ LOGIKI WALIDACJI ---
 
 
+    // Pozostała część funkcji bez zmian - walidacja typu slotu
+    const normalizedSlotType = slotType.replace(/_/g, '-');
     let isTypeValid = false;
-    if (normalizedSlotType === 'blade' && (partActualType === 'blade' || partActualType === 'ux-blade')) {
+    if (normalizedSlotType === 'blade' && (draggedPartType === 'blade' || draggedPartType === 'ux-blade')) {
         isTypeValid = true;
-    } else if (normalizedSlotType === partActualType) {
+    } else if (normalizedSlotType === draggedPartType) {
         isTypeValid = true;
     }
 
     if (!isTypeValid) {
         const slotLabelElement = dropZone.querySelector('span');
         const slotLabel = slotLabelElement ? slotLabelElement.textContent.replace('Upuść ', '').replace(' tutaj', '') : slotType;
-        showNotification(`Nie można umieścić części typu "${partActualType}" w slocie na "${slotLabel}".`, 4000, 'warning');
+        showNotification(`Nie można umieścić części typu "${draggedPartType}" w slocie na "${slotLabel}".`, 4000, 'warning');
         draggedItemData = null;
         return;
     }
 
     const newPartId = draggedItemData.id;
-    const newPartDetails = magazyn.find(p => p.id === newPartId);
-    if (!newPartDetails) {
-        showNotification("Nie znaleziono części w magazynie.", 3000, 'error');
-        draggedItemData = null;
-        return;
-    }
-
     const partIdKey = getPartIdKeyForSlot(normalizedSlotType, targetSet.seria);
+
     if (!partIdKey) {
         showNotification("Nieprawidłowy typ slotu – brak klucza ID.", 3000, 'error');
         draggedItemData = null;
         return;
     }
-    
-    // --- NOWA, DODATKOWA LOGIKA: Czyszczenie niekompatybilnych części po udanym dropie ---
-    // Jeśli upuściliśmy ClockMirage, a w slocie Ratchet była część, która przeszła walidację, to wszystko jest OK.
-    // Ale jeśli upuściliśmy ZWYKŁY Blade, a w slocie Ratchet był "Simple" (np. 9-65), warto go wyczyścić, by uniknąć pomyłek.
-    if ((normalizedSlotType === 'blade' || normalizedSlotType === 'ux-blade') && draggedItemData.id !== ID_CLOCK_MIRAGE && targetSet.ratchetId) {
-        const istniejacyRatchet = magazyn.find(p => p.id === targetSet.ratchetId);
-         if (istniejacyRatchet && (istniejacyRatchet.nazwa.match(/-\d*5$/) || istniejacyRatchet.nazwa.match(/^M-\d*5$/))) {
-            targetSet.ratchetId = null; // Wyczyść niekompatybilny Ratchet
-            showNotification(`Usunięto Ratchet "${istniejacyRatchet.nazwa}", ponieważ nie jest on w pełni kompatybilny ze standardowymi Blade'ami.`, 4000, 'info');
-        }
-    }
-    
+
     // Zapisz ID upuszczonej części
     targetSet[partIdKey] = newPartId;
 
     const trybIndexKey = partIdKey.replace('Id', 'AktywnyTrybIndex');
-    targetSet[trybIndexKey] = draggedItemData.aktywnyTrybIndex ?? 0;
+    if (draggedItemData.hasOwnProperty('aktywnyTrybIndex')) {
+         targetSet[trybIndexKey] = draggedItemData.aktywnyTrybIndex;
+    }
 
     console.log(`Zaktualizowano zestaw ${setArrayIndex + 1}:`, JSON.parse(JSON.stringify(targetSet)));
 
@@ -6080,7 +6066,6 @@ saved-deck-card {
                     "nazwa": "Turbo",
                     "skroconaNazwa": "Tr",
                     "rodzaj": "atak",
-                    "ilosc": 0,
                     "img": "img/RatchetBitTurbo.webp",
                     "integrujeBit": true,
                     "ilosc": 0,
